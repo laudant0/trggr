@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRGGR | Poll the Culture</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050505;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg,#fff,#9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .poll-card {
+      transition: all 0.35s ease;
+    }
+
+    .poll-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .vote-bar {
+      transition: width 0.8s cubic-bezier(.22,1,.36,1);
+    }
+
+    .hidden-poll {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+      <h1 class="text-3xl font-black tracking-tight">TRGGR</h1>
+
+      <div class="hidden md:flex gap-8 text-zinc-300">
+        <a href="#" class="hover:text-white">Explore</a>
+        <a href="#" class="hover:text-white">Polls</a>
+        <a href="#" class="hover:text-white">Topics</a>
+        <a href="#" class="hover:text-white">Community</a>
+      </div>
+
+      <div class="flex gap-3">
+        <button class="px-5 py-2 rounded-full border border-zinc-700">
+          Login
+        </button>
+        <button class="bg-white text-black px-5 py-2 rounded-full font-bold">
+          Join TRGGR
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="pt-40 pb-24 px-6">
+    <div class="max-w-7xl mx-auto text-center">
+      <span class="glass px-5 py-2 rounded-full text-sm inline-block mb-8">
+        Real Opinions • Live Rankings • Culture Moves Fast
+      </span>
+
+      <h1 class="text-6xl md:text-8xl font-black leading-none mb-8">
+        Trigger the
+        <span class="gradient-text block">World's Opinion</span>
+      </h1>
+
+      <p class="text-zinc-400 text-xl max-w-3xl mx-auto mb-12">
+        Sports, Music, Tech, Science, Politics, Culture.
+        One question can move millions.
+      </p>
+
+      <div class="flex flex-col md:flex-row justify-center gap-5">
+        <button class="bg-white text-black px-8 py-4 rounded-2xl font-bold">
+          Start Voting
+        </button>
+        <button class="glass px-8 py-4 rounded-2xl font-bold">
+          Create Poll
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="px-6 pb-20">
+    <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4">
+      <button class="glass p-6 rounded-3xl">🏀 Sports</button>
+      <button class="glass p-6 rounded-3xl">🎵 Music</button>
+      <button class="glass p-6 rounded-3xl">💻 Tech</button>
+      <button class="glass p-6 rounded-3xl">🧬 Science</button>
+      <button class="glass p-6 rounded-3xl">🌍 Culture</button>
+    </div>
+  </section>
+
+  <!-- POLLS -->
+  <section class="px-6 py-20">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex justify-between items-center mb-14">
+        <h2 class="text-5xl font-black">Trending Polls</h2>
+
+        <button onclick="togglePolls()" id="expandBtn"
+          class="glass px-6 py-3 rounded-2xl font-bold">
+          View More
+        </button>
+      </div>
+
+      <div id="pollGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        <!-- MJ vs LeBron -->
+        <div class="poll-card glass rounded-3xl p-8">
+          <span class="text-zinc-500">Sports</span>
+          <h3 class="text-3xl font-black mt-4 mb-8">
+            Jordan vs LeBron
+          </h3>
+
+          <button onclick="vote(this,70,30)" class="w-full mb-5">
+            <div class="flex justify-between mb-2">
+              <span>Michael Jordan</span>
+              <span>70%</span>
+            </div>
+            <div class="bg-zinc-800 rounded-full h-4">
+              <div class="vote-bar bg-white h-4 rounded-full" style="width:70%"></div>
+            </div>
+          </button>
+
+          <button onclick="vote(this,30,70)" class="w-full">
+            <div class="flex justify-between mb-2">
+              <span>LeBron James</span>
+              <span>30%</span>
+            </div>
+            <div class="bg-zinc-800 rounded-full h-4">
+              <div class="vote-bar bg-zinc-500 h-4 rounded-full" style="width:30%"></div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Drake vs Kendrick -->
+        <div class="poll-card glass rounded-3xl p-8">
+          <span class="text-zinc-500">Music</span>
+          <h3 class="text-3xl font-black mt-4 mb-8">
+            Drake vs Kendrick
+          </h3>
+
+          <button onclick="vote(this,48,52)" class="w-full mb-5">
+            <div class="flex justify-between mb-2">
+              <span>Drake</span>
+              <span>48%</span>
+            </div>
+            <div class="bg-zinc-800 rounded-full h-4">
+              <div class="vote-bar bg-white h-4 rounded-full" style="width:48%"></div>
+            </div>
+          </button>
+
+          <button onclick="vote(this,52,48)" class="w-full">
+            <div class="flex justify-between mb-2">
+              <span>Kendrick Lamar</span>
+              <span>52%</span>
+            </div>
+            <div class="bg-zinc-800 rounded-full h-4">
+              <div class="vote-bar bg-zinc-500 h-4 rounded-full" style="width:52%"></div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Apple vs Samsung -->
+        <div class="poll-card glass rounded-3xl p-8">
+          <span class="text-zinc-500">Tech</span>
+          <h3 class="text-3xl font-black mt-4 mb-8">
+            Apple vs Samsung
+          </h3>
+
+          <button onclick="vote(this,39,61)" class="w-full">
+            <div class="flex justify-between mb-2">
+              <span>Apple</span>
+              <span>61%</span>
+            </div>
+            <div class="bg-zinc-800 rounded-full h-4">
+              <div class="vote-bar bg-white h-4 rounded-full" style="width:61%"></div>
+            </div>
+          </button>
+
+          <button onclick="vote(this,39,61)" class="w-full">
+            <div class="flex justify-between mb-2">
+              <span>Samsung</span>
+              <span>39%</span>
+            </div>
+            <div class="bg-zinc-800 rounded-full h-4">
+              <div class="vote-bar bg-zinc-500 h-4 rounded-full" style="width:39%"></div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Hidden Polls -->
+        <div class="poll-card glass rounded-3xl p-8 hidden-poll extra">
+          <span class="text-zinc-500">Football</span>
+          <h3 class="text-3xl font-black mt-4 mb-8">
+            Messi vs Ronaldo
+          </h3>
+          <p class="text-zinc-400">18.4M votes</p>
+        </div>
+
+        <div class="poll-card glass rounded-3xl p-8 hidden-poll extra">
+          <span class="text-zinc-500">Science</span>
+          <h3 class="text-3xl font-black mt-4 mb-8">
+            Mars by 2040?
+          </h3>
+          <p class="text-zinc-400">7.9M votes</p>
+        </div>
+
+        <div class="poll-card glass rounded-3xl p-8 hidden-poll extra">
+          <span class="text-zinc-500">Culture</span>
+          <h3 class="text-3xl font-black mt-4 mb-8">
+            Best Decade Ever?
+          </h3>
+          <p class="text-zinc-400">4.2M votes</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMUNITY -->
+  <section class="px-6 py-24">
+    <div class="max-w-6xl mx-auto glass rounded-[40px] p-16 text-center">
+      <h2 class="text-6xl font-black mb-8">
+        Join the Community
+      </h2>
+
+      <p class="text-zinc-400 text-xl max-w-2xl mx-auto mb-12">
+        Vote. Debate. Rank. Follow creators.
+        Your opinion becomes data, trends, and culture.
+      </p>
+
+      <div class="flex flex-col md:flex-row justify-center gap-5">
+        <button class="bg-white text-black px-10 py-5 rounded-2xl font-black">
+          Create Account
+        </button>
+        <button class="glass px-10 py-5 rounded-2xl font-black">
+          Explore Topics
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <<script>
+const polls = [
+  {
+    id: 1,
+    title: "Jordan vs LeBron",
+    category: "Sports",
+    options: [
+      { name: "Jordan", votes: 70 },
+      { name: "LeBron", votes: 30 }
+    ],
+    voted: false
+  },
+  {
+    id: 2,
+    title: "Drake vs Kendrick",
+    category: "Music",
+    options: [
+      { name: "Drake", votes: 48 },
+      { name: "Kendrick", votes: 52 }
+    ],
+    voted: false
+  },
+  {
+    id: 3,
+    title: "Apple vs Samsung",
+    category: "Tech",
+    options: [
+      { name: "Apple", votes: 61 },
+      { name: "Samsung", votes: 39 }
+    ],
+    voted: false
+  }
+];
+
+let expanded = false;
+
+/* FIXED EXPAND SYSTEM */
+function togglePolls() {
+  expanded = !expanded;
+
+  const extras = document.querySelectorAll('.extra');
+  const btn = document.getElementById('expandBtn');
+
+  extras.forEach(el => {
+    el.style.display = expanded ? 'block' : 'none';
+  });
+
+  btn.innerText = expanded ? "Show Less" : "View More";
+}
+
+/* REAL VOTING SYSTEM */
+function vote(button, pollId, optionIndex) {
+  const poll = polls.find(p => p.id === pollId);
+
+  if (!poll || poll.voted) return;
+  poll.voted = true;
+
+  const total = poll.options.reduce((sum, o) => sum + o.votes, 0);
+
+  poll.options[optionIndex].votes += 5;
+
+  const newTotal = poll.options.reduce((sum, o) => sum + o.votes, 0);
+
+  poll.options.forEach((opt, i) => {
+    const percent = Math.round((opt.votes / newTotal) * 100);
+
+    const card = button.closest('.poll-card');
+    const bars = card.querySelectorAll('.vote-bar');
+    const spans = card.querySelectorAll('span:last-child');
+
+    bars[i].style.width = percent + "%";
+    spans[i].innerText = percent + "%";
+  });
+}
+</script>
+
+</body>
+</html>
