@@ -93,6 +93,9 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       time: new Date(row.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }),
       optionIds: options.map((option) => option.id),
       choices: options.map((option) => option.label),
+      images: options.map((option) => option.image_path
+        ? backend.storage.from("poll-option-images").getPublicUrl(option.image_path).data.publicUrl
+        : null),
       votes: options.map((option) => Number(option.votes)),
       votedPosition: row.my_option_position === null ? null : Number(row.my_option_position)
     };
@@ -181,11 +184,23 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       button.setAttribute("aria-pressed", String(selected));
       const optionTop = el("span", "option-top");
       optionTop.append(el("span", "option-name", choice), el("span", "option-percent", `${percent}%`));
+      const content = el("span", "option-content");
+      content.append(optionTop);
+      const imageUrl = poll.images?.[index];
+      if (imageUrl) {
+        const image = el("img", "option-image");
+        image.src = imageUrl;
+        image.alt = `${choice} option`;
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.referrerPolicy = "no-referrer";
+        content.prepend(image);
+      }
       const track = el("span", "option-track");
       const fill = el("span", "option-fill");
       fill.style.width = hasVoted ? `${percent}%` : "0%";
       track.append(fill);
-      button.append(optionTop, track);
+      button.append(content, track);
       options.append(button);
     });
 

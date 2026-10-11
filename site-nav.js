@@ -3,8 +3,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 const loginLinks = document.querySelectorAll('a[href="login.html"]');
 const profileLinks = document.querySelectorAll('a[href="profile.html"]');
 
+if (isBackendConfigured()) {
+  document.body.classList.add("auth-checking");
+}
+
 function showSignedIn(session) {
   const signedIn = Boolean(session?.user);
+  document.body.classList.toggle("is-signed-in", signedIn);
+  document.body.classList.remove("auth-checking");
   loginLinks.forEach((link) => {
     link.hidden = signedIn;
   });
@@ -32,6 +38,7 @@ async function initializeNavigation() {
     });
   } catch (error) {
     console.error("Could not update the account navigation.", error);
+    document.body.classList.remove("auth-checking");
   }
 }
 

@@ -36,13 +36,28 @@
         <label for="question">Your question <span class="field-count" id="question-count">0 / 110</span>
           <textarea id="question" name="question" maxlength="110" placeholder="Settle this for us…" required></textarea>
         </label>
-          <div class="choice-builder">
-            <div class="choice-builder-heading"><span class="field-count">OPTIONS · 2 MIN / 4 MAX</span><button class="choice-add" id="add-choice" type="button">＋ Add an option</button></div>
-            <div class="choice-inputs" id="choice-inputs">
-              <label for="option-1">Option 1<input id="option-1" name="options" maxlength="40" placeholder="Make your case" required></label>
-              <label for="option-2">Option 2<input id="option-2" name="options" maxlength="40" placeholder="Or go this way" required></label>
+        <div class="choice-builder">
+          <div class="choice-builder-heading"><span class="field-count">OPTIONS · 2 MIN / 4 MAX</span><button class="choice-add" id="add-choice" type="button">＋ Add an option</button></div>
+          <p class="choice-image-guidance">Add an optional image to any choice. Images are resized into compact thumbnails.</p>
+          <div class="choice-inputs" id="choice-inputs">
+            <div class="choice-field">
+              <label for="option-1">Option 1</label>
+              <input id="option-1" name="options" maxlength="40" placeholder="Make your case" required>
+              <input id="option-image-1" class="choice-image-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="choice-image-actions"><button class="choice-image-trigger" type="button" aria-label="Add an image for option 1">＋ Add image</button><button class="choice-image-remove" type="button" aria-label="Remove image from option 1" hidden>Remove image</button></div>
+              <img class="choice-image-preview" alt="" hidden>
+              <button class="choice-remove" type="button" hidden>Remove option</button>
+            </div>
+            <div class="choice-field">
+              <label for="option-2">Option 2</label>
+              <input id="option-2" name="options" maxlength="40" placeholder="Or go this way" required>
+              <input id="option-image-2" class="choice-image-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="choice-image-actions"><button class="choice-image-trigger" type="button" aria-label="Add an image for option 2">＋ Add image</button><button class="choice-image-remove" type="button" aria-label="Remove image from option 2" hidden>Remove image</button></div>
+              <img class="choice-image-preview" alt="" hidden>
+              <button class="choice-remove" type="button" hidden>Remove option</button>
             </div>
           </div>
+        </div>
         <label for="category">Put it in a lane
           <select id="category" name="category" required></select>
         </label>
