@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRGGR | Explore</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>TRGGA | Explore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav class="navbar">
-    <a href="index.html" class="logo">TRGGR</a>
+    <a href="index.html" class="logo">TRGGA</a>
     <div class="nav-links">
         <a href="explore.html" class="active">Explore</a>
         <a href="topics.html">Topics</a>
@@ -18,17 +21,15 @@
 </nav>
 
 <section class="hero-small">
+    <span class="eyebrow"><span class="live-dot"></span> EVERY CORNER OF THE CONVERSATION</span>
     <h1>Explore</h1>
-    <p>Find the world's loudest opinions.</p>
+    <p>Sports, style, science, society, and whatever else is on your mind. Pick a lane—or make a new one.</p>
 </section>
 
-<section class="card-grid">
-    <div class="glass-card">🔥 Trending Now</div>
-    <div class="glass-card">🏀 Sports</div>
-    <div class="glass-card">🎵 Music</div>
-    <div class="glass-card">💻 Tech</div>
-    <div class="glass-card">🌍 Politics</div>
-    <div class="glass-card">🧬 Science</div>
+<section class="card-grid" id="category-grid" aria-live="polite">
 </section>
+<script src="auth-config.js"></script>
+<script src="poll-data.js"></script>
+<script type="module" src="explore.js"></script>
 </body>
 </html>
