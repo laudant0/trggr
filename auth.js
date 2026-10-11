@@ -54,7 +54,8 @@ async function initializeAuth() {
           }
         }
         const allowedDestinations = new Set(["index.html", "index.html#polls", "create.html", "profile.html"]);
-        if (next && allowedDestinations.has(next)) {
+        const memberDestination = /^member\.html\?id=[0-9a-f-]{36}$/i.test(next || "");
+        if (next && (allowedDestinations.has(next) || memberDestination)) {
           sessionStorage.removeItem("trggr-auth-next");
           window.location.replace(next);
         } else if (!next) {

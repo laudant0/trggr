@@ -66,22 +66,112 @@ function render(profile) {
   panel.append(panelHeading);
   const polls = document.createElement("div");
   polls.className = "member-poll-list";
-  if (!profile.recent_polls.length) {
-    addText(polls, "p", "profile-empty", "No public polls yet.");
-  } else {
-    profile.recent_polls.forEach((poll) => {
-      const pollCard = document.createElement("article");
-      pollCard.className = "member-poll";
-      addText(pollCard, "span", "topic-poll-tag", `${poll.category.toUpperCase()} · ${Number(poll.total_votes).toLocaleString()} VOTES`);
-      addText(pollCard, "h3", "", poll.question);
-      polls.append(pollCard);
-    });
-  }
+  polls.id = "member-poll-list";
+  addText(polls, "p", "profile-empty", "Loading polls…");
   panel.append(polls);
   content.replaceChildren(hero, stats, panel);
   content.hidden = false;
   status.hidden = true;
 }
+
+let backendClient = null;
+let memberId = null;
+let signedIn = false;
+
+function renderMemberPoll(row) {
+  const options = Array.isArray(row.options) ? row.options : [];
+  const total = options.reduce((sum, option) => sum + Number(option.votes), 0);
+  const myPosition = row.my_option_position === null ? null : Number(row.my_option_position);
+  const hasVoted = myPosition !== null;
+  const card = document.createElement("article");
+  card.className = "poll-card member-poll-card";
+  const top = document.createElement("div");
+  top.className = "poll-card-top";
+  addText(top, "span", "poll-label", row.tag || `${row.category.toUpperCase()} CHECK`);
+  addText(top, "span", "category-label", row.category.toUpperCase());
+  const group = document.createElement("div");
+  group.className = "poll-options";
+  options.forEach((option) => {
+    const percent = total ? Math.round((Number(option.votes) / total) * 100) : 0;
+    const selected = myPosition === Number(option.position);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `poll-option${selected ? " selected" : ""}${hasVoted ? " show-results" : ""}`;
+    button.disabled = hasVoted;
+    button.dataset.poll = row.id;
+    button.dataset.option = option.id;
+    const content = document.createElement("span");
+    content.className = "option-content";
+    if (option.image_path) {
+      const image = document.createElement("img");
+      image.className = "option-image";
+      image.src = backendClient.storage.from("poll-option-images").getPublicUrl(option.image_path).data.publicUrl;
+      image.alt = `${option.label} option`;
+      image.loading = "lazy";
+      content.append(image);
+    }
+    const line = document.createElement("span");
+    line.className = "option-top";
+    addText(line, "span", "option-name", option.label);
+    addText(line, "span", "option-percent", `${percent}%`);
+    content.append(line);
+    const track = document.createElement("span");
+    track.className = "option-track";
+    const fill = document.createElement("span");
+    fill.className = "option-fill";
+    fill.style.width = hasVoted ? `${percent}%` : "0%";
+    track.append(fill);
+    button.append(content, track);
+    group.append(button);
+  });
+  const footer = document.createElement("div");
+  footer.className = "poll-card-footer";
+  addText(footer, "span", "vote-count", `${total.toLocaleString()} VOTES`);
+  addText(footer, "span", "vote-hint", hasVoted ? "YOUR VOTE IS IN ✓" : signedIn ? "PICK A SIDE ↗" : "SIGN IN TO VOTE ↗");
+  const title = document.createElement("h3");
+  title.className = "poll-question";
+  title.textContent = row.question;
+  card.append(top, title, group, footer);
+  return card;
+}
+
+async function loadMemberPolls() {
+  const list = document.querySelector("#member-poll-list");
+  const { data, error } = await backendClient.rpc("get_member_polls", { p_profile_id: memberId });
+  if (error) {
+    console.error("Could not load the member's polls.", error);
+    list.replaceChildren();
+    addText(list, "p", "profile-empty", "Their polls couldn't load right now.");
+    return;
+  }
+  list.replaceChildren();
+  if (!data.length) {
+    addText(list, "p", "profile-empty", "No public polls yet.");
+    return;
+  }
+  data.forEach((row) => list.append(renderMemberPoll(row)));
+}
+
+content.addEventListener("click", async (event) => {
+  const button = event.target.closest(".member-poll-card .poll-option");
+  if (!button || button.disabled) return;
+  if (!signedIn) {
+    window.location.href = `login.html?next=${encodeURIComponent(`member.html?id=${memberId}`)}`;
+    return;
+  }
+  button.disabled = true;
+  try {
+    const { error } = await backendClient.rpc("vote_on_poll", {
+      p_poll_id: button.dataset.poll,
+      p_option_id: button.dataset.option
+    });
+    if (error) throw error;
+    await loadMemberPolls();
+  } catch (error) {
+    console.error("Could not submit the vote.", error);
+    button.disabled = false;
+  }
+});
 
 async function initialize() {
   const id = new URLSearchParams(window.location.search).get("id");
@@ -100,6 +190,11 @@ async function initialize() {
     if (!data) throw new Error("This member has not opted into public discovery.");
     document.title = `${data.display_name} — TRGGA`;
     render(data);
+    memberId = id;
+    backendClient = backend;
+    const { data: sessionData } = await backend.auth.getSession();
+    signedIn = Boolean(sessionData.session?.user);
+    await loadMemberPolls();
   } catch (error) {
     console.error("Could not load the public member profile.", error);
     status.textContent = error.message.includes("profile_not_found_or_private")
