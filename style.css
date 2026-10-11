@@ -859,3 +859,9 @@ body {
 .poll-creator-link:hover { border-bottom-color: var(--lime); }
 .member-poll-list { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 .member-poll-card { margin: 0; }
+
+.oauth-button[hidden], .auth-signout[hidden] { display: none !important; }
+
+.mobile-menu nav .mobile-profile-link[hidden] { display: none; }
+
+.button-profile[hidden] { display: none !important; }
