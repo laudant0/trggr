@@ -78,7 +78,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     }
     polls = stored;
     voted = getStored(voteKey, {});
-    setStatus("DEMO MODE — polls and votes are saved only in this browser. Set up Supabase to go live.", "demo");
+    setStatus("LOCAL MODE — polls and votes stay in this browser. Sign in to use the shared TRGGA feed.", "demo");
   }
 
   function mapPoll(row) {
@@ -178,7 +178,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 
     const footer = el("div", "poll-card-footer");
     footer.append(
-      el("span", "vote-count", `${total.toLocaleString()} ${backend ? "VOTES" : "DEMO VOTES"}`),
+      el("span", "vote-count", `${total.toLocaleString()} ${backend ? "VOTES" : "LOCAL VOTES"}`),
       el("span", "vote-hint", votedPosition !== undefined && votedPosition !== null ? "YOUR VOTE IS IN ✓" : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
     );
     if (backend) {
