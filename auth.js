@@ -58,7 +58,7 @@ async function initializeAuth() {
           sessionStorage.removeItem("trggr-auth-next");
           window.location.replace(next);
         } else if (!next) {
-          window.location.replace("index.html#polls");
+          window.location.replace("profile.html");
         }
       }
     });
