@@ -10,42 +10,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav class="navbar">
-    <a href="index.html" class="logo">TRGGA</a>
-    <div class="nav-links">
-        <a href="explore.html">Explore</a>
-        <a href="topics.html">Topics</a>
-        <a href="community.html" class="active">Community</a>
-        <a href="login.html">Login</a>
-    </div>
-</nav>
-
-<section class="hero-small">
-    <h1>Community</h1>
-    <p>Debate, rank, and shape public opinion.</p>
+<header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a class="active" href="community.html">Community</a><a href="profile.html">Profile</a></nav>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
+    <div class="header-actions"><a class="nav-login" href="login.html">Log in</a><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
+</header>
+<main>
+<section class="hero-small shell supporting-hero">
+    <span class="eyebrow"><span class="live-dot"></span> BETTER TOGETHER, NEVER IN AN ECHO CHAMBER</span>
+    <h1>The room is<br><span class="highlight">what we make it.</span></h1>
+    <p>Bring your point of view. Hear the room out. The best conversations start when more people get a say.</p>
 </section>
 
-<section class="feed">
-    <div class="glass-card">
-        <span class="eyebrow">SPORTS · COMMUNITY TAKE</span>
-        <h3>@sportsmind</h3>
-        <p>LeBron's longevity changes everything.</p>
-        <a class="topic-link" href="index.html?category=Sports#polls">Take it to the polls ↗</a>
-    </div>
-
-    <div class="glass-card">
-        <span class="eyebrow">MUSIC · COMMUNITY TAKE</span>
-        <h3>@raptalk</h3>
-        <p>Kendrick won the battle. Drake won the charts.</p>
-        <a class="topic-link" href="index.html?category=Music#polls">Take it to the polls ↗</a>
-    </div>
-
-    <div class="glass-card">
-        <span class="eyebrow">TECH · COMMUNITY TAKE</span>
-        <h3>@futuretech</h3>
-        <p>AI won't replace humans. Humans using AI will.</p>
-        <a class="topic-link" href="index.html?category=Tech#polls">Take it to the polls ↗</a>
-    </div>
+<section class="community-invite shell">
+    <article class="community-card community-card-lime"><span class="eyebrow">01 / HAVE A TAKE?</span><h2>Put the question<br>to the room.</h2><p>Turn the group-chat debate into a question everyone can weigh in on.</p><a class="button button-dark button-small" href="create.html">Start a poll <span aria-hidden="true">↗</span></a></article>
+    <article class="community-card"><span class="eyebrow">02 / FIND YOUR PEOPLE</span><h2>See where the<br>room really lands.</h2><p>Explore live questions across the topics you care about and cast your vote.</p><a class="button button-profile button-small" href="explore.html">Explore the pulse <span aria-hidden="true">↗</span></a></article>
 </section>
+
+<section class="community-guidelines shell">
+    <div><span class="eyebrow">THE ROOM RULES</span><h2>Strong takes.<br><span class="highlight">Good faith.</span></h2></div>
+    <p>Disagree with the take, not the person. Keep questions clear and choices fair. If something crosses a line, report it so the community can be safer for everyone.</p>
+</section>
+</main>
+<footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>THE ROOM IS BETTER WITH YOU IN IT.</span><span><a href="profile.html">YOUR PROFILE ↗</a></span></footer>
 </body>
 </html>

@@ -10,24 +10,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav class="navbar">
-    <a href="index.html" class="logo">TRGGA</a>
-    <div class="nav-links">
-        <a href="explore.html" class="active">Explore</a>
-        <a href="topics.html">Topics</a>
-        <a href="community.html">Community</a>
-        <a href="login.html">Login</a>
-    </div>
-</nav>
+<header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">The pulse</a><a class="active" href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a href="profile.html">Profile</a></nav>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
+    <div class="header-actions"><a class="nav-login" href="login.html">Log in</a><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
+</header>
 
-<section class="hero-small">
+<main>
+<section class="hero-small shell supporting-hero">
     <span class="eyebrow"><span class="live-dot"></span> EVERY CORNER OF THE CONVERSATION</span>
-    <h1>Explore</h1>
-    <p>Sports, style, science, society, and whatever else is on your mind. Pick a lane—or make a new one.</p>
+    <h1>Find your<br><span class="highlight">frequency.</span></h1>
+    <p>Sports, style, science, society, and whatever else is on your mind. Pick a lane—or make a new one. The room has range.</p>
 </section>
 
-<section class="card-grid" id="category-grid" aria-live="polite">
-</section>
+<section class="card-grid shell" id="category-grid" aria-live="polite"></section>
+</main>
+<footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>EVERY TAKE HAS A PLACE.</span><span><a href="profile.html">MAKE IT YOURS ↗</a></span></footer>
 <script src="auth-config.js"></script>
 <script src="poll-data.js"></script>
 <script type="module" src="explore.js"></script>

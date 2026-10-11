@@ -1,12 +1,12 @@
 # TRGGA
 
-TRGGA is a browser-based culture poll prototype. Run it from the repository root with:
+TRGGA is a culture-polling app for following the conversations moving the room. Run it from the repository root with:
 
 ```powershell
 python -m http.server 8081 --bind 127.0.0.1
 ```
 
-Open `http://localhost:8081`. Without Supabase settings the site explicitly runs in demo mode: polls and votes are stored in that browser only and are not real platform-wide results.
+Open `http://localhost:8081`. Without Supabase settings the site runs in local mode: polls and votes stay in that browser and do not count as shared results.
 
 ## Deploy from GitHub to Netlify
 
@@ -28,12 +28,12 @@ The Google button uses Google sign-in (commonly a Gmail account); Facebook authe
 
 ## Data behavior
 
-The initial migration publishes eight sample questions into the shared database with **zero votes**. The previous prototype's invented counts are not imported or described as actual community results. Shared voting requires sign-in and is limited to one vote per Supabase user account per poll. This does not prove that one human cannot create multiple accounts.
+The initial migration publishes eight sample questions into the shared database with **zero votes**. The earlier demo's invented counts are not imported or described as actual community results. Shared voting requires sign-in and is limited to one vote per Supabase user account per poll. This does not prove that one human cannot create multiple accounts.
 
-The seeded topic list spans arts, automotive, books, business, creators, culture, education, entertainment, environment, fashion, finance, food, gaming, health, lifestyle, music, news, politics, relationships, science, sports, technology, travel, world, and Other. Explore filters and the poll form read categories from the database. To expand the list, add a row to `public.poll_categories` in the Supabase SQL Editor; the site will include it automatically.
+The seeded topic list spans arts, automotive, books, business, creators, culture, education, entertainment, environment, fashion, finance, food, gaming, health, lifestyle, music, news, politics, relationships, science, sports, technology, travel, world, and Other. Explore filters and the poll form read categories from the database. The Topics page uses the shared poll feed, while Explore shows the category list. To expand the list, add a row to `public.poll_categories` in the Supabase SQL Editor; the site will include it automatically.
 
 ## Launch readiness
 
-The shared database schema and server-side authorization are implemented in this repository, but a live service is **not configured or ready to launch** until both migrations have been applied to your Supabase project, real project/provider credentials and production callback URLs have been configured, and end-to-end tests pass. The interface only displays the shared live feed when the backend is configured and reachable; otherwise it labels its local data as demo mode.
+The shared database schema and server-side authorization are implemented in this repository, but a live service is **not configured or ready to launch** until both migrations have been applied to your Supabase project, real project/provider credentials and production callback URLs have been configured, and end-to-end tests pass. The interface only displays the shared live feed when the backend is configured and reachable; otherwise it clearly identifies local-only data.
 
 Before public launch, publish privacy/terms and contact details, decide who will review and act on poll reports, test account recovery and deletion, add operational backups/monitoring, and verify production security and mobile/desktop behavior. A basic `python -m http.server` is for development only, not production hosting.

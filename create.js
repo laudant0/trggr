@@ -54,7 +54,7 @@ function restoreDraft() {
 async function initialize() {
   if (!isBackendConfigured()) {
     fillCategories(window.TRGGR_CATEGORIES);
-    modeNote.textContent = "DEMO MODE: this poll is saved only in this browser. Connect Supabase to publish it for everyone.";
+    modeNote.textContent = "LOCAL MODE: this poll stays in this browser. Sign in to publish to the shared feed.";
     return;
   }
 
@@ -153,8 +153,8 @@ form.addEventListener("submit", async (event) => {
     localStorage.setItem(key, JSON.stringify(polls));
     window.location.href = "index.html#polls";
   } catch (error) {
-    console.error("Could not save your demo poll in this browser.", error);
-    note.textContent = "Couldn't save this demo poll here. Check your browser storage settings and try again.";
+    console.error("Could not save your local poll.", error);
+    note.textContent = "Couldn't save this poll in this browser. Check your browser storage settings and try again.";
   }
 });
 
