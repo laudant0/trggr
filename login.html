@@ -1,26 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRGGR | Login</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11120f">
+  <title>Log in — TRGGA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="auth-container">
-    <div class="auth-card glass-card">
-        <h1>Welcome Back</h1>
-        <p>Sign in to TRGGR.</p>
+  <header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a>
+    </nav>
+    <details class="mobile-menu">
+      <summary>Menu <span aria-hidden="true">☰</span></summary>
+      <nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a></nav>
+    </details>
+    <a class="nav-login" href="index.html">← Back to the pulse</a>
+  </header>
 
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Password">
+  <main class="auth-layout shell">
+    <section class="auth-intro">
+      <span class="eyebrow"><span class="live-dot"></span> SAME YOU. BIGGER ROOM.</span>
+      <h1>Your voice.<br>Your <span class="highlight">people.</span></h1>
+      <p>Sign in to keep your TRGGA identity close. The conversation is better when the room knows you're in it.</p>
+      <div class="auth-pullquote"><span aria-hidden="true">“</span><p>It's not about having the loudest take.<br>It's about knowing where the room stands.</p></div>
+      <div class="auth-aside-note"><span>01 / YOUR ACCOUNT</span><span>ONE TAP. BACK IN THE MIX.</span></div>
+    </section>
 
-        <button class="primary-btn">Login</button>
+    <section class="auth-panel">
+      <a class="wordmark auth-panel-logo" href="index.html">TRGGA<span class="wordmark-period">.</span></a>
+      <span class="eyebrow">WELCOME BACK</span>
+      <h2>Come on in.</h2>
+      <p class="auth-panel-copy">Choose how you want to sign in.</p>
+      <div class="oauth-options">
+        <button class="oauth-button" type="button" data-provider="google">
+          <span class="oauth-mark google-mark" aria-hidden="true">G</span><span>Continue with Google <small>(Gmail)</small></span><span class="oauth-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="oauth-button" type="button" data-provider="facebook">
+          <span class="oauth-mark meta-mark" aria-hidden="true">f</span><span>Continue with Facebook <small>(Meta)</small></span><span class="oauth-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="oauth-button" type="button" data-provider="twitter">
+          <span class="oauth-mark x-mark" aria-hidden="true">𝕏</span><span>Continue with X</span><span class="oauth-arrow" aria-hidden="true">↗</span>
+        </button>
+      </div>
+      <p class="auth-status" id="auth-status" role="status" aria-live="polite">Checking sign-in setup…</p>
+      <button class="auth-signout" id="sign-out" type="button" hidden>Sign out</button>
+      <div class="auth-divider"><span>OR KEEP IT MOVING</span></div>
+      <a class="auth-browse" href="index.html#polls">Browse the pulse without signing in <span aria-hidden="true">→</span></a>
+      <p class="auth-footnote">Facebook sign-in uses your Facebook account; Instagram connection is a separate feature. TRGGA never sees your social password.</p>
+    </section>
+  </main>
 
-        <p class="auth-switch">
-            New here? <a href="#">Create an account</a>
-        </p>
-    </div>
-</div>
+  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span><a href="README.md">SIGN-IN SETUP</a></span></footer>
+  <script src="auth-config.js"></script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>

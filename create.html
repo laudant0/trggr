@@ -1,30 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRGGR | Create Poll</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11120f">
+  <title>Start a poll — TRGGA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="auth-container">
-    <div class="auth-card glass-card">
-        <h1>Create Poll</h1>
-
-        <input type="text" placeholder="Poll Question">
-        <input type="text" placeholder="Option One">
-        <input type="text" placeholder="Option Two">
-
-        <select>
-            <option>Sports</option>
-            <option>Music</option>
-            <option>Tech</option>
-            <option>Politics</option>
-            <option>Culture</option>
-        </select>
-
-        <button class="primary-btn">Publish Poll</button>
-    </div>
-</div>
+  <header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a>
+    </nav>
+    <details class="mobile-menu">
+      <summary>Menu <span aria-hidden="true">☰</span></summary>
+      <nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a></nav>
+    </details>
+    <a class="nav-login" href="index.html">← Back to the pulse</a>
+  </header>
+  <main class="create-layout shell">
+    <section class="create-intro">
+      <span class="eyebrow"><span class="live-dot"></span> YOUR TURN AT THE MIC</span>
+      <h1>Put it to<br>the <span class="highlight">room.</span></h1>
+      <p>Good questions don't need a think piece. Keep it clear, give people a real choice, and see where the room lands.</p>
+      <div class="create-tip"><span>01</span><p><strong>Ask one thing.</strong><br>The best polls are easy to get and hard to scroll past.</p></div>
+      <div class="create-tip"><span>02</span><p><strong>Give both sides a shot.</strong><br>No loaded options. Let people speak for themselves.</p></div>
+    </section>
+    <section class="create-panel">
+      <div class="create-panel-heading"><span class="eyebrow">NEW CONVERSATION</span><span class="panel-step">01 / 01</span></div>
+      <form class="create-form" id="create-poll-form">
+        <label for="question">Your question <span class="field-count" id="question-count">0 / 110</span>
+          <textarea id="question" name="question" maxlength="110" placeholder="Settle this for us…" required></textarea>
+        </label>
+        <div class="form-options">
+          <label for="option-one">Option one<input id="option-one" name="optionOne" maxlength="40" placeholder="Make your case" required></label>
+          <label for="option-two">Option two<input id="option-two" name="optionTwo" maxlength="40" placeholder="Or go this way" required></label>
+        </div>
+        <label for="category">Put it in a lane
+          <select id="category" name="category" required></select>
+        </label>
+        <p class="create-disclaimer" id="create-mode-note">Your poll will be shared with the TRGGA community after you sign in.</p>
+        <p class="form-note" id="form-note" role="status" aria-live="polite"></p>
+        <button class="button button-lime create-submit" type="submit">Put it to the room <span aria-hidden="true">↗</span></button>
+      </form>
+    </section>
+  </main>
+  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span>PROTOTYPE · SAVED ON THIS DEVICE</span></footer>
+  <script src="poll-data.js"></script>
+  <script src="poll-data.js"></script>
+  <script src="auth-config.js"></script>
+  <script type="module" src="create.js"></script>
 </body>
 </html>
