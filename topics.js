@@ -2,7 +2,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 
 const topicList = document.querySelector("#topic-list");
 
-function renderPolls(polls) {
+function renderPolls(polls, backend = null) {
   if (!polls.length) {
     const empty = document.createElement("p");
     empty.className = "profile-empty";
@@ -20,6 +20,16 @@ function renderPolls(polls) {
     tag.textContent = `${poll.category.toUpperCase()} · ${poll.tag || "COMMUNITY QUESTION"}`;
     const question = document.createElement("strong");
     question.textContent = poll.question;
+    const firstImage = poll.options?.find((option) => option.image_path)?.image_path;
+    if (firstImage && backend) {
+      const image = document.createElement("img");
+      image.className = "topic-poll-image";
+      image.src = backend.storage.from("poll-option-images").getPublicUrl(firstImage).data.publicUrl;
+      image.alt = `Image for a choice in ${poll.question}`;
+      image.loading = "lazy";
+      image.decoding = "async";
+      card.append(image);
+    }
     const detail = document.createElement("span");
     detail.className = "topic-link";
     const votes = Number(poll.total_votes || 0);
@@ -42,7 +52,7 @@ async function initializeTopics() {
     const backend = await getBackend();
     const { data, error } = await backend.rpc("get_public_polls");
     if (error) throw error;
-    renderPolls(data || []);
+    renderPolls(data || [], backend);
   } catch (error) {
     console.error("Could not load recent TRGGA conversations.", error);
     const message = document.createElement("p");

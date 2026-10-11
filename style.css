@@ -29,6 +29,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .main-nav { display: flex; align-items: center; gap: 36px; height: 100%; }
 .main-nav a, .nav-login { color: #92948b; font-size: 12px; transition: color .2s; }
 .main-nav a:hover, .nav-login:hover, .main-nav a.active { color: var(--paper); }
+.auth-checking a[href="login.html"], .is-signed-in a[href="login.html"] { display: none !important; }
 .main-nav a.active { position: relative; }
 .main-nav a.active::after { content: ""; position: absolute; height: 2px; left: 0; right: 0; bottom: -30px; background: var(--lime); }
 .mobile-menu { display: none; }
@@ -110,9 +111,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .poll-question { min-height: 51px; margin: 18px 0 6px; font: 600 19px/1.25 var(--display); letter-spacing: -.045em; }
 .poll-meta { margin: 0 0 16px; color: #74766e; font: 400 8px var(--mono); letter-spacing: .03em; }
 .poll-options { display: grid; gap: 7px; }
-.poll-option { position: relative; overflow: hidden; width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid rgba(240,240,233,.13); background: transparent; color: var(--paper); text-align: left; cursor: pointer; }
+.poll-option { position: relative; overflow: hidden; width: 100%; min-height: 38px; display: flex; align-items: stretch; gap: 11px; padding: 9px; border: 1px solid rgba(240,240,233,.13); background: transparent; color: var(--paper); text-align: left; cursor: pointer; }
 .poll-option:not(:disabled):hover { border-color: var(--lime); }
 .poll-option:disabled { cursor: default; }
+.option-content { position: relative; z-index: 1; min-width: 0; flex: 1; display: grid; align-content: center; gap: 8px; }
+.option-image { width: 100%; max-height: 104px; aspect-ratio: 16 / 9; display: block; object-fit: cover; background: #25271f; }
 .option-top { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 10px; font-size: 10px; }
 .option-percent { color: #92948b; font: 400 9px var(--mono); }
 .option-track { position: absolute; inset: 0; }
@@ -227,12 +230,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .create-form textarea { min-height: 96px; resize: vertical; }
 .choice-builder { display: grid; gap: 10px; }
 .choice-builder-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.choice-add, .choice-remove { min-height: 30px; padding: 0 9px; border: 1px solid var(--line); background: transparent; color: var(--lime); font-size: 9px; cursor: pointer; }
+.choice-add { min-height: 30px; padding: 0 9px; border: 1px solid var(--line); background: transparent; color: var(--lime); font-size: 9px; cursor: pointer; }
 .choice-add:disabled { cursor: default; opacity: .45; }
 .choice-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.choice-inputs > label { display: grid; gap: 7px; color: #c4c5bd; font-size: 10px; }
-.choice-inputs input { width: 100%; min-height: 43px; padding: 11px 12px; border: 1px solid var(--line); background: #10110e; color: var(--paper); font-size: 11px; }
-.choice-remove { justify-self: start; min-height: 24px; padding-inline: 7px; color: #d1a89f; }
+.choice-image-guidance { margin: -4px 0 0; color: var(--muted); font-size: 9px; line-height: 1.6; }
+.choice-field { min-width: 0; display: grid; align-content: start; gap: 8px; padding: 12px; border: 1px solid var(--line); background: #11120f; }
+.choice-field > label { color: #c4c5bd; font-size: 10px; }
+.choice-field > input[name="options"] { width: 100%; min-height: 43px; padding: 11px 12px; border: 1px solid var(--line); background: #10110e; color: var(--paper); font-size: 11px; }
+.choice-image-actions { display: flex; gap: 7px; }
+.choice-image-trigger, .choice-image-remove { min-height: 29px; padding: 0 9px; border: 1px solid rgba(200,241,105,.24); background: rgba(200,241,105,.035); color: #d7e9b1; font-size: 9px; cursor: pointer; }
+.choice-image-remove { border-color: var(--line); background: transparent; color: #d1a89f; }
+.choice-image-trigger:hover, .choice-image-remove:hover { border-color: var(--lime); }
+.choice-image-preview { width: 100%; max-height: 130px; aspect-ratio: 16 / 9; display: block; object-fit: cover; background: #25271f; }
+.choice-image-preview[hidden], .choice-image-trigger[hidden], .choice-image-remove[hidden], .choice-remove[hidden] { display: none; }
+.choice-remove { justify-self: start; min-height: 24px; padding-inline: 7px; border: 0; background: transparent; color: #d1a89f; font-size: 9px; cursor: pointer; }
+.choice-remove:hover { color: var(--paper); }
 .form-note { min-height: 17px; color: var(--lime); font-size: 11px; }
 .create-back { color: var(--muted); font-size: 11px; }
 .create-layout { min-height: calc(100vh - 154px); display: grid; grid-template-columns: 1fr .85fr; align-items: center; gap: 90px; padding-block: 70px; }
@@ -341,6 +353,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .topic-poll-card { min-height: 172px; justify-content: space-between; gap: 20px; transition: transform .2s, border-color .2s; }
 .topic-poll-card:hover { transform: translateY(-3px); border-color: rgba(200,241,105,.45); }
 .topic-poll-card > strong { font: 600 19px/1.3 var(--display); letter-spacing: -.04em; }
+.topic-poll-image { width: 100%; max-height: 130px; aspect-ratio: 16 / 9; object-fit: cover; background: #25271f; }
 .topic-poll-tag, .topic-poll-card .topic-link { color: var(--lime); font: 400 8px/1.6 var(--mono); letter-spacing: .06em; }
 .topic-poll-card .topic-link { color: #9da095; }
 .community-invite { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 74px; }
