@@ -6,6 +6,8 @@ const questionCount = document.querySelector("#question-count");
 const note = document.querySelector("#form-note");
 const modeNote = document.querySelector("#create-mode-note");
 const categorySelect = form.elements.namedItem("category");
+const choiceInputs = document.querySelector("#choice-inputs");
+const addChoiceButton = document.querySelector("#add-choice");
 let backend;
 let userId = null;
 
@@ -27,10 +29,9 @@ questionInput.addEventListener("input", () => {
 function saveDraft() {
   try {
     localStorage.setItem("trggr-poll-draft-v1", JSON.stringify({
-      question: questionInput.value,
-      optionOne: form.elements.namedItem("optionOne").value,
-      optionTwo: form.elements.namedItem("optionTwo").value,
-      category: form.elements.namedItem("category").value
+        question: questionInput.value,
+        options: [...form.querySelectorAll('input[name="options"]')].map((input) => input.value),
+        category: form.elements.namedItem("category").value
     }));
   } catch (error) {
     console.warn("Could not save the poll draft before sign-in.", error);
@@ -42,14 +43,65 @@ function restoreDraft() {
     const draft = JSON.parse(localStorage.getItem("trggr-poll-draft-v1") || "null");
     if (!draft) return;
     questionInput.value = draft.question || "";
-    form.elements.namedItem("optionOne").value = draft.optionOne || "";
-    form.elements.namedItem("optionTwo").value = draft.optionTwo || "";
+    (draft.options || []).slice(2, 4).forEach(() => addChoice());
+    [...form.querySelectorAll('input[name="options"]')].forEach((input, index) => {
+      input.value = draft.options?.[index] || "";
+    });
     categorySelect.value = draft.category || categorySelect.value;
     questionCount.textContent = `${questionInput.value.length} / 110`;
   } catch (error) {
     console.warn("Could not restore the saved poll draft.", error);
   }
 }
+
+function addChoice(value = "") {
+  const currentInputs = [...choiceInputs.querySelectorAll('input[name="options"]')];
+  if (currentInputs.length >= 4) return;
+  const nextNumber = currentInputs.length + 1;
+  const label = document.createElement("label");
+  label.htmlFor = `option-${nextNumber}`;
+  label.append(document.createTextNode(`Option ${nextNumber}`));
+  const input = document.createElement("input");
+  input.id = `option-${nextNumber}`;
+  input.name = "options";
+  input.maxLength = 40;
+  input.required = true;
+  input.placeholder = `Option ${nextNumber}`;
+  input.value = value;
+  label.append(input);
+  choiceInputs.append(label);
+  updateChoiceControls();
+}
+
+function updateChoiceControls() {
+  const inputs = [...choiceInputs.querySelectorAll('input[name="options"]')];
+  addChoiceButton.disabled = inputs.length >= 4;
+  inputs.forEach((input, index) => {
+    const label = input.closest("label");
+    const removeButton = label.querySelector(".choice-remove");
+    if (inputs.length > 2 && !removeButton) {
+      const remove = document.createElement("button");
+      remove.className = "choice-remove";
+      remove.type = "button";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", () => {
+        label.remove();
+        [...choiceInputs.querySelectorAll('input[name="options"]')].forEach((optionInput, optionIndex) => {
+          optionInput.id = `option-${optionIndex + 1}`;
+          optionInput.closest("label").htmlFor = optionInput.id;
+          optionInput.closest("label").firstChild.textContent = `Option ${optionIndex + 1}`;
+        });
+        updateChoiceControls();
+      });
+      label.append(remove);
+    } else if (inputs.length <= 2 && removeButton) {
+      removeButton.remove();
+    }
+    label.firstChild.textContent = `Option ${index + 1}`;
+  });
+}
+
+addChoiceButton.addEventListener("click", () => addChoice());
 
 async function initialize() {
   if (!isBackendConfigured()) {
@@ -91,16 +143,15 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const values = new FormData(form);
   const question = String(values.get("question") || "").trim();
-  const first = String(values.get("optionOne") || "").trim();
-  const second = String(values.get("optionTwo") || "").trim();
+  const options = values.getAll("options").map((option) => String(option).trim());
   const category = String(values.get("category") || "");
 
-  if (!question || !first || !second) {
-    note.textContent = "Fill in the question and both sides first.";
+  if (!question || options.length < 2 || options.some((option) => !option)) {
+    note.textContent = "Add a question and at least two complete options.";
     return;
   }
-  if (first.toLowerCase() === second.toLowerCase()) {
-    note.textContent = "Give the room two different choices.";
+  if (new Set(options.map((option) => option.toLocaleLowerCase())).size !== options.length) {
+    note.textContent = "Make every option different so the room can choose clearly.";
     return;
   }
 
@@ -119,11 +170,10 @@ form.addEventListener("submit", async (event) => {
     submitButton.disabled = true;
     note.textContent = "Publishing your poll…";
     try {
-      const { error } = await backend.rpc("create_poll", {
+      const { error } = await backend.rpc("create_poll_with_options", {
         p_question: question,
         p_category: category,
-        p_option_one: first,
-        p_option_two: second
+        p_options: options
       });
       if (error) throw error;
       localStorage.removeItem("trggr-poll-draft-v1");
@@ -144,8 +194,8 @@ form.addEventListener("submit", async (event) => {
       id: `community-${Date.now()}`,
       category,
       question,
-      choices: [first, second],
-      votes: [0, 0],
+      choices: options,
+      votes: options.map(() => 0),
       tag: "COMMUNITY QUESTION",
       creator: "you",
       time: "JUST NOW"

@@ -1,0 +1,111 @@
+import { getBackend, isBackendConfigured } from "./backend.js";
+
+const memberGrid = document.querySelector("#member-grid");
+const searchInput = document.querySelector("#member-search");
+let backend;
+let requestNumber = 0;
+
+function profileInitials(name) {
+  return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "%";
+}
+
+function renderMembers(profiles) {
+  if (!profiles.length) {
+    const empty = document.createElement("p");
+    empty.className = "profile-empty";
+    empty.textContent = searchInput.value.trim()
+      ? "No public profiles matched. Try another name or search."
+      : "No one has opted into discovery yet. Turn on profile discovery in your profile settings to be found here.";
+    memberGrid.replaceChildren(empty);
+    return;
+  }
+
+  memberGrid.replaceChildren(...profiles.map((profile) => {
+    const card = document.createElement("a");
+    card.className = "member-card";
+    card.href = `member.html?id=${encodeURIComponent(profile.id)}`;
+    const avatar = document.createElement("span");
+    avatar.className = "member-avatar";
+    if (profile.avatar_url) {
+      const image = document.createElement("img");
+      image.src = profile.avatar_url;
+      image.alt = "";
+      image.referrerPolicy = "no-referrer";
+      image.addEventListener("error", () => { avatar.textContent = profileInitials(profile.display_name); }, { once: true });
+      avatar.append(image);
+    } else {
+      avatar.textContent = profileInitials(profile.display_name);
+    }
+    const identity = document.createElement("span");
+    identity.className = "member-identity";
+    const name = document.createElement("strong");
+    name.textContent = profile.display_name;
+    const bio = document.createElement("span");
+    bio.className = "member-bio";
+    bio.textContent = profile.bio || "In the room, shaping the conversation.";
+    const stats = document.createElement("span");
+    stats.className = "member-stats";
+    stats.textContent = `${Number(profile.polls_created).toLocaleString()} POLLS · ${Number(profile.votes_received).toLocaleString()} VOTES RECEIVED`;
+    identity.append(name, bio, stats);
+    const arrow = document.createElement("span");
+    arrow.className = "member-arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    arrow.textContent = "↗";
+    card.append(avatar, identity, arrow);
+    return card;
+  }));
+}
+
+async function loadMembers(query = "") {
+  const currentRequest = ++requestNumber;
+  memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
+    className: "profile-empty",
+    textContent: "Finding the people behind the polls…"
+  }));
+  try {
+    const { data, error } = await backend.rpc("get_discoverable_profiles", {
+      p_search: query.trim() || null
+    });
+    if (error) throw error;
+    if (currentRequest === requestNumber) renderMembers(data || []);
+  } catch (error) {
+    if (currentRequest !== requestNumber) return;
+    console.error("Could not load the member directory.", error);
+    memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
+      className: "category-load-error",
+      role: "status",
+      textContent: `Public profiles couldn't load: ${error.message}. Refresh to try again.`
+    }));
+  }
+}
+
+async function initializeDirectory() {
+  if (!isBackendConfigured()) {
+    memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
+      className: "profile-empty",
+      textContent: "Public member discovery will appear here when the shared Supabase project is connected."
+    }));
+    return;
+  }
+  try {
+    backend = await getBackend();
+    await loadMembers();
+  } catch (error) {
+    console.error("Could not connect to public member discovery.", error);
+    memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
+      className: "category-load-error",
+      role: "status",
+      textContent: `Public profiles couldn't load: ${error.message}.`
+    }));
+  }
+}
+
+let searchTimer;
+searchInput.addEventListener("input", () => {
+  window.clearTimeout(searchTimer);
+  searchTimer = window.setTimeout(() => {
+    if (backend) loadMembers(searchInput.value);
+  }, 250);
+});
+
+initializeDirectory();

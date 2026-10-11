@@ -14,15 +14,16 @@ The repository includes `netlify.toml` for publishing this static site from the 
 
 ## Set up the shared backend
 
-The Supabase migrations create profiles, polls, options, votes, and reports; enable row-level security; and expose narrow server-side RPCs to read published polls, create polls, vote, report polls, and manage the signed-in user's profile. The browser cannot write directly to database tables. A signed-in account can vote once per poll; creating polls and submitting reports also require sign-in.
+The Supabase migrations create profiles, polls, options, votes, and reports; enable row-level security; and expose narrow server-side RPCs to read published polls, create polls, vote, report polls, manage the signed-in user's profile, and discover opted-in members. The browser cannot write directly to database tables. A signed-in account can vote once per poll; creating polls and submitting reports also require sign-in. Public profiles never expose individual vote histories.
 
 1. Create a Supabase project.
 2. Apply `supabase/migrations/20261011000000_initial_schema.sql`. With the Supabase CLI, run `npx supabase init` once, then `npx supabase login`, `npx supabase link --project-ref YOUR_PROJECT_REF`, and `npx supabase db push` from this repository. Alternatively, paste the migration into your project's Supabase SQL Editor and run it.
 3. Apply `supabase/migrations/20261011000100_profile_dashboard.sql` to add the profile bio, activity statistics, and authenticated profile read/update functions. If you use the Supabase SQL Editor, run this second migration after the initial schema.
-4. Copy the project's **Project URL** and **publishable key** into `auth-config.js` as `supabaseUrl` and `supabasePublishableKey`. A legacy `anon` public key can also be used. Never put a Supabase `service_role` or provider secret key in browser code.
-5. Add your final HTTPS website URL to Supabase **Authentication → URL Configuration**, along with `http://localhost:8081/login.html` for local testing.
-6. In Supabase **Authentication → Sign In / Providers**, enable Google, Facebook, and X and add their OAuth client credentials. For Facebook sign-in, configure a Meta app and its Supabase callback URL; the `public_profile` and `email` permissions are required by Supabase's Facebook login flow.
-7. Test sign-in on each provider, verify the user lands on their editable profile, confirm profile changes persist after refresh, verify poll creation and voting from separate accounts/devices, confirm duplicate votes and reports are rejected, and confirm anonymous direct database writes are denied. Reports are stored privately in `public.poll_reports`; review and moderation still need an assigned person and operating process.
+4. Apply `supabase/migrations/20261011000200_discovery_multi_option_polls.sql` to add opt-in member discovery and server-validated two-to-four-option polls. If you use the SQL Editor, apply it after the profile migration.
+5. Copy the project's **Project URL** and **publishable key** into `auth-config.js` as `supabaseUrl` and `supabasePublishableKey`. A legacy `anon` public key can also be used. Never put a Supabase `service_role` or provider secret key in browser code.
+6. Add your final HTTPS website URL to Supabase **Authentication → URL Configuration**, along with `http://localhost:8081/login.html` for local testing.
+7. In Supabase **Authentication → Sign In / Providers**, enable Google, Facebook, and X and add their OAuth client credentials. For Facebook sign-in, configure a Meta app and its Supabase callback URL; the `public_profile` and `email` permissions are required by Supabase's Facebook login flow.
+8. Test sign-in on each provider, verify the user lands on their editable profile, confirm profile changes persist after refresh, verify opted-in members can be discovered and individual votes remain private, create polls with two through four options, verify poll creation and voting from separate accounts/devices, confirm duplicate votes and reports are rejected, and confirm anonymous direct database writes are denied. Reports are stored privately in `public.poll_reports`; review and moderation still need an assigned person and operating process.
 
 The Google button uses Google sign-in (commonly a Gmail account); Facebook authenticates Facebook accounts, **not Instagram**; X uses X OAuth. Instagram profile linking or Threads integration is a separate feature, with separate Meta eligibility, review, and permissions. Neither is implemented by these sign-in buttons.
 
@@ -30,7 +31,11 @@ The Google button uses Google sign-in (commonly a Gmail account); Facebook authe
 
 The initial migration publishes eight sample questions into the shared database with **zero votes**. The earlier demo's invented counts are not imported or described as actual community results. Shared voting requires sign-in and is limited to one vote per Supabase user account per poll. This does not prove that one human cannot create multiple accounts.
 
-The seeded topic list spans arts, automotive, books, business, creators, culture, education, entertainment, environment, fashion, finance, food, gaming, health, lifestyle, music, news, politics, relationships, science, sports, technology, travel, world, and Other. Explore filters and the poll form read categories from the database. The Topics page uses the shared poll feed, while Explore shows the category list. To expand the list, add a row to `public.poll_categories` in the Supabase SQL Editor; the site will include it automatically.
+The seeded topic list spans arts, automotive, books, business, creators, culture, education, entertainment, environment, fashion, finance, food, gaming, health, lifestyle, music, news, politics, relationships, science, sports, technology, travel, world, and Other. The Topics page reads categories from the database, while Explore shows the shared poll feed. To expand the list, add a row to `public.poll_categories` in the Supabase SQL Editor; the site will include it automatically.
+
+On the website, the Explore and Topics labels are intentionally distinct from their legacy HTML filenames: `topics.html` is the live poll feed, and `explore.html` is the topic directory.
+
+After voting, members can share the poll results to X and WhatsApp. The Instagram button uses the device's native share sheet when available; otherwise it copies the share text so it can be pasted into Instagram. Individual vote identities are never included in public profiles or public poll results.
 
 ## Launch readiness
 
