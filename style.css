@@ -271,6 +271,53 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-browse { display: flex; justify-content: space-between; gap: 10px; margin-top: 17px; font-size: 10px; }
 .auth-browse span { color: var(--lime); }
 .auth-footnote { margin: 21px 0 0; color: #777970; font-size: 9px; line-height: 1.7; }
+.profile-shell { width: min(1030px, calc(100% - 56px)); min-height: calc(100vh - 154px); margin: 0 auto; padding: 64px 0 76px; }
+.profile-status { margin-bottom: 20px; color: #a5a69e; font-size: 11px; line-height: 1.7; }
+.profile-status[data-mode="error"] { color: #ffb6a6; }
+.profile-signed-out { max-width: 610px; padding: 65px 0; }
+.profile-signed-out > .eyebrow { display: flex; color: var(--lime); }
+.profile-signed-out h1 { margin: 25px 0 18px; font: 600 clamp(54px, 7vw, 80px)/.96 var(--display); letter-spacing: -.08em; }
+.profile-signed-out > p { max-width: 420px; margin-bottom: 28px; color: #a5a69e; font-size: 13px; line-height: 1.8; }
+.profile-dashboard[hidden], .profile-signed-out[hidden] { display: none; }
+.profile-hero { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 4px 0 31px; border-bottom: 1px solid var(--line); }
+.profile-identity { display: flex; align-items: center; gap: 22px; min-width: 0; }
+.profile-avatar { width: 88px; height: 88px; flex: 0 0 auto; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(200,241,105,.5); border-radius: 50%; background: #24271d; color: var(--lime); font: 600 28px var(--display); }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-identity .eyebrow { display: flex; color: var(--lime); }
+.profile-identity h1 { margin: 8px 0 3px; overflow-wrap: anywhere; font: 600 clamp(30px, 5vw, 46px)/1 var(--display); letter-spacing: -.07em; }
+.profile-member-since { margin: 8px 0 0; color: #85877d; font: 400 8px var(--mono); letter-spacing: .08em; }
+.profile-bio-display { max-width: 500px; margin: 11px 0 0; color: #c4c5bd; font-size: 11px; line-height: 1.65; overflow-wrap: anywhere; }
+.profile-bio-display[hidden] { display: none; }
+.profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 23px 0; border: 1px solid var(--line); }
+.profile-stat { min-height: 112px; display: flex; flex-direction: column; justify-content: space-between; padding: 18px 20px; }
+.profile-stat + .profile-stat { border-left: 1px solid var(--line); }
+.profile-stat > span { color: #85877d; font: 400 8px var(--mono); letter-spacing: .09em; }
+.profile-stat strong { font: 600 34px/1 var(--display); letter-spacing: -.06em; }
+.profile-content { display: grid; grid-template-columns: minmax(260px, .78fr) minmax(0, 1.22fr); align-items: start; gap: 15px; }
+.profile-panel { min-width: 0; padding: 23px; border: 1px solid var(--line); background: #171814; }
+.profile-panel-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.profile-panel-heading .eyebrow { color: var(--lime); }
+.profile-panel-heading h2 { margin: 7px 0 0; font: 600 23px var(--display); letter-spacing: -.05em; }
+.profile-panel-heading .text-link { flex: 0 0 auto; font-size: 10px; }
+.profile-form { display: grid; gap: 16px; padding-top: 19px; }
+.profile-form label { display: grid; gap: 8px; color: #c4c5bd; font-size: 10px; }
+.profile-form input, .profile-form textarea { width: 100%; min-height: 43px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 0; background: #10110e; color: var(--paper); font-size: 11px; }
+.profile-form textarea { min-height: 95px; resize: vertical; }
+.profile-form input:focus, .profile-form textarea:focus { outline: 2px solid var(--lime); outline-offset: 2px; }
+.profile-form input::placeholder, .profile-form textarea::placeholder { color: #66685f; }
+.profile-field-note { color: #777970; font: 400 7px var(--mono); letter-spacing: .07em; }
+.profile-form-status { min-height: 15px; margin: -4px 0 0; color: var(--lime); font-size: 9px; line-height: 1.6; }
+.profile-form .button { justify-self: start; }
+.profile-form .button:disabled, .profile-hero .auth-signout:disabled { cursor: wait; opacity: .6; }
+.profile-activity-list { display: grid; }
+.profile-activity-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+.profile-activity-item:last-child { border-bottom: 0; }
+.profile-activity-main { min-width: 0; }
+.profile-activity-kind, .profile-activity-date { color: #85877d; font: 400 7px var(--mono); letter-spacing: .08em; }
+.profile-activity-item h3 { margin: 7px 0; overflow-wrap: anywhere; font: 500 14px/1.45 var(--display); }
+.profile-activity-item p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.6; }
+.profile-activity-date { flex: 0 0 auto; padding-top: 1px; white-space: nowrap; }
+.profile-empty { margin: 18px 0 3px; color: var(--muted); font-size: 10px; line-height: 1.7; }
 @media (max-width: 900px) {
   .shell { width: min(100% - 48px, 720px); }
   .site-header { padding-inline: 24px; }
@@ -341,6 +388,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .nav-links { gap: 13px; }
   .nav-links a { font-size: 10px; }
   .navbar { min-height: 64px; padding-inline: 18px; }
+  .profile-shell { width: calc(100% - 36px); padding-block: 43px 55px; }
+  .profile-hero { align-items: flex-start; }
+  .profile-identity { align-items: flex-start; gap: 14px; }
+  .profile-avatar { width: 62px; height: 62px; font-size: 21px; }
+  .profile-identity .eyebrow { font-size: 7px; }
+  .profile-hero > .auth-signout { min-height: 31px; padding-inline: 9px; font-size: 9px; }
+  .profile-stats { grid-template-columns: 1fr; }
+  .profile-stat { min-height: 78px; gap: 12px; padding: 14px 16px; }
+  .profile-stat + .profile-stat { border-top: 1px solid var(--line); border-left: 0; }
+  .profile-stat strong { font-size: 28px; }
+  .profile-content { grid-template-columns: 1fr; }
+  .profile-panel { padding: 18px; }
   .hero-small { width: calc(100% - 36px); margin-top: 54px; }
   .card-grid, .topic-list, .feed, .stats-grid { width: calc(100% - 36px); }
   .stats-grid { grid-template-columns: 1fr; }
