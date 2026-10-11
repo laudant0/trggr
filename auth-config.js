@@ -1,4 +1,4 @@
 window.TRGGR_AUTH_CONFIG = {
-  supabaseUrl: "",
-  supabasePublishableKey: ""
+  supabaseUrl: "https://sxlweaxmqcfxzxrybyvb.supabase.co",
+  supabasePublishableKey: "sb_publishable_-IVBeZscVKBByyy7ArrCVg__VtIyzXK"
 };
