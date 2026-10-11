@@ -25,7 +25,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .site-header { height: 77px; padding: 0 max(40px, calc((100vw - 1216px) / 2)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .wordmark { display: inline-flex; align-items: center; gap: 9px; font: 700 27px var(--display); letter-spacing: -.09em; }
 .wordmark::before { content: "%"; width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid rgba(200,241,105,.55); border-radius: 50%; color: var(--lime); font: 700 17px/1 var(--display); letter-spacing: -.08em; }
-.wordmark-period { color: var(--lime); }
 .main-nav { display: flex; align-items: center; gap: 36px; height: 100%; }
 .main-nav a, .nav-login { color: #92948b; font-size: 12px; transition: color .2s; }
 .main-nav a:hover, .nav-login:hover, .main-nav a.active { color: var(--paper); }
