@@ -130,7 +130,10 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     try {
       const { data, error } = await backend.rpc("get_public_polls");
       if (error) throw error;
+      const { data: links } = await backend.rpc("get_poll_creator_links");
+      const creatorByPoll = new Map((links || []).map((link) => [link.poll_id, link.creator_id]));
       polls = (data || []).map(mapPoll);
+      polls.forEach((poll) => { poll.creatorId = creatorByPoll.get(poll.id) || null; });
       voted = {};
       polls.forEach((poll) => {
         if (poll.votedPosition !== null) voted[poll.id] = poll.votedPosition;
@@ -167,7 +170,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     );
 
     const title = el("h3", "poll-question", poll.question);
-    const meta = el("p", "poll-meta", `${poll.creator || "TRGGA community"}  ·  ${poll.time || "JUST NOW"}`);
+    const meta = el("p", "poll-meta");
+    if (poll.creatorId) {
+      const creatorLink = el("a", "poll-creator-link", poll.creator);
+      creatorLink.href = `member.html?id=${encodeURIComponent(poll.creatorId)}`;
+      meta.append(creatorLink, document.createTextNode(`  ·  ${poll.time || "JUST NOW"}`));
+    } else {
+      meta.textContent = `${poll.creator || "TRGGA community"}  ·  ${poll.time || "JUST NOW"}`;
+    }
     const options = el("div", "poll-options");
     const total = poll.votes.reduce((sum, count) => sum + count, 0);
     const votedPosition = poll.votedPosition === undefined ? voted[poll.id] : poll.votedPosition;
