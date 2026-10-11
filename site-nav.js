@@ -7,8 +7,36 @@ if (isBackendConfigured()) {
   document.body.classList.add("auth-checking");
 }
 
+const menuAuthItems = [];
+document.querySelectorAll(".mobile-menu nav").forEach((nav) => {
+  const item = document.createElement("a");
+  item.className = "menu-auth";
+  item.href = "login.html";
+  item.textContent = "Sign in ↗";
+  item.hidden = !isBackendConfigured();
+  nav.append(item);
+  menuAuthItems.push(item);
+});
+
+async function signOut(event) {
+  event.preventDefault();
+  try {
+    const backend = await getBackend();
+    const { error } = await backend.auth.signOut();
+    if (error) throw error;
+    window.location.assign("index.html");
+  } catch (error) {
+    console.error("Could not sign out of TRGGA.", error);
+  }
+}
+
 function showSignedIn(session) {
   const signedIn = Boolean(session?.user);
+  menuAuthItems.forEach((item) => {
+    item.textContent = signedIn ? "Sign out" : "Sign in ↗";
+    item.href = signedIn ? "#" : "login.html";
+    item.onclick = signedIn ? signOut : null;
+  });
   document.body.classList.toggle("is-signed-in", signedIn);
   document.body.classList.remove("auth-checking");
   loginLinks.forEach((link) => {
