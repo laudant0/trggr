@@ -82,6 +82,7 @@ function renderProfile(profile) {
   document.querySelector("#profile-name").textContent = name;
   document.querySelector("#profile-display-name").value = name;
   document.querySelector("#profile-bio").value = bio;
+  document.querySelector("#profile-discoverable").checked = Boolean(profile.discoverable);
   document.querySelector("#profile-member-since").textContent = `IN THE ROOM SINCE ${formatDate(profile.created_at)}`;
   const bioDisplay = document.querySelector("#profile-bio-display");
   bioDisplay.textContent = bio;
@@ -113,9 +114,15 @@ function renderProfile(profile) {
 
 async function loadProfile() {
   setStatus("Loading your profile…");
-  const { data, error } = await backend.rpc("get_my_profile");
-  if (error) throw error;
+  const [profileResult, discoveryResult] = await Promise.all([
+    backend.rpc("get_my_profile"),
+    backend.rpc("get_my_profile_discovery_setting")
+  ]);
+  if (profileResult.error) throw profileResult.error;
+  if (discoveryResult.error) throw discoveryResult.error;
+  const data = profileResult.data;
   if (!data) throw new Error("Your profile could not be found. Try signing out and back in.");
+  data.discoverable = discoveryResult.data;
   renderProfile(data);
 }
 
@@ -154,6 +161,7 @@ form.addEventListener("submit", async (event) => {
   if (!backend) return;
   const displayName = form.elements.display_name.value.trim();
   const bio = form.elements.bio.value.trim();
+  const discoverable = form.elements.discoverable.checked;
   if (!displayName) {
     formStatus.textContent = "Add a display name before saving.";
     return;
@@ -164,7 +172,8 @@ form.addEventListener("submit", async (event) => {
   try {
     const { error } = await backend.rpc("update_my_profile", {
       p_display_name: displayName,
-      p_bio: bio
+      p_bio: bio,
+      p_discoverable: discoverable
     });
     if (error) throw error;
     document.querySelector("#profile-name").textContent = displayName;

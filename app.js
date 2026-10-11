@@ -29,6 +29,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   let userId = null;
   let loading = false;
   let category = new URLSearchParams(window.location.search).get("category") || "All";
+  const sharedPollId = new URLSearchParams(window.location.search).get("poll");
   let query = "";
   let backend;
   const selectedFilter = document.querySelector(`[data-category="${CSS.escape(category)}"]`);
@@ -133,6 +134,17 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       });
       updateDailyPulse();
       render();
+      if (sharedPollId) {
+        const targetPoll = polls.find((poll) => poll.id === sharedPollId);
+        if (targetPoll) {
+          category = targetPoll.category;
+          document.querySelectorAll(".filter-chip").forEach((chip) => {
+            chip.classList.toggle("active", chip.dataset.category.toLowerCase() === category.toLowerCase());
+          });
+          render();
+          document.getElementById(`poll-${targetPoll.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
       setStatus("LIVE MODE — shared polls and verified votes are connected.", "live");
     } catch (error) {
       console.error("Could not load the shared poll feed.", error);
@@ -144,6 +156,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 
   function renderPoll(poll) {
     const card = el("article", "poll-card");
+    card.id = `poll-${poll.id}`;
     const top = el("div", "poll-card-top");
     top.append(
       el("span", "poll-label", poll.tag || `${poll.category.toUpperCase()} CHECK`),
@@ -216,7 +229,40 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       report.append(summary, form);
       footer.append(report);
     }
-    card.append(top, title, meta, options, footer);
+    card.append(top, title, meta, options);
+    if (votedPosition !== undefined && votedPosition !== null) {
+      const share = el("div", "poll-share");
+      const resultSummary = poll.choices
+        .map((choice, index) => `${choice}: ${total ? Math.round((poll.votes[index] / total) * 100) : 0}%`)
+        .join(" · ");
+      const url = new URL(`index.html?poll=${encodeURIComponent(poll.id)}#polls`, window.location.href).href;
+      const shareText = `I voted "${poll.choices[votedPosition]}" on TRGGA: ${poll.question} — ${resultSummary}`;
+      const shareButton = el("button", "poll-share-native", "Share my take ↗");
+      shareButton.type = "button";
+      shareButton.setAttribute("aria-label", "Share this vote using your device's sharing options, including Instagram when available");
+      shareButton.dataset.shareTitle = poll.question;
+      shareButton.dataset.shareText = shareText;
+      shareButton.dataset.shareUrl = url;
+      const xLink = el("a", "poll-share-link", "X");
+      xLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+      xLink.target = "_blank";
+      xLink.rel = "noopener noreferrer";
+      xLink.setAttribute("aria-label", "Share your vote on X");
+      const whatsappLink = el("a", "poll-share-link", "WhatsApp");
+      whatsappLink.href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${url}`)}`;
+      whatsappLink.target = "_blank";
+      whatsappLink.rel = "noopener noreferrer";
+      whatsappLink.setAttribute("aria-label", "Share your vote on WhatsApp");
+      const instagramButton = el("button", "poll-share-link", "Instagram");
+      instagramButton.type = "button";
+      instagramButton.dataset.shareTitle = poll.question;
+      instagramButton.dataset.shareText = shareText;
+      instagramButton.dataset.shareUrl = url;
+      instagramButton.setAttribute("aria-label", "Share your vote using the device share sheet for Instagram");
+      share.append(shareButton, xLink, whatsappLink, instagramButton);
+      card.append(share);
+    }
+    card.append(footer);
     return card;
   }
 
@@ -246,6 +292,28 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   });
 
   grid.addEventListener("click", async (event) => {
+    const shareButton = event.target.closest(".poll-share-native, .poll-share-link[data-share-url]");
+    if (shareButton) {
+      const payload = {
+        title: shareButton.dataset.shareTitle,
+        text: shareButton.dataset.shareText,
+        url: shareButton.dataset.shareUrl
+      };
+      try {
+        if (navigator.share) {
+          await navigator.share(payload);
+        } else {
+          await navigator.clipboard.writeText(`${payload.text} ${payload.url}`);
+          shareButton.textContent = "Copied — paste into Instagram ✓";
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Could not share the poll result.", error);
+          shareButton.textContent = "Sharing unavailable";
+        }
+      }
+      return;
+    }
     const button = event.target.closest(".poll-option");
     if (!button || button.disabled) return;
     const poll = polls.find((item) => item.id === button.dataset.poll);

@@ -15,9 +15,9 @@
   <header class="site-header">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
     <nav class="main-nav" aria-label="Main navigation">
-      <a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a class="active" href="profile.html" aria-current="page">Profile</a>
+      <a href="index.html">The pulse</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="active" href="profile.html" aria-current="page">Profile</a>
     </nav>
-    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
     <div class="header-actions"><a class="nav-login" href="login.html">Log in</a><a class="button button-small button-dark" href="create.html">＋ Start a poll</a></div>
   </header>
 
@@ -63,6 +63,10 @@
             <label for="profile-bio">A little about you <span class="profile-field-note">OPTIONAL · 160 CHARACTERS</span>
               <textarea id="profile-bio" name="bio" maxlength="160" rows="3" placeholder="What are you here to talk about?"></textarea>
             </label>
+            <label class="profile-discoverable-control">
+              <input id="profile-discoverable" name="discoverable" type="checkbox">
+              <span><strong>Show me in the member directory</strong><small>People can see your name, bio, and polls you created. Your individual votes stay private.</small></span>
+            </label>
             <p class="profile-form-status" id="profile-form-status" role="status" aria-live="polite"></p>
             <button class="button button-lime button-small" id="profile-save" type="submit">Save profile <span aria-hidden="true">↗</span></button>
           </form>
@@ -76,6 +80,7 @@
           <div class="profile-activity-list" id="profile-activity">
             <p class="profile-empty">Loading your activity…</p>
           </div>
+          <a class="profile-directory-link" href="community.html#members">Meet the community ↗</a>
         </section>
       </div>
     </div>
@@ -84,5 +89,6 @@
   <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span>YOUR VOICE IS THE DATA.</span></footer>
   <script src="auth-config.js"></script>
   <script type="module" src="profile.js"></script>
+  <script type="module" src="site-nav.js"></script>
 </body>
 </html>

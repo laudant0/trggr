@@ -12,8 +12,8 @@
 <body>
 <header class="site-header">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
-    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a class="active" href="community.html">Community</a><a href="profile.html">Profile</a></nav>
-    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">The pulse</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a class="active" href="community.html">Community</a><a href="profile.html">Profile</a></nav>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
     <div class="header-actions"><a class="nav-login" href="login.html">Log in</a><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
 </header>
 <main>
@@ -25,7 +25,12 @@
 
 <section class="community-invite shell">
     <article class="community-card community-card-lime"><span class="eyebrow">01 / HAVE A TAKE?</span><h2>Put the question<br>to the room.</h2><p>Turn the group-chat debate into a question everyone can weigh in on.</p><a class="button button-dark button-small" href="create.html">Start a poll <span aria-hidden="true">↗</span></a></article>
-    <article class="community-card"><span class="eyebrow">02 / FIND YOUR PEOPLE</span><h2>See where the<br>room really lands.</h2><p>Explore live questions across the topics you care about and cast your vote.</p><a class="button button-profile button-small" href="explore.html">Explore the pulse <span aria-hidden="true">↗</span></a></article>
+    <article class="community-card"><span class="eyebrow">02 / FIND YOUR PEOPLE</span><h2>See where the<br>room really lands.</h2><p>Explore live questions across the topics you care about and cast your vote.</p><a class="button button-profile button-small" href="topics.html">Explore the pulse <span aria-hidden="true">↗</span></a></article>
+</section>
+
+<section class="member-directory shell" id="members">
+    <div class="directory-heading"><div><span class="eyebrow"><span class="live-dot"></span> PEOPLE BEHIND THE POLLS</span><h2>Meet the room.</h2><p>Discover members who chose to make their profile public. Votes remain private.</p></div><label class="directory-search"><span aria-hidden="true">⌕</span><input id="member-search" type="search" placeholder="Find a member" aria-label="Search members"></label></div>
+    <div class="member-grid" id="member-grid" aria-live="polite"><p class="profile-empty">Loading public profiles…</p></div>
 </section>
 
 <section class="community-guidelines shell">
@@ -34,5 +39,8 @@
 </section>
 </main>
 <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>THE ROOM IS BETTER WITH YOU IN IT.</span><span><a href="profile.html">YOUR PROFILE ↗</a></span></footer>
+<script src="auth-config.js"></script>
+<script type="module" src="community.js"></script>
+<script type="module" src="site-nav.js"></script>
 </body>
 </html>

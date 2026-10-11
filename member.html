@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11120f">
+  <meta name="description" content="Meet the people shaping the TRGGA conversation.">
+  <title>Member profile — TRGGA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA<span class="wordmark-period">.</span></a>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">The pulse</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a href="profile.html">Profile</a></nav>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">The pulse</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a href="profile.html">Your profile ↗</a><a href="login.html">Log in</a></nav></details>
+    <div class="header-actions"><a class="nav-login" href="login.html">Log in</a><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
+  </header>
+  <main class="profile-shell member-profile-shell">
+    <p class="profile-status" id="member-status" role="status" aria-live="polite">Loading public profile…</p>
+    <section id="member-content" hidden></section>
+  </main>
+  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA<span class="wordmark-period">.</span></a><span>PUBLIC PROFILE · VOTES STAY PRIVATE</span><span><a href="community.html#members">MEET THE ROOM ↗</a></span></footer>
+  <script src="auth-config.js"></script>
+  <script type="module" src="member.js"></script>
+  <script type="module" src="site-nav.js"></script>
+</body>
+</html>
