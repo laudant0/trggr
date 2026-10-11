@@ -861,3 +861,7 @@ body {
 .member-poll-card { margin: 0; }
 
 .oauth-button[hidden], .auth-signout[hidden] { display: none !important; }
+
+.mobile-menu nav .mobile-profile-link[hidden] { display: none; }
+
+.button-profile[hidden] { display: none !important; }

@@ -43,19 +43,29 @@ function showSignedIn(session) {
     link.hidden = signedIn;
   });
   profileLinks.forEach((link) => {
-    if (link.classList.contains("button-profile")) {
-      const label = document.createTextNode(signedIn ? "My profile " : "Profile ");
+    if (link.classList.contains("mobile-profile-link")) {
+      link.hidden = !signedIn;
+    } else if (link.classList.contains("button-profile")) {
+      if (document.body.querySelector(".auth-layout")) {
+        link.hidden = !signedIn;
+        return;
+      }
+      const label = document.createTextNode(signedIn ? "My profile " : "Sign in ");
       const arrow = document.createElement("span");
       arrow.setAttribute("aria-hidden", "true");
       arrow.textContent = "↗";
       link.replaceChildren(label, arrow);
-      link.setAttribute("aria-label", signedIn ? "Open your profile" : "Profile");
+      link.href = signedIn ? "profile.html" : "login.html";
+      link.setAttribute("aria-label", signedIn ? "Open your profile" : "Sign in");
     }
   });
 }
 
 async function initializeNavigation() {
-  if (!isBackendConfigured()) return;
+  if (!isBackendConfigured()) {
+    showSignedIn(null);
+    return;
+  }
   try {
     const backend = await getBackend();
     const { data, error } = await backend.auth.getSession();
