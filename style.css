@@ -892,7 +892,7 @@ body {
 .window-cat em { font-style: normal; font: 500 12px "DM Mono", monospace; opacity: .7; }
 .window-bar { height: 10px; border-radius: 999px; background: var(--lime); }
 /* Poll images: show the whole picture, square or wide */
-.option-image { width: 100%; height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; background: #1b1d16; }
+.option-image { width: auto; max-width: 100%; height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; background: none; justify-self: start; }
 .choice-image-preview { height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; }
 .poll-option:has(.option-image) { padding: 11px; }
 
@@ -908,3 +908,21 @@ body {
 #note-form textarea { width: 100%; }
 #note-list { margin-top: 8px; }
 .window-page .profile-stat strong { overflow-wrap: anywhere; }
+/* Roomier mobile text and cards */
+.member-identity strong { white-space: normal; overflow-wrap: anywhere; font-size: 16px; line-height: 1.3; }
+.member-bio { font-size: 12px; line-height: 1.55; }
+@media (max-width: 760px) {
+  .member-card { min-height: 0; padding: 18px; gap: 14px; }
+  .member-avatar { width: 52px; height: 52px; font-size: 16px; }
+  .member-identity { gap: 7px; }
+  .member-identity strong { font-size: 17px; }
+  .member-bio { font-size: 13px; -webkit-line-clamp: 3; }
+  .member-stats { font-size: 11px; letter-spacing: .06em; }
+  .profile-member-since, .profile-bio-display { font-size: 13px; }
+  .profile-stat span, .eyebrow { font-size: 10px; }
+  .profile-activity-item h3 { font-size: 15px; }
+  .profile-activity-item p, .profile-empty, .avatar-status { font-size: 12px; }
+  .window-note-body { font-size: 16px; }
+  .poll-option { padding: 12px; }
+  .option-image { max-height: 170px; }
+}
