@@ -28,8 +28,13 @@
       <section class="profile-hero"><div><span class="eyebrow"><span class="live-dot"></span> ADMIN ONLY</span><h1>Control room</h1><p class="profile-member-since">Moderate reported polls and publish official ones.</p></div></section>
       <section class="profile-panel"><div class="profile-panel-heading"><div><span class="eyebrow">OFFICIAL POLL</span><h2>Publish from the TRGGA desk</h2></div></div>
         <form class="profile-form" id="official-form">
-          <label for="official-question">Question<input id="official-question" maxlength="140" required></label>
-          <label>Options (2–4)<input class="official-option" maxlength="60" required placeholder="Option 1"><input class="official-option" maxlength="60" required placeholder="Option 2"><input class="official-option" maxlength="60" placeholder="Option 3 (optional)"><input class="official-option" maxlength="60" placeholder="Option 4 (optional)"></label>
+          <label for="official-question">Question<input id="official-question" maxlength="110" required></label>
+          <fieldset class="official-options"><legend>Options (2-4) with optional images</legend>
+<div class="official-row"><input class="official-option" maxlength="40" required placeholder="Option 1"><label class="official-image-label">Image<input class="official-image" type="file" accept="image/jpeg,image/png,image/webp"></label><img class="official-preview" alt="" hidden></div>
+<div class="official-row"><input class="official-option" maxlength="40" required placeholder="Option 2"><label class="official-image-label">Image<input class="official-image" type="file" accept="image/jpeg,image/png,image/webp"></label><img class="official-preview" alt="" hidden></div>
+<div class="official-row"><input class="official-option" maxlength="40" placeholder="Option 3 (optional)"><label class="official-image-label">Image<input class="official-image" type="file" accept="image/jpeg,image/png,image/webp"></label><img class="official-preview" alt="" hidden></div>
+<div class="official-row"><input class="official-option" maxlength="40" placeholder="Option 4 (optional)"><label class="official-image-label">Image<input class="official-image" type="file" accept="image/jpeg,image/png,image/webp"></label><img class="official-preview" alt="" hidden></div>
+</fieldset>
           <label for="official-tag">Label<select id="official-tag"><option>THE DAILY PULSE</option><option>THE GOAT DEBATE</option><option>FUTURE CHECK</option><option>CULTURE CHECK</option><option>BIG QUESTION</option><option selected>OFFICIAL POLL</option></select></label>
           <label for="official-category">Category<select id="official-category"></select></label>
           <label for="official-duration">Voting stays open<select id="official-duration"><option value="">No time limit</option><option value="24">24 hours</option><option value="72">3 days</option><option value="168">7 days</option></select></label>

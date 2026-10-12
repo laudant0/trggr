@@ -85,17 +85,68 @@ async function fillCategories() {
   }));
 }
 
+async function makeThumbnail(file) {
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Use a JPG, PNG or WebP image.");
+  if (file.size > 10 * 1024 * 1024) throw new Error("Images must be under 10 MB.");
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 640 / bitmap.width, 420 / bitmap.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  for (const quality of [0.82, 0.68, 0.52, 0.38]) {
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    if (blob && blob.type === "image/webp" && blob.size <= 200 * 1024) return blob;
+  }
+  throw new Error("That image is too detailed to compress. Try another.");
+}
+
+form.addEventListener("change", (event) => {
+  const input = event.target.closest(".official-image");
+  if (!input) return;
+  const preview = input.closest(".official-row").querySelector(".official-preview");
+  const file = input.files[0];
+  if (preview.dataset.url) URL.revokeObjectURL(preview.dataset.url);
+  if (!file) {
+    preview.hidden = true;
+    return;
+  }
+  preview.dataset.url = URL.createObjectURL(file);
+  preview.src = preview.dataset.url;
+  preview.hidden = false;
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const options = [...form.querySelectorAll(".official-option")].map((i) => i.value.trim()).filter(Boolean);
+  const rows = [...form.querySelectorAll(".official-row")].filter((row) => row.querySelector(".official-option").value.trim());
+  const options = rows.map((row) => row.querySelector(".official-option").value.trim());
   if (options.length < 2) {
     formStatus.textContent = "Add at least two options.";
     return;
   }
+  const uploaded = [];
   const hours = Number(form.querySelector("#official-duration").value || 0);
   formStatus.textContent = "Publishing…";
   try {
+    const { data: sessionData } = await backend.auth.getSession();
+    const adminId = sessionData.session.user.id;
+    const images = [];
+    for (const row of rows) {
+      const file = row.querySelector(".official-image").files[0];
+      if (!file) {
+        images.push(null);
+        continue;
+      }
+      const blob = await makeThumbnail(file);
+      const path = `${adminId}/${crypto.randomUUID()}.webp`;
+      const { error: uploadError } = await backend.storage.from("poll-option-images").upload(path, blob, { contentType: "image/webp", upsert: false });
+      if (uploadError) throw uploadError;
+      uploaded.push(path);
+      images.push(path);
+    }
     await call("admin_create_poll", {
+      p_option_images: images.some(Boolean) ? images : null,
       p_question: form.querySelector("#official-question").value.trim(),
       p_category: form.querySelector("#official-category").value,
       p_options: options,
@@ -103,8 +154,10 @@ form.addEventListener("submit", async (event) => {
       p_closes_at: hours ? new Date(Date.now() + hours * 3600000).toISOString() : null
     });
     form.reset();
+    form.querySelectorAll(".official-preview").forEach((img) => { img.hidden = true; });
     formStatus.textContent = "Published to the room ✓";
   } catch (error) {
+    if (uploaded.length) await backend.storage.from("poll-option-images").remove(uploaded).catch(() => {});
     formStatus.textContent = error.message;
   }
 });

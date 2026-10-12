@@ -40,6 +40,7 @@ async function init() {
     myBackend = backend;
     setupNotes();
     loadNotes();
+    loadNotifications();
   } catch (error) {
     console.error("Could not open Window.", error);
     status.textContent = `Window couldn't load: ${error.message}`;
@@ -79,6 +80,32 @@ function render(data) {
     link.append(node("strong", "", row.question), node("span", "", detail.toUpperCase()));
     return link;
   }));
+}
+
+async function loadNotifications() {
+  const list = document.querySelector("#notif-list");
+  const { data, error } = await myBackend.rpc("get_my_notifications");
+  if (error) {
+    list.replaceChildren(node("p", "profile-empty", "Notifications could not load right now."));
+    return;
+  }
+  if (!data.length) {
+    list.replaceChildren(node("p", "profile-empty", "Nothing yet. New followers and vote milestones on your polls show up here."));
+    return;
+  }
+  list.replaceChildren(...data.map((item) => {
+    const isFollow = item.kind === "follow";
+    const link = node("a", `notif-item${item.is_read ? "" : " unread"}`);
+    link.href = isFollow ? `member.html?id=${encodeURIComponent(item.actor_id)}` : `index.html?poll=${encodeURIComponent(item.poll_id)}`;
+    const title = isFollow
+      ? `${item.actor_name || "Someone"} started following you`
+      : `Your poll hit ${item.detail} votes: ${item.poll_question || ""}`;
+    link.append(node("strong", "", title), node("span", "", new Date(item.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }).toUpperCase()));
+    return link;
+  }));
+  if (data.some((item) => !item.is_read)) {
+    myBackend.rpc("mark_notifications_read").then(() => document.querySelectorAll(".nav-badge").forEach((b) => b.remove()));
+  }
 }
 
 async function loadNotes() {
