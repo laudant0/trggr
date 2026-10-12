@@ -290,7 +290,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       const resultSummary = poll.choices
         .map((choice, index) => `${choice}: ${total ? Math.round((poll.votes[index] / total) * 100) : 0}%`)
         .join(" · ");
-      const url = new URL(`index.html?poll=${encodeURIComponent(poll.id)}#polls`, window.location.href).href;
+      const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+      const url = new URL(isLocal ? `index.html?poll=${encodeURIComponent(poll.id)}#polls` : `p/${encodeURIComponent(poll.id)}`, window.location.href).href;
       const shareText = `I voted "${poll.choices[votedPosition]}" on TRGGA: ${poll.question} — ${resultSummary}`;
       const shareButton = el("button", "poll-share-native", "Share my take ↗");
       shareButton.type = "button";
