@@ -19,6 +19,11 @@ async function setupConnection(profile) {
   note.className = "avatar-status";
   note.setAttribute("role", "status");
   const paint = () => {
+    if (state.followers === null || state.followers === undefined) {
+      counts.textContent = state.follows_me ? "FOLLOWS YOU" : "";
+      counts.hidden = !state.follows_me;
+      return;
+    }
     counts.textContent = `${Number(state.followers).toLocaleString()} FOLLOWERS · ${Number(state.following).toLocaleString()} FOLLOWING${state.follows_me ? " · FOLLOWS YOU" : ""}`;
   };
   paint();

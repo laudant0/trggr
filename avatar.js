@@ -38,11 +38,13 @@ export async function resizeAvatar(file) {
   }
   if (file.size > 10 * 1024 * 1024) throw new Error("Choose an image under 10 MB.");
   const bitmap = await createImageBitmap(file);
-  const side = Math.min(bitmap.width, bitmap.height);
+  const cropWidth = Math.min(bitmap.width, bitmap.height * 0.8);
+  const cropHeight = cropWidth * 1.25;
   const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 320;
+  canvas.width = 320;
+  canvas.height = 400;
   const context = canvas.getContext("2d");
-  context.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, 320, 320);
+  context.drawImage(bitmap, (bitmap.width - cropWidth) / 2, (bitmap.height - cropHeight) / 2, cropWidth, cropHeight, 0, 0, 320, 400);
   bitmap.close?.();
   for (const quality of [0.86, 0.74, 0.62, 0.5]) {
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));

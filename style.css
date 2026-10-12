@@ -877,3 +877,18 @@ body {
 .connect-box { display: grid; justify-items: start; gap: 10px; margin-left: auto; }
 .connect-counts { margin: 0; color: var(--muted, #a8aa9d); font: 500 11px var(--mono, monospace); letter-spacing: .08em; }
 @media (max-width: 760px) { .connect-box { margin-left: 0; width: 100%; } }
+
+/* Taller portrait profile photo */
+.profile-avatar { width: 96px; height: 120px; border-radius: 18px; }
+.profile-avatar img { object-position: center top; }
+@media (max-width: 760px) { .profile-avatar { width: 76px; height: 95px; font-size: 24px; } }
+
+/* Pins and iWindow */
+.poll-pin { border: 1px solid rgba(200,241,105,.45); background: transparent; color: var(--lime); border-radius: 999px; padding: 6px 12px; font: 500 11px var(--mono, "DM Mono", monospace); letter-spacing: .08em; cursor: pointer; }
+.poll-pin:hover, .poll-pin.pinned { background: var(--lime); color: #11120f; }
+.poll-pin:disabled { opacity: .6; cursor: wait; }
+.window-cats { display: grid; gap: 14px; }
+.window-cat { display: grid; grid-template-columns: minmax(90px, 160px) 1fr auto; align-items: center; gap: 14px; }
+.window-cat em { font-style: normal; font: 500 12px "DM Mono", monospace; opacity: .7; }
+.window-bar { height: 10px; border-radius: 999px; background: var(--lime); }
+.iwindow-link { color: var(--lime); }

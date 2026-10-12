@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11120f">
+  <meta name="description" content="iWindow: a private look at how your votes compare with the room on TRGGA.">
+  <title>iWindow — TRGGA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="profile-page">
+  <header class="site-header shell">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link active" href="window.html" aria-current="page">iWindow</a>
+    </nav>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">iWindow</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav></details>
+    <div class="header-actions"><a class="button button-profile button-small" href="profile.html">My profile</a><a class="button button-small button-dark" href="create.html">＋ Start a poll</a></div>
+  </header>
+
+  <main class="profile-shell">
+    <div class="profile-status" id="window-status" role="status" aria-live="polite">Opening your window…</div>
+
+    <section class="profile-signed-out" id="window-signed-out" hidden>
+      <span class="eyebrow"><span class="live-dot"></span> PRIVATE TO YOU</span>
+      <h1>See yourself<br><span class="highlight">through the room.</span></h1>
+      <p>iWindow shows how your votes line up with everyone else's. Sign in to open yours.</p>
+      <a class="button button-lime" href="login.html?next=window.html">Sign in to continue <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <div class="profile-dashboard" id="window-dashboard" hidden>
+      <section class="profile-hero">
+        <div>
+          <span class="eyebrow"><span class="live-dot"></span> iWINDOW · ONLY YOU SEE THIS</span>
+          <h1>You vs. the room</h1>
+          <p class="profile-member-since">Based on your latest votes. Nobody else can see this page.</p>
+        </div>
+      </section>
+
+      <section class="profile-stats" aria-label="Your iWindow summary">
+        <article class="profile-stat"><span>VOTES ANALYSED</span><strong id="win-total">—</strong></article>
+        <article class="profile-stat"><span>WITH THE ROOM</span><strong id="win-with">—</strong></article>
+        <article class="profile-stat"><span>YOUR PERSONALITY</span><strong id="win-label">—</strong></article>
+      </section>
+
+      <section class="profile-panel">
+        <div class="profile-panel-heading"><div><span class="eyebrow">WHAT YOU CARE ABOUT</span><h2>Your top topics</h2></div></div>
+        <div class="window-cats" id="win-cats"></div>
+      </section>
+
+      <section class="profile-panel">
+        <div class="profile-panel-heading"><div><span class="eyebrow">YOUR LATEST TAKES</span><h2>How you landed</h2></div></div>
+        <div class="profile-activity-list" id="win-recent"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE LOBBY IS NOTHING WITHOUT YOU.</span><span>YOUR VOICE IS THE DATA.</span></footer>
+  <script src="auth-config.js"></script>
+  <script type="module" src="window.js"></script>
+  <script type="module" src="site-nav.js"></script>
+</body>
+</html>
