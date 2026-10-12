@@ -127,7 +127,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .poll-share-native:hover, .poll-share-link:hover { border-color: var(--lime); color: var(--lime); }
 .vote-hint { color: #a9aaa3; }
 .poll-report { position: relative; flex: 0 0 auto; }
-.poll-report summary { color: #7d7f76; cursor: pointer; list-style: none; font: 400 7px var(--mono); letter-spacing: .06em; }
+.poll-report summary { color: #7d7f76; cursor: pointer; list-style: none; font: 400 16px/1 var(--mono); padding: 2px 6px; }
 .poll-report summary::-webkit-details-marker { display: none; }
 .poll-report summary:hover { color: var(--lime); }
 .report-form { position: absolute; z-index: 3; right: 0; bottom: 19px; width: 210px; display: grid; gap: 7px; padding: 11px; border: 1px solid var(--line); background: #11120f; box-shadow: 0 10px 26px #0009; }
@@ -992,7 +992,8 @@ body {
 a.take-author:hover{color:#c8ff3d;opacity:1}
 .take-agree,.take-report,.take-delete{background:none;border:1px solid rgba(255,255,255,.2);border-radius:999px;color:inherit;padding:4px 9px;font:inherit;cursor:pointer}
 .take-agree.agreed{background:#c8ff3d;color:#11120f;border-color:#c8ff3d}
-.take-report,.take-delete{opacity:.6}
+.take-report,.take-delete{opacity:.5}
+.take-report{border-color:transparent;padding:0 6px;font-size:16px;line-height:1}
 .take-count{opacity:.6}
 .take-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .take-input{flex:1 1 180px;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit;font:inherit}
