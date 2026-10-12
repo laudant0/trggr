@@ -24,6 +24,15 @@ async function addAdminLink() {
   adminChecked = true;
   try {
     const backend = await getBackend();
+    backend.rpc("get_unread_notification_count").then(({ data: count }) => {
+      if (!count) return;
+      document.querySelectorAll(".iwindow-link").forEach((link) => {
+        const badge = document.createElement("span");
+        badge.className = "nav-badge";
+        badge.textContent = count > 9 ? "9+" : String(count);
+        link.append(badge);
+      });
+    });
     const { data } = await backend.rpc("is_admin");
     if (data !== true) return;
     document.querySelectorAll(".main-nav, .mobile-menu nav").forEach((nav) => {
