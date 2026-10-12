@@ -1010,3 +1010,14 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 .result-spark span{flex:1;background:rgba(200,255,61,.7);border-radius:3px 3px 0 0}
 .blocked-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}
 .block-button{margin-left:6px}
+
+/* X handle, FAQ, footer */
+.profile-x{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.x-link{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid rgba(255,255,255,.2);border-radius:999px;color:inherit;text-decoration:none;font:500 12px "DM Mono",monospace;letter-spacing:.04em}
+.x-link:hover{border-color:#c8ff3d;color:#c8ff3d}
+.faq{border-top:1px solid rgba(255,255,255,.1);padding:12px 0}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{margin:8px 0 0;opacity:.8}
+.site-footer span a{color:inherit}
+.legal select,.legal textarea,.legal input{width:100%}
+.legal select{min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:#0d100d;color:inherit;font:inherit}

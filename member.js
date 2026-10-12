@@ -1,10 +1,24 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { avatarUrl, fillAvatar, loadAvatarPaths } from "./avatar.js";
+import { instagramLink, xLink } from "./xhandle.js";
 
 async function setupConnection(profile) {
   const avatar = document.querySelector(".member-profile-hero .profile-avatar");
   const paths = await loadAvatarPaths(backendClient, [memberId]);
   if (avatar && paths.get(memberId)) fillAvatar(avatar, profile.display_name, avatarUrl(backendClient, paths.get(memberId)));
+
+  const [{ data: xHandle }, { data: igHandle }] = await Promise.all([
+    backendClient.rpc("get_member_x_handle", { p_member_id: memberId }),
+    backendClient.rpc("get_member_instagram_handle", { p_member_id: memberId })
+  ]);
+  const socials = [xHandle && xLink(xHandle), igHandle && instagramLink(igHandle)].filter(Boolean);
+  const identityText = document.querySelector(".member-profile-hero .profile-identity > div:last-child");
+  if (socials.length && identityText) {
+    const row = document.createElement("p");
+    row.className = "profile-x";
+    row.append(...socials);
+    identityText.append(row);
+  }
 
   const { data: me } = await backendClient.auth.getSession();
   const myId = me.session?.user.id || null;
