@@ -1,4 +1,57 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
+import { avatarUrl, fillAvatar, loadAvatarPaths } from "./avatar.js";
+
+async function setupConnection(profile) {
+  const avatar = document.querySelector(".member-profile-hero .profile-avatar");
+  const paths = await loadAvatarPaths(backendClient, [memberId]);
+  if (avatar && paths.get(memberId)) fillAvatar(avatar, profile.display_name, avatarUrl(backendClient, paths.get(memberId)));
+
+  const { data: me } = await backendClient.auth.getSession();
+  const myId = me.session?.user.id || null;
+  const { data: state } = await backendClient.rpc("get_connection_state", { p_member_id: memberId });
+  if (!state) return;
+  const hero = document.querySelector(".member-profile-hero");
+  const box = document.createElement("div");
+  box.className = "connect-box";
+  const counts = document.createElement("p");
+  counts.className = "connect-counts";
+  const note = document.createElement("span");
+  note.className = "avatar-status";
+  note.setAttribute("role", "status");
+  const paint = () => {
+    counts.textContent = `${Number(state.followers).toLocaleString()} FOLLOWERS · ${Number(state.following).toLocaleString()} FOLLOWING${state.follows_me ? " · FOLLOWS YOU" : ""}`;
+  };
+  paint();
+  box.append(counts);
+  if (myId !== memberId) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "button button-lime button-small";
+    const label = () => { button.textContent = state.i_follow ? "Following ✓" : state.follows_me ? "Follow back" : "Follow"; };
+    label();
+    button.addEventListener("click", async () => {
+      if (!myId) {
+        window.location.href = `login.html?next=${encodeURIComponent(`member.html?id=${memberId}`)}`;
+        return;
+      }
+      button.disabled = true;
+      note.textContent = "";
+      const { data, error } = await backendClient.rpc("toggle_follow", { p_member_id: memberId });
+      button.disabled = false;
+      if (error) {
+        console.error("Could not update the connection.", error);
+        note.textContent = `Couldn't update: ${error.message}`;
+        return;
+      }
+      state.i_follow = data;
+      state.followers = Number(state.followers) + (data ? 1 : -1);
+      label();
+      paint();
+    });
+    box.append(button, note);
+  }
+  hero.append(box);
+}
 
 const status = document.querySelector("#member-status");
 const content = document.querySelector("#member-content");
@@ -195,6 +248,7 @@ async function initialize() {
     const { data: sessionData } = await backend.auth.getSession();
     signedIn = Boolean(sessionData.session?.user);
     await loadMemberPolls();
+    await setupConnection(data);
   } catch (error) {
     console.error("Could not load the public member profile.", error);
     status.textContent = error.message.includes("profile_not_found_or_private")

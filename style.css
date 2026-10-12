@@ -865,3 +865,15 @@ body {
 .mobile-menu nav .mobile-profile-link[hidden] { display: none; }
 
 .button-profile[hidden] { display: none !important; }
+
+.avatar-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.avatar-pick { display: inline-flex; align-items: center; cursor: pointer; }
+.avatar-status { color: var(--muted, #a8aa9d); font-size: 11px; }
+.connection-tabs { display: flex; gap: 6px; }
+.connection-tab { min-height: 32px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--paper); font: inherit; font-size: 12px; cursor: pointer; }
+.connection-tab.active { border-color: var(--lime); color: var(--lime); }
+.profile-connections { margin-top: 20px; }
+.profile-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.connect-box { display: grid; justify-items: start; gap: 10px; margin-left: auto; }
+.connect-counts { margin: 0; color: var(--muted, #a8aa9d); font: 500 11px var(--mono, monospace); letter-spacing: .08em; }
+@media (max-width: 760px) { .connect-box { margin-left: 0; width: 100%; } }

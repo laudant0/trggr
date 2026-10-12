@@ -40,6 +40,12 @@
             <h1 id="profile-name">Your profile</h1>
             <p class="profile-member-since" id="profile-member-since"></p>
             <p class="profile-bio-display" id="profile-bio-display" hidden></p>
+            <div class="avatar-controls">
+              <label class="auth-signout avatar-pick" for="avatar-input">Change photo</label>
+              <input id="avatar-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <button class="auth-signout" id="avatar-remove" type="button" hidden>Remove photo</button>
+              <span class="avatar-status" id="avatar-status" role="status" aria-live="polite"></span>
+            </div>
           </div>
         </div>
         <button class="auth-signout" id="profile-sign-out" type="button">Sign out</button>
@@ -49,8 +55,21 @@
         <article class="profile-stat"><span>POLLS STARTED</span><strong id="stat-polls">—</strong></article>
         <article class="profile-stat"><span>VOTES CAST</span><strong id="stat-votes">—</strong></article>
         <article class="profile-stat"><span>VOTES ON YOUR POLLS</span><strong id="stat-received">—</strong></article>
+        <article class="profile-stat"><span>FOLLOWERS</span><strong id="stat-followers">0</strong></article>
+        <article class="profile-stat"><span>FOLLOWING</span><strong id="stat-following">0</strong></article>
       </section>
 
+      <section class="profile-panel profile-connections" id="connections">
+        <div class="profile-panel-heading">
+          <div><span class="eyebrow">YOUR PEOPLE</span><h2>Connections</h2></div>
+          <div class="connection-tabs" role="tablist">
+            <button type="button" role="tab" class="connection-tab active" data-kind="following" aria-selected="true">Following</button>
+            <button type="button" role="tab" class="connection-tab" data-kind="followers" aria-selected="false">Followers</button>
+          </div>
+        </div>
+        <div class="member-grid" id="connection-list"><p class="profile-empty">Loading your connections...</p></div>
+        <a class="profile-directory-link" href="community.html#members">Find more people to follow</a>
+      </section>
       <div class="profile-content">
         <section class="profile-panel">
           <div class="profile-panel-heading">
