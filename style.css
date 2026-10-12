@@ -891,4 +891,20 @@ body {
 .window-cat { display: grid; grid-template-columns: minmax(90px, 160px) 1fr auto; align-items: center; gap: 14px; }
 .window-cat em { font-style: normal; font: 500 12px "DM Mono", monospace; opacity: .7; }
 .window-bar { height: 10px; border-radius: 999px; background: var(--lime); }
-.iwindow-link { color: var(--lime); }
+/* Poll images: show the whole picture, square or wide */
+.option-image { width: 100%; height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; background: #1b1d16; }
+.choice-image-preview { height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; }
+.poll-option:has(.option-image) { padding: 11px; }
+
+/* Window notes */
+.window-note { display: grid; gap: 8px; padding: 16px 18px; margin-top: 12px; border: 1px solid rgba(240,240,233,.12); border-radius: 14px; background: rgba(240,240,233,.035); }
+.window-note.mine { border-color: rgba(200,241,105,.35); background: rgba(200,241,105,.06); }
+.window-note-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.window-note-head strong { font: 600 14px var(--display); }
+.window-note-head time { font: 500 11px "DM Mono", monospace; letter-spacing: .06em; opacity: .6; }
+.window-note-body { margin: 0; font-size: 15px; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap; }
+.window-note-delete { justify-self: end; border: 0; background: transparent; color: var(--muted); font: 500 11px "DM Mono", monospace; letter-spacing: .08em; cursor: pointer; }
+.window-note-delete:hover { color: #ff8f7a; }
+#note-form textarea { width: 100%; }
+#note-list { margin-top: 8px; }
+.window-page .profile-stat strong { overflow-wrap: anywhere; }

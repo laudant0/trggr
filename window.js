@@ -94,12 +94,13 @@ async function loadNotes() {
     return;
   }
   list.replaceChildren(...data.map((note) => {
-    const item = node("div", "profile-activity-item window-note");
-    const head = node("span", "", `${note.mine ? "YOU" : note.author_name} · ${new Date(note.created_at).toLocaleString()}`.toUpperCase());
-    const body = node("strong", "", note.body);
+    const item = node("article", `window-note${note.mine ? " mine" : ""}`);
+    const head = node("div", "window-note-head");
+    head.append(node("strong", "", note.mine ? "You" : note.author_name), node("time", "", new Date(note.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })));
+    const body = node("p", "window-note-body", note.body);
     item.append(head, body);
     if (note.mine) {
-      const remove = node("button", "auth-signout", "Delete");
+      const remove = node("button", "window-note-delete", "Delete");
       remove.type = "button";
       remove.addEventListener("click", async () => {
         remove.disabled = true;
