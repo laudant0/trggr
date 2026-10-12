@@ -883,7 +883,7 @@ body {
 .profile-avatar img { object-position: center top; }
 @media (max-width: 760px) { .profile-avatar { width: 76px; height: 95px; font-size: 24px; } }
 
-/* Pins and iWindow */
+/* Pins and Window */
 .poll-pin { border: 1px solid rgba(200,241,105,.45); background: transparent; color: var(--lime); border-radius: 999px; padding: 6px 12px; font: 500 11px var(--mono, "DM Mono", monospace); letter-spacing: .08em; cursor: pointer; }
 .poll-pin:hover, .poll-pin.pinned { background: var(--lime); color: #11120f; }
 .poll-pin:disabled { opacity: .6; cursor: wait; }

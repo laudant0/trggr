@@ -3,6 +3,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 const status = document.querySelector("#window-status");
 const signedOut = document.querySelector("#window-signed-out");
 const dashboard = document.querySelector("#window-dashboard");
+let myBackend = null;
 
 function node(tag, className, text) {
   const item = document.createElement(tag);
@@ -20,7 +21,7 @@ function personality(percent) {
 
 async function init() {
   if (!isBackendConfigured()) {
-    status.textContent = "iWindow needs the shared TRGGA database. Connect it to see your window.";
+    status.textContent = "Window needs the shared TRGGA database. Connect it to see your window.";
     return;
   }
   try {
@@ -36,9 +37,12 @@ async function init() {
     status.hidden = true;
     dashboard.hidden = false;
     render(data);
+    myBackend = backend;
+    setupNotes();
+    loadNotes();
   } catch (error) {
-    console.error("Could not open iWindow.", error);
-    status.textContent = `iWindow couldn't load: ${error.message}`;
+    console.error("Could not open Window.", error);
+    status.textContent = `Window couldn't load: ${error.message}`;
   }
 }
 
@@ -75,6 +79,66 @@ function render(data) {
     link.append(node("strong", "", row.question), node("span", "", detail.toUpperCase()));
     return link;
   }));
+}
+
+async function loadNotes() {
+  const list = document.querySelector("#note-list");
+  const { data, error } = await myBackend.rpc("get_window_notes");
+  if (error) {
+    console.error("Could not load notes.", error);
+    list.replaceChildren(node("p", "profile-empty", "Notes couldn't load right now."));
+    return;
+  }
+  if (!data.length) {
+    list.replaceChildren(node("p", "profile-empty", "No notes yet. Post one, or follow members to see theirs."));
+    return;
+  }
+  list.replaceChildren(...data.map((note) => {
+    const item = node("div", "profile-activity-item window-note");
+    const head = node("span", "", `${note.mine ? "YOU" : note.author_name} · ${new Date(note.created_at).toLocaleString()}`.toUpperCase());
+    const body = node("strong", "", note.body);
+    item.append(head, body);
+    if (note.mine) {
+      const remove = node("button", "auth-signout", "Delete");
+      remove.type = "button";
+      remove.addEventListener("click", async () => {
+        remove.disabled = true;
+        const { error: deleteError } = await myBackend.rpc("delete_window_note", { p_note_id: note.id });
+        if (deleteError) {
+          console.error("Could not delete the note.", deleteError);
+          remove.disabled = false;
+          return;
+        }
+        loadNotes();
+      });
+      item.append(remove);
+    }
+    return item;
+  }));
+}
+
+function setupNotes() {
+  const form = document.querySelector("#note-form");
+  const message = document.querySelector("#note-status");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const field = document.querySelector("#note-body");
+    const body = field.value.trim();
+    if (!body) return;
+    const submit = form.querySelector("button[type=submit]");
+    submit.disabled = true;
+    message.textContent = "";
+    const { error } = await myBackend.rpc("post_window_note", { p_body: body });
+    submit.disabled = false;
+    if (error) {
+      console.error("Could not post the note.", error);
+      message.textContent = `Couldn't post: ${error.message}`;
+      return;
+    }
+    field.value = "";
+    message.textContent = "Posted to your window.";
+    loadNotes();
+  });
 }
 
 init();

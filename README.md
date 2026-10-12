@@ -24,7 +24,7 @@ The Supabase migrations create profiles, polls, options, votes, and reports; ena
 6. Apply `supabase/migrations/20261011000400_database_hardening.sql` for extra indexes, per-account rate limits, and automatic hiding of polls reported by five members.
 7. Apply `supabase/migrations/20261011000500_member_polls.sql` so visitors can view and vote on a member's polls from their profile and poll creators link to their profiles.
 8. Apply `supabase/migrations/20261011000600_connections_and_avatars.sql` for profile photo uploads (WebP, 256 KB, owner-only) and member connections (follow/followers).
-9. Apply `supabase/migrations/20261011000700_pins_window_private_counts.sql` for private follower counts, poll pins, and the private iWindow insights.
+9. Apply `supabase/migrations/20261011000700_pins_window_private_counts.sql` for private follower counts, poll pins, and the Window page (private vote insights plus notes for you and your followers).
 10. Copy the project's **Project URL** and **publishable key** into `auth-config.js` as `supabaseUrl` and `supabasePublishableKey`. A legacy `anon` public key can also be used. Never put a Supabase `service_role` or provider secret key in browser code.
 11. Add your final HTTPS website URL to Supabase **Authentication → URL Configuration**, along with `http://localhost:8081/login.html` for local testing.
 12. In Supabase **Authentication → Sign In / Providers**, enable Google, Facebook, and X and add their OAuth client credentials. For Facebook sign-in, configure a Meta app and its Supabase callback URL; the `public_profile` and `email` permissions are required by Supabase's Facebook login flow.

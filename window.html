@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#11120f">
-  <meta name="description" content="iWindow: a private look at how your votes compare with the room on TRGGA.">
-  <title>iWindow — TRGGA</title>
+  <meta name="description" content="Window: a private look at how your votes compare with the room on TRGGA.">
+  <title>Window — TRGGA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -15,9 +15,9 @@
   <header class="site-header shell">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
     <nav class="main-nav" aria-label="Main navigation">
-      <a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link active" href="window.html" aria-current="page">iWindow</a>
+      <a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link active" href="window.html" aria-current="page">Window</a>
     </nav>
-    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">iWindow</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav></details>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav></details>
     <div class="header-actions"><a class="button button-profile button-small" href="profile.html">My profile</a><a class="button button-small button-dark" href="create.html">＋ Start a poll</a></div>
   </header>
 
@@ -27,23 +27,35 @@
     <section class="profile-signed-out" id="window-signed-out" hidden>
       <span class="eyebrow"><span class="live-dot"></span> PRIVATE TO YOU</span>
       <h1>See yourself<br><span class="highlight">through the room.</span></h1>
-      <p>iWindow shows how your votes line up with everyone else's. Sign in to open yours.</p>
+      <p>Window shows how your votes line up with everyone else's. Sign in to open yours.</p>
       <a class="button button-lime" href="login.html?next=window.html">Sign in to continue <span aria-hidden="true">↗</span></a>
     </section>
 
     <div class="profile-dashboard" id="window-dashboard" hidden>
       <section class="profile-hero">
         <div>
-          <span class="eyebrow"><span class="live-dot"></span> iWINDOW · ONLY YOU SEE THIS</span>
+          <span class="eyebrow"><span class="live-dot"></span> WINDOW · ONLY YOU SEE THIS</span>
           <h1>You vs. the room</h1>
-          <p class="profile-member-since">Based on your latest votes. Nobody else can see this page.</p>
+          <p class="profile-member-since">Your vote stats are private. Notes you post are seen only by you and your followers.</p>
         </div>
       </section>
 
-      <section class="profile-stats" aria-label="Your iWindow summary">
+      <section class="profile-stats" aria-label="Your Window summary">
         <article class="profile-stat"><span>VOTES ANALYSED</span><strong id="win-total">—</strong></article>
         <article class="profile-stat"><span>WITH THE ROOM</span><strong id="win-with">—</strong></article>
         <article class="profile-stat"><span>YOUR PERSONALITY</span><strong id="win-label">—</strong></article>
+      </section>
+
+      <section class="profile-panel" id="notes">
+        <div class="profile-panel-heading"><div><span class="eyebrow">YOU + YOUR FOLLOWERS ONLY</span><h2>Window notes</h2></div></div>
+        <form class="profile-form" id="note-form">
+          <label for="note-body">Say something only you and your followers can see
+            <textarea id="note-body" maxlength="500" rows="3" placeholder="What's on your mind?" required></textarea>
+          </label>
+          <p class="profile-form-status" id="note-status" role="status" aria-live="polite"></p>
+          <button class="button button-lime button-small" type="submit">Post to my window <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="profile-activity-list" id="note-list"><p class="profile-empty">Loading notes…</p></div>
       </section>
 
       <section class="profile-panel">

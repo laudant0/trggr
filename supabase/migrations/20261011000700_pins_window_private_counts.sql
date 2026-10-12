@@ -85,7 +85,7 @@ as $$
   limit 200;
 $$;
 
--- iWindow: a private look at how your votes compare with the room.
+-- Window: a private look at how your votes compare with the room.
 create function public.get_my_window()
 returns jsonb
 language sql
@@ -141,3 +141,80 @@ revoke all on function public.get_my_window() from public;
 grant execute on function public.toggle_pin(uuid) to authenticated;
 grant execute on function public.get_my_pins() to authenticated;
 grant execute on function public.get_my_window() to authenticated;
+
+-- Window notes: short notes visible only to their author and the author's followers.
+create table public.window_notes (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references auth.users (id) on delete cascade,
+  body text not null check (char_length(btrim(body)) between 1 and 500),
+  created_at timestamptz not null default now()
+);
+create index window_notes_author_recent_idx on public.window_notes (author_id, created_at desc);
+alter table public.window_notes enable row level security;
+revoke all on public.window_notes from anon, authenticated;
+
+create function public.post_window_note(p_body text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  uid uuid := (select auth.uid());
+  new_id uuid;
+begin
+  if uid is null then
+    raise exception 'sign_in_required' using errcode = '28000';
+  end if;
+  if (select count(*) from public.window_notes where author_id = uid and created_at > now() - interval '1 hour') >= 30 then
+    raise exception 'You are posting too fast. Try again later.' using errcode = 'P0001';
+  end if;
+  insert into public.window_notes (author_id, body) values (uid, btrim(p_body)) returning id into new_id;
+  return new_id;
+end;
+$$;
+
+create function public.delete_window_note(p_note_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  removed int;
+begin
+  delete from public.window_notes where id = p_note_id and author_id = (select auth.uid());
+  get diagnostics removed = row_count;
+  return removed > 0;
+end;
+$$;
+
+-- Your notes plus notes from members you follow.
+create function public.get_window_notes()
+returns table (id uuid, author_id uuid, author_name text, avatar_path text, body text, created_at timestamptz, mine boolean)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select n.id, n.author_id, pr.display_name, pr.avatar_path, n.body, n.created_at, n.author_id = (select auth.uid())
+  from public.window_notes n
+  join public.profiles pr on pr.id = n.author_id
+  where (select auth.uid()) is not null
+    and (
+      n.author_id = (select auth.uid())
+      or exists (
+        select 1 from public.member_follows f
+        where f.follower_id = (select auth.uid()) and f.followee_id = n.author_id
+      )
+    )
+  order by n.created_at desc
+  limit 50;
+$$;
+
+revoke all on function public.post_window_note(text) from public;
+revoke all on function public.delete_window_note(uuid) from public;
+revoke all on function public.get_window_notes() from public;
+grant execute on function public.post_window_note(text) to authenticated;
+grant execute on function public.delete_window_note(uuid) to authenticated;
+grant execute on function public.get_window_notes() to authenticated;
