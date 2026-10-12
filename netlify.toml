@@ -1,2 +1,11 @@
 [build]
-publish = "."
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/p/:id"
+  to = "/.netlify/functions/poll?id=:id"
+  status = 200
+  force = true
