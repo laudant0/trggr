@@ -892,8 +892,8 @@ body {
 .window-cat em { font-style: normal; font: 500 12px "DM Mono", monospace; opacity: .7; }
 .window-bar { height: 10px; border-radius: 999px; background: var(--lime); }
 /* Poll images: show the whole picture, square or wide */
-.option-image { width: 100%; height: auto; max-height: 240px; aspect-ratio: auto; object-fit: contain; background: #1b1d16; }
-.choice-image-preview { height: auto; max-height: 220px; aspect-ratio: auto; object-fit: contain; }
+.option-image { width: 100%; height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; background: #1b1d16; }
+.choice-image-preview { height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; }
 .poll-option:has(.option-image) { padding: 11px; }
 
 /* Window notes */
