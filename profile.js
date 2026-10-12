@@ -129,6 +129,8 @@ async function loadProfile() {
   loadCounts();
   loadConnections();
   loadPins();
+  loadResults();
+  loadBlocked();
 }
 
 async function initializeProfile() {
@@ -225,6 +227,96 @@ async function loadPins() {
     meta.textContent = String(pin.category || "").toUpperCase();
     link.append(title, meta);
     return link;
+  }));
+}
+
+function textNode(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  node.textContent = text;
+  return node;
+}
+
+async function loadResults() {
+  const list = document.querySelector("#results-list");
+  const { data, error } = await backend.rpc("get_my_poll_results");
+  if (error) {
+    console.error("Could not load poll results.", error);
+    list.replaceChildren(textNode("p", "profile-empty", "Your results couldn't load right now."));
+    return;
+  }
+  if (!data.length) {
+    list.replaceChildren(textNode("p", "profile-empty", "Start a poll and its results will show up here."));
+    return;
+  }
+  list.replaceChildren(...data.map((poll) => {
+    const card = document.createElement("article");
+    card.className = "result-card";
+    const closed = poll.closes_at && new Date(poll.closes_at) <= new Date();
+    const state = poll.status === "hidden" ? "HIDDEN" : closed ? "CLOSED" : poll.closes_at ? "OPEN · CLOSES " + new Date(poll.closes_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }).toUpperCase() : "OPEN";
+    const head = document.createElement("a");
+    head.className = "result-head";
+    head.href = `index.html?poll=${encodeURIComponent(poll.poll_id)}`;
+    head.append(textNode("strong", "", poll.question), textNode("span", "", `${state} · ${Number(poll.total_votes).toLocaleString()} VOTES`));
+    card.append(head);
+    const total = Number(poll.total_votes);
+    poll.options.forEach((option) => {
+      const percent = total ? Math.round((Number(option.votes) / total) * 100) : 0;
+      const row = document.createElement("div");
+      row.className = "result-row";
+      const bar = document.createElement("span");
+      bar.className = "result-bar";
+      const fill = document.createElement("span");
+      fill.style.width = `${percent}%`;
+      bar.append(fill);
+      row.append(textNode("span", "result-label", option.label), bar, textNode("em", "", `${percent}% · ${option.votes}`));
+      card.append(row);
+    });
+    const days = poll.daily || [];
+    const max = Math.max(1, ...days.map((day) => Number(day.votes)));
+    const spark = document.createElement("div");
+    spark.className = "result-spark";
+    spark.setAttribute("aria-label", "Votes per day over the last 14 days");
+    days.forEach((day) => {
+      const bar = document.createElement("span");
+      bar.style.height = `${Math.max(4, Math.round((Number(day.votes) / max) * 100))}%`;
+      bar.title = `${day.day}: ${day.votes} vote${Number(day.votes) === 1 ? "" : "s"}`;
+      spark.append(bar);
+    });
+    card.append(spark, textNode("small", "", "VOTES PER DAY · LAST 14 DAYS"));
+    return card;
+  }));
+}
+
+async function loadBlocked() {
+  const list = document.querySelector("#blocked-list");
+  const { data, error } = await backend.rpc("get_my_blocks");
+  if (error) {
+    console.error("Could not load blocked members.", error);
+    list.replaceChildren(textNode("p", "profile-empty", "This couldn't load right now."));
+    return;
+  }
+  if (!data.length) {
+    list.replaceChildren(textNode("p", "profile-empty", "You haven't blocked anyone."));
+    return;
+  }
+  list.replaceChildren(...data.map((member) => {
+    const row = document.createElement("div");
+    row.className = "blocked-row";
+    const unblock = textNode("button", "auth-signout", "Unblock");
+    unblock.type = "button";
+    unblock.addEventListener("click", async () => {
+      unblock.disabled = true;
+      const { error: unblockError } = await backend.rpc("toggle_block", { p_member_id: member.id });
+      if (unblockError) {
+        console.error("Could not unblock.", unblockError);
+        unblock.disabled = false;
+        return;
+      }
+      loadBlocked();
+    });
+    row.append(textNode("strong", "", member.display_name), unblock);
+    return row;
   }));
 }
 
