@@ -27,6 +27,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   let polls = [];
   let voted = {};
   let userId = null;
+  let pins = new Set();
   let loading = false;
   let category = new URLSearchParams(window.location.search).get("category") || "All";
   const sharedPollId = new URLSearchParams(window.location.search).get("poll");
@@ -132,6 +133,12 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       if (error) throw error;
       const { data: links } = await backend.rpc("get_poll_creator_links");
       const creatorByPoll = new Map((links || []).map((link) => [link.poll_id, link.creator_id]));
+      if (userId) {
+        const { data: pinRows } = await backend.rpc("get_my_pins");
+        pins = new Set((pinRows || []).map((row) => row.poll_id));
+      } else {
+        pins = new Set();
+      }
       polls = (data || []).map(mapPoll);
       polls.forEach((poll) => { poll.creatorId = creatorByPoll.get(poll.id) || null; });
       voted = {};
@@ -151,7 +158,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
           document.getElementById(`poll-${targetPoll.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
-      setStatus("LIVE MODE — shared polls and verified votes are connected.", "live");
+      status.hidden = true;
     } catch (error) {
       console.error("Could not load the shared poll feed.", error);
       setStatus(`The shared feed could not load: ${error.message}. Refresh to try again.`, "error");
@@ -220,6 +227,12 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       el("span", "vote-hint", votedPosition !== undefined && votedPosition !== null ? "YOUR VOTE IS IN ✓" : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
     );
     if (backend) {
+      const pinned = pins.has(poll.id);
+      const pin = el("button", `poll-pin${pinned ? " pinned" : ""}`, pinned ? "PINNED ✓" : "PIN");
+      pin.type = "button";
+      pin.dataset.pin = poll.id;
+      pin.setAttribute("aria-pressed", String(pinned));
+      footer.append(pin);
       const report = el("details", "poll-report");
       const summary = el("summary", "", "REPORT");
       const form = document.createElement("form");
@@ -336,6 +349,26 @@ import { getBackend, isBackendConfigured } from "./backend.js";
           console.error("Could not share the poll result.", error);
           shareButton.textContent = "Sharing unavailable";
         }
+      }
+      return;
+    }
+    const pinButton = event.target.closest(".poll-pin");
+    if (pinButton) {
+      if (!userId) {
+        window.location.href = "login.html?next=index.html%23polls";
+        return;
+      }
+      pinButton.disabled = true;
+      try {
+        const { data, error } = await backend.rpc("toggle_pin", { p_poll_id: pinButton.dataset.pin });
+        if (error) throw error;
+        if (data) pins.add(pinButton.dataset.pin);
+        else pins.delete(pinButton.dataset.pin);
+        render();
+      } catch (error) {
+        console.error("Could not update the pin.", error);
+        setStatus(`Couldn't update your pin: ${error.message}`, "error");
+        pinButton.disabled = false;
       }
       return;
     }

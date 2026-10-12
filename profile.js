@@ -128,6 +128,7 @@ async function loadProfile() {
   renderProfile(data);
   loadCounts();
   loadConnections();
+  loadPins();
 }
 
 async function initializeProfile() {
@@ -197,9 +198,34 @@ form.addEventListener("submit", async (event) => {
 
 async function loadCounts() {
   const { data } = await backend.rpc("get_connection_state", { p_member_id: myId });
-  if (!data) return;
+  if (!data || data.followers === null) return;
   document.querySelector("#stat-followers").textContent = Number(data.followers).toLocaleString();
   document.querySelector("#stat-following").textContent = Number(data.following).toLocaleString();
+}
+
+async function loadPins() {
+  const list = document.querySelector("#pin-list");
+  const { data, error } = await backend.rpc("get_my_pins");
+  if (error) {
+    console.error("Could not load pins.", error);
+    list.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Your pins couldn't load right now." }));
+    return;
+  }
+  if (!data.length) {
+    list.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Nothing pinned yet. Tap PIN on any poll to keep it here." }));
+    return;
+  }
+  list.replaceChildren(...data.map((pin) => {
+    const link = document.createElement("a");
+    link.className = "profile-activity-item";
+    link.href = `index.html?poll=${encodeURIComponent(pin.poll_id)}`;
+    const title = document.createElement("strong");
+    title.textContent = pin.question;
+    const meta = document.createElement("span");
+    meta.textContent = String(pin.category || "").toUpperCase();
+    link.append(title, meta);
+    return link;
+  }));
 }
 
 async function loadConnections() {
