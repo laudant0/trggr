@@ -18,21 +18,39 @@ document.querySelectorAll(".mobile-menu nav").forEach((nav) => {
   menuAuthItems.push(item);
 });
 
+const bellSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+
+async function addBell(backend) {
+  if (document.querySelector(".notif-bell")) return;
+  const actions = document.querySelector(".header-actions");
+  if (!actions) return;
+  const bell = document.createElement("a");
+  bell.className = "notif-bell";
+  bell.href = "window.html#activity";
+  bell.setAttribute("aria-label", "Notifications");
+  bell.innerHTML = bellSvg;
+  actions.prepend(bell);
+  try {
+    const { data: count } = await backend.rpc("get_unread_notification_count");
+    if (count > 0) {
+      const badge = document.createElement("span");
+      badge.className = "nav-badge";
+      badge.textContent = count > 9 ? "9+" : String(count);
+      bell.append(badge);
+      bell.setAttribute("aria-label", `Notifications, ${count} unread`);
+    }
+  } catch (error) {
+    console.error("Could not load notifications.", error);
+  }
+}
+
 let adminChecked = false;
 async function addAdminLink() {
   if (adminChecked) return;
   adminChecked = true;
   try {
     const backend = await getBackend();
-    backend.rpc("get_unread_notification_count").then(({ data: count }) => {
-      if (!count) return;
-      document.querySelectorAll(".iwindow-link").forEach((link) => {
-        const badge = document.createElement("span");
-        badge.className = "nav-badge";
-        badge.textContent = count > 9 ? "9+" : String(count);
-        link.append(badge);
-      });
-    });
+    addBell(backend);
     const { data } = await backend.rpc("is_admin");
     if (data !== true) return;
     document.querySelectorAll(".main-nav, .mobile-menu nav").forEach((nav) => {
@@ -67,7 +85,7 @@ function showSignedIn(session) {
     item.onclick = signedIn ? signOut : null;
   });
   document.body.classList.toggle("is-signed-in", signedIn);
-  if (signedIn) addAdminLink(); else document.querySelectorAll(".admin-link").forEach((a) => a.remove());
+  if (signedIn) addAdminLink(); else document.querySelectorAll(".admin-link, .notif-bell").forEach((a) => a.remove());
   document.body.classList.remove("auth-checking");
   loginLinks.forEach((link) => {
     link.hidden = signedIn;
