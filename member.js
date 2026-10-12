@@ -1,10 +1,17 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { avatarUrl, fillAvatar, loadAvatarPaths } from "./avatar.js";
+import { xLink } from "./xhandle.js";
 
 async function setupConnection(profile) {
   const avatar = document.querySelector(".member-profile-hero .profile-avatar");
   const paths = await loadAvatarPaths(backendClient, [memberId]);
   if (avatar && paths.get(memberId)) fillAvatar(avatar, profile.display_name, avatarUrl(backendClient, paths.get(memberId)));
+
+  const { data: xHandle } = await backendClient.rpc("get_member_x_handle", { p_member_id: memberId });
+  if (xHandle) {
+    const heading = document.querySelector(".member-profile-hero .profile-identity > div:last-child");
+    if (heading) heading.append(Object.assign(document.createElement("p"), { className: "profile-x" })).append(xLink(xHandle));
+  }
 
   const { data: me } = await backendClient.auth.getSession();
   const myId = me.session?.user.id || null;

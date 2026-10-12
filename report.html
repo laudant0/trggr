@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11120f">
+  <meta name="description" content="Report something to the TRGGA team.">
+  <title>Report — TRGGA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="profile-page">
+  <header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a>
+    </nav>
+    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav></details>
+    <div class="header-actions"><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
+  </header>
+
+  <main class="profile-shell legal"><section class="profile-panel"><span class="eyebrow">KEEP THE ROOM SAFE</span><h1>Report something</h1>
+    <p class="profile-member-since">Tell the TRGGA team what went wrong. Every report is read by a person.</p>
+    <div class="profile-status" id="report-status" role="status" aria-live="polite" hidden></div>
+    <form class="profile-form" id="report-form">
+      <label for="report-kind">What are you reporting?<select id="report-kind" name="kind"><option value="poll">A poll</option><option value="take">A take</option><option value="member">A member</option><option value="bug">A bug or problem</option><option value="other">Something else</option></select></label>
+      <label for="report-reference">Link or description <span class="profile-field-note">PASTE THE POLL LINK OR PROFILE LINK</span><input id="report-reference" name="reference" maxlength="300" required placeholder="https://…/p/… or the poll question"></label>
+      <label for="report-reason">Reason<select id="report-reason" name="reason"><option value="spam">Spam or scam</option><option value="harassment">Harassment</option><option value="hate">Hate or abuse</option><option value="misinformation">Misinformation</option><option value="other">Other</option></select></label>
+      <label for="report-details">What happened? <span class="profile-field-note">20 TO 1000 CHARACTERS</span><textarea id="report-details" name="details" rows="6" minlength="20" maxlength="1000" required placeholder="Explain what is wrong and why it breaks the rules."></textarea></label>
+      <p class="profile-form-status" id="report-message" role="status" aria-live="polite"></p>
+      <button class="button button-lime button-small" id="report-submit" type="submit">Send report <span aria-hidden="true">↗</span></button>
+      <p class="profile-field-note">You can send up to 5 reports a day. Reports about polls, takes and members are reviewed by the team; misuse of reporting can lead to restrictions.</p>
+    </form></section></main>  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
+  <script src="auth-config.js"></script>
+  
+  <script type="module" src="report.js"></script>
+  <script type="module" src="site-nav.js"></script>
+</body>
+</html>

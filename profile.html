@@ -40,6 +40,7 @@
             <h1 id="profile-name">Your profile</h1>
             <p class="profile-member-since" id="profile-member-since"></p>
             <p class="profile-bio-display" id="profile-bio-display" hidden></p>
+            <p class="profile-x" id="profile-x-display" hidden></p>
             <div class="avatar-controls">
               <label class="auth-signout avatar-pick" for="avatar-input">Change photo</label>
               <input id="avatar-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -100,6 +101,9 @@
             <label for="profile-bio">A little about you <span class="profile-field-note">OPTIONAL · 160 CHARACTERS</span>
               <textarea id="profile-bio" name="bio" maxlength="160" rows="3" placeholder="What are you here to talk about?"></textarea>
             </label>
+            <label for="profile-x">X handle <span class="profile-field-note">OPTIONAL · @NAME OR X.COM LINK</span>
+              <input id="profile-x" name="x_handle" type="text" maxlength="120" placeholder="@yourhandle" autocomplete="off" autocapitalize="off" spellcheck="false">
+            </label>
             <label class="profile-discoverable-control">
               <input id="profile-discoverable" name="discoverable" type="checkbox">
               <span><strong>Show me in the member directory</strong><small>People can see your name, bio, and polls you created. Your individual votes stay private.</small></span>
@@ -128,7 +132,7 @@
     </div>
   </main>
 
-  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a></span></footer>
+  <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
   <script src="auth-config.js"></script>
   <script type="module" src="profile.js"></script>
   <script type="module" src="site-nav.js"></script>

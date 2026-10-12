@@ -222,12 +222,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
           agree.dataset.take = row.take_id;
           agree.dataset.poll = poll.id;
           agree.setAttribute("aria-pressed", String(row.i_agreed));
-          const flag = el("button", "take-report", "⋯");
-          flag.title = "Report this take";
-          flag.setAttribute("aria-label", "Report this take");
-          flag.type = "button";
-          flag.dataset.take = row.take_id;
-          meta.append(agree, flag);
+          meta.append(agree);
         } else {
           meta.append(el("span", "take-count", `${row.agrees} AGREE`));
         }
@@ -341,41 +336,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       pin.dataset.pin = poll.id;
       pin.setAttribute("aria-pressed", String(pinned));
       footer.append(pin);
-      const report = el("details", "poll-report");
-      const summary = el("summary", "", "⋯");
-      summary.title = "Report this poll";
-      summary.setAttribute("aria-label", "Report this poll");
-      const form = document.createElement("form");
-      form.className = "report-form";
-      form.dataset.poll = poll.id;
-      const reason = document.createElement("select");
-      reason.name = "reason";
-      reason.setAttribute("aria-label", "Report reason");
-      [
-        ["spam", "Spam"],
-        ["harassment", "Harassment"],
-        ["hate", "Hate or abuse"],
-        ["misinformation", "Misinformation"],
-        ["other", "Other"]
-      ].forEach(([value, label]) => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = label;
-        reason.append(option);
-      });
-      const details = document.createElement("textarea");
-      details.name = "details";
-      details.maxLength = 500;
-      details.placeholder = "Optional details";
-      details.setAttribute("aria-label", "Report details");
-      const submit = document.createElement("button");
-      submit.type = "submit";
-      submit.textContent = "Send report";
-      const message = el("span", "report-message");
-      message.setAttribute("role", "status");
-      form.append(reason, details, submit, message);
-      report.append(summary, form);
-      footer.append(report);
+
     }
     card.append(top, title, meta, options);
     if (votedPosition !== undefined && votedPosition !== null) {
@@ -493,16 +454,6 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       await refreshTakesFor(deleteTake.dataset.poll);
       return;
     }
-    const reportTake = event.target.closest(".take-report");
-    if (reportTake) {
-      if (!window.confirm("Report this take as abusive or spam?")) return;
-      reportTake.disabled = true;
-      const { error } = await backend.rpc("report_take", { p_take_id: reportTake.dataset.take });
-      reportTake.textContent = error ? "⋯" : "✓";
-      reportTake.title = error ? (error.message.includes("report_limit_reached") ? "Daily report limit reached" : "Report failed") : "Reported";
-      if (error) reportTake.disabled = false;
-      return;
-    }
     const pinButton = event.target.closest(".poll-pin");
     if (pinButton) {
       if (!userId) {
@@ -579,31 +530,6 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       input.value = "";
       await refreshTakesFor(takeForm.dataset.poll);
       return;
-    }
-    const form = event.target.closest(".report-form");
-    if (!form) return;
-    event.preventDefault();
-    if (!backend) return;
-    if (!userId) {
-      window.location.href = "login.html?next=index.html%23polls";
-      return;
-    }
-
-    const button = form.querySelector("button[type=submit]");
-    const message = form.querySelector(".report-message");
-    button.disabled = true;
-    try {
-      const { data, error } = await backend.rpc("report_poll", {
-        p_poll_id: form.dataset.poll,
-        p_reason: form.elements.reason.value,
-        p_details: form.elements.details.value.trim() || null
-      });
-      if (error) throw error;
-      message.textContent = data ? "Report received. Thanks for flagging it." : "You've already reported this poll.";
-    } catch (error) {
-      console.error("Could not submit the poll report.", error);
-      message.textContent = `Report failed: ${error.message}`;
-      button.disabled = false;
     }
   });
 

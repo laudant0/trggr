@@ -1,5 +1,6 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { avatarUrl, fillAvatar, loadAvatarPaths, resizeAvatar } from "./avatar.js";
+import { parseXHandle, xLink } from "./xhandle.js";
 
 const status = document.querySelector("#profile-status");
 const signedOut = document.querySelector("#profile-signed-out");
@@ -87,6 +88,13 @@ function paintAvatar(fallbackUrl) {
   document.querySelector("#avatar-remove").hidden = !myAvatarPath;
 }
 
+function paintXHandle(handle) {
+  const display = document.querySelector("#profile-x-display");
+  document.querySelector("#profile-x").value = handle ? `@${handle}` : "";
+  display.replaceChildren(...(handle ? [xLink(handle)] : []));
+  display.hidden = !handle;
+}
+
 function renderProfile(profile) {
   const name = profile.display_name || "TRGGA member";
   const bio = profile.bio || "";
@@ -98,6 +106,7 @@ function renderProfile(profile) {
   const bioDisplay = document.querySelector("#profile-bio-display");
   bioDisplay.textContent = bio;
   bioDisplay.hidden = !bio;
+  paintXHandle(profile.x_handle);
 
   myName = name;
   paintAvatar(profile.avatar_url);
@@ -113,15 +122,17 @@ function renderProfile(profile) {
 
 async function loadProfile() {
   setStatus("Loading your profile…");
-  const [profileResult, discoveryResult] = await Promise.all([
+  const [profileResult, discoveryResult, xResult] = await Promise.all([
     backend.rpc("get_my_profile"),
-    backend.rpc("get_my_profile_discovery_setting")
+    backend.rpc("get_my_profile_discovery_setting"),
+    backend.rpc("get_my_x_handle")
   ]);
   if (profileResult.error) throw profileResult.error;
   if (discoveryResult.error) throw discoveryResult.error;
   const data = profileResult.data;
   if (!data) throw new Error("Your profile could not be found. Try signing out and back in.");
   data.discoverable = discoveryResult.data;
+  data.x_handle = xResult.error ? null : xResult.data;
   const { data: sessionData } = await backend.auth.getSession();
   myId = sessionData.session.user.id;
   myAvatarPath = (await loadAvatarPaths(backend, [myId])).get(myId) || null;
@@ -173,6 +184,11 @@ form.addEventListener("submit", async (event) => {
     formStatus.textContent = "Add a display name before saving.";
     return;
   }
+  const xHandle = parseXHandle(form.elements.x_handle.value);
+  if (xHandle === null) {
+    formStatus.textContent = "That X handle doesn't look right. Use @name or your x.com link.";
+    return;
+  }
 
   saveButton.disabled = true;
   formStatus.textContent = "Saving your profile…";
@@ -183,6 +199,9 @@ form.addEventListener("submit", async (event) => {
       p_discoverable: discoverable
     });
     if (error) throw error;
+    const { data: savedHandle, error: handleError } = await backend.rpc("set_my_x_handle", { p_handle: xHandle });
+    if (handleError) throw handleError;
+    paintXHandle(savedHandle);
     document.querySelector("#profile-name").textContent = displayName;
     const bioDisplay = document.querySelector("#profile-bio-display");
     bioDisplay.textContent = bio;

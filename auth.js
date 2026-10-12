@@ -53,7 +53,7 @@ async function initializeAuth() {
             console.warn("Could not read the post-login destination.", error);
           }
         }
-        const allowedDestinations = new Set(["index.html", "index.html#polls", "create.html", "profile.html", "window.html", "admin.html"]);
+        const allowedDestinations = new Set(["index.html", "index.html#polls", "create.html", "profile.html", "window.html", "admin.html", "report.html"]);
         const memberDestination = /^member\.html\?id=[0-9a-f-]{36}$/i.test(next || "");
         if (next && (allowedDestinations.has(next) || memberDestination)) {
           sessionStorage.removeItem("trggr-auth-next");

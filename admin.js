@@ -36,6 +36,34 @@ async function call(name, args) {
   if (error) throw error;
 }
 
+async function loadSupportReports() {
+  const el = document.querySelector("#admin-reports");
+  const { data, error } = await backend.rpc("admin_get_support_reports");
+  if (error) throw error;
+  el.replaceChildren();
+  if (!data.length) {
+    el.append(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "No open member reports." }));
+    return;
+  }
+  data.forEach((row) => {
+    const card = document.createElement("article");
+    card.className = "admin-item";
+    const q = document.createElement("strong");
+    q.textContent = `${row.kind.toUpperCase()} · ${row.reason}`;
+    const ref = document.createElement("span");
+    ref.textContent = row.reference;
+    const details = document.createElement("p");
+    details.textContent = row.details;
+    const meta = document.createElement("span");
+    meta.textContent = `from ${row.reporter_name} · ${new Date(row.created_at).toLocaleString()}`;
+    const actions = document.createElement("div");
+    actions.className = "admin-actions";
+    actions.append(button("Mark resolved", () => call("admin_resolve_support_report", { p_report_id: row.report_id })));
+    card.append(q, ref, details, meta, actions);
+    el.append(card);
+  });
+}
+
 async function loadTakesQueue() {
   const el = document.querySelector("#admin-takes");
   const { data, error } = await backend.rpc("admin_get_reported_takes");
@@ -67,6 +95,7 @@ async function loadTakesQueue() {
 }
 
 async function loadQueue() {
+  await loadSupportReports();
   await loadTakesQueue();
   const { data, error } = await backend.rpc("admin_get_queue");
   if (error) throw error;
