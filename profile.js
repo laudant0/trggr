@@ -1,6 +1,6 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { avatarUrl, fillAvatar, loadAvatarPaths, resizeAvatar } from "./avatar.js";
-import { parseXHandle, xLink } from "./xhandle.js";
+import { instagramLink, parseInstagramHandle, parseXHandle, xLink } from "./xhandle.js";
 
 const status = document.querySelector("#profile-status");
 const signedOut = document.querySelector("#profile-signed-out");
@@ -88,11 +88,17 @@ function paintAvatar(fallbackUrl) {
   document.querySelector("#avatar-remove").hidden = !myAvatarPath;
 }
 
-function paintXHandle(handle) {
+let savedX = "";
+let savedInstagram = "";
+
+function paintSocials(x, instagram) {
+  savedX = x || "";
+  savedInstagram = instagram || "";
   const display = document.querySelector("#profile-x-display");
-  document.querySelector("#profile-x").value = handle ? `@${handle}` : "";
-  display.replaceChildren(...(handle ? [xLink(handle)] : []));
-  display.hidden = !handle;
+  document.querySelector("#profile-x").value = savedX ? `@${savedX}` : "";
+  document.querySelector("#profile-instagram").value = savedInstagram ? `@${savedInstagram}` : "";
+  display.replaceChildren(...[savedX && xLink(savedX), savedInstagram && instagramLink(savedInstagram)].filter(Boolean));
+  display.hidden = !savedX && !savedInstagram;
 }
 
 function renderProfile(profile) {
@@ -106,7 +112,7 @@ function renderProfile(profile) {
   const bioDisplay = document.querySelector("#profile-bio-display");
   bioDisplay.textContent = bio;
   bioDisplay.hidden = !bio;
-  paintXHandle(profile.x_handle);
+  paintSocials(profile.x_handle, profile.instagram_handle);
 
   myName = name;
   paintAvatar(profile.avatar_url);
@@ -122,10 +128,11 @@ function renderProfile(profile) {
 
 async function loadProfile() {
   setStatus("Loading your profile…");
-  const [profileResult, discoveryResult, xResult] = await Promise.all([
+  const [profileResult, discoveryResult, xResult, igResult] = await Promise.all([
     backend.rpc("get_my_profile"),
     backend.rpc("get_my_profile_discovery_setting"),
-    backend.rpc("get_my_x_handle")
+    backend.rpc("get_my_x_handle"),
+    backend.rpc("get_my_instagram_handle")
   ]);
   if (profileResult.error) throw profileResult.error;
   if (discoveryResult.error) throw discoveryResult.error;
@@ -133,6 +140,7 @@ async function loadProfile() {
   if (!data) throw new Error("Your profile could not be found. Try signing out and back in.");
   data.discoverable = discoveryResult.data;
   data.x_handle = xResult.error ? null : xResult.data;
+  data.instagram_handle = igResult.error ? null : igResult.data;
   const { data: sessionData } = await backend.auth.getSession();
   myId = sessionData.session.user.id;
   myAvatarPath = (await loadAvatarPaths(backend, [myId])).get(myId) || null;
@@ -189,6 +197,11 @@ form.addEventListener("submit", async (event) => {
     formStatus.textContent = "That X handle doesn't look right. Use @name or your x.com link.";
     return;
   }
+  const instagramHandle = parseInstagramHandle(form.elements.instagram_handle.value);
+  if (instagramHandle === null) {
+    formStatus.textContent = "That Instagram handle doesn't look right. Use @name or your instagram.com link.";
+    return;
+  }
 
   saveButton.disabled = true;
   formStatus.textContent = "Saving your profile…";
@@ -201,7 +214,9 @@ form.addEventListener("submit", async (event) => {
     if (error) throw error;
     const { data: savedHandle, error: handleError } = await backend.rpc("set_my_x_handle", { p_handle: xHandle });
     if (handleError) throw handleError;
-    paintXHandle(savedHandle);
+    const { data: savedIg, error: igError } = await backend.rpc("set_my_instagram_handle", { p_handle: instagramHandle });
+    if (igError) throw igError;
+    paintSocials(savedHandle, savedIg);
     document.querySelector("#profile-name").textContent = displayName;
     const bioDisplay = document.querySelector("#profile-bio-display");
     bioDisplay.textContent = bio;

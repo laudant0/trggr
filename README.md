@@ -30,7 +30,7 @@ The Supabase migrations create profiles, polls, options, votes, and reports; ena
 12. Apply `supabase/migrations/20261011001000_blocks_takes_results.sql` for blocking, one-line takes (ranked by agrees), creator poll results and take moderation.
 13. Apply `supabase/migrations/20261011001100_report_limits.sql` to cap reports at 10 per member per day.
 14. Apply `supabase/migrations/20261011001200_footer_reports.sql` for the footer Report page (5 reports per member per day, admin review queue).
-15. Apply `supabase/migrations/20261011001300_x_handle.sql` for the optional X handle on profiles.
+15. Apply `supabase/migrations/20261011001300_x_handle.sql` for the optional X and Instagram handles on profiles.
 16. Copy the project's **Project URL** and **publishable key** into `auth-config.js` as `supabaseUrl` and `supabasePublishableKey`. A legacy `anon` public key can also be used. Never put a Supabase `service_role` or provider secret key in browser code.
 17. Add your final HTTPS website URL to Supabase **Authentication → URL Configuration**, along with `http://localhost:8081/login.html` for local testing.
 18. In Supabase **Authentication → Sign In / Providers**, enable Google, Facebook, and X and add their OAuth client credentials. For Facebook sign-in, configure a Meta app and its Supabase callback URL; the `public_profile` and `email` permissions are required by Supabase's Facebook login flow.
