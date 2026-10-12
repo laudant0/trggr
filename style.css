@@ -892,8 +892,8 @@ body {
 .window-cat em { font-style: normal; font: 500 12px "DM Mono", monospace; opacity: .7; }
 .window-bar { height: 10px; border-radius: 999px; background: var(--lime); }
 /* Poll images: show the whole picture, square or wide */
-.option-image { width: auto; max-width: 100%; height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; background: none; justify-self: start; }
-.choice-image-preview { height: auto; max-height: 150px; aspect-ratio: auto; object-fit: contain; }
+.option-image { width: 100%; height: 150px; max-height: none; aspect-ratio: auto; object-fit: cover; object-position: center; background: none; border-radius: 10px; }
+.choice-image-preview { width: 100%; height: 150px; max-height: none; aspect-ratio: auto; object-fit: cover; }
 .poll-option:has(.option-image) { padding: 11px; }
 
 /* Window notes */
@@ -924,5 +924,29 @@ body {
   .profile-activity-item p, .profile-empty, .avatar-status { font-size: 12px; }
   .window-note-body { font-size: 16px; }
   .poll-option { padding: 12px; }
-  .option-image { max-height: 170px; }
+  .option-image { height: 170px; }
 }
+/* Member profile page: card layout, horizontal names, photo fills its frame */
+.profile-avatar img, .member-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.member-profile-shell { max-width: 960px; }
+.member-profile-hero { position: relative; flex-direction: column; align-items: stretch; gap: 22px; padding: 0 0 26px; overflow: hidden; border: 1px solid rgba(200,241,105,.22); border-radius: 22px; background: linear-gradient(180deg, rgba(200,241,105,.16) 0, rgba(200,241,105,.04) 120px, rgba(23,24,20,.7) 120px); }
+.member-profile-hero::before { content: "%"; position: absolute; top: -34px; right: 18px; color: rgba(200,241,105,.16); font: 800 190px/1 var(--display); pointer-events: none; }
+.member-profile-hero .profile-identity { position: relative; flex-direction: row; align-items: flex-end; gap: 22px; padding: 56px 28px 0; }
+.member-profile-hero .profile-avatar { width: 128px; height: 160px; border-radius: 20px; border: 3px solid #11120f; box-shadow: 0 14px 34px rgba(0,0,0,.4); font-size: 40px; }
+.member-profile-hero .profile-identity > div:last-child { flex: 1 1 0; min-width: 0; padding-bottom: 4px; }
+.member-profile-hero h1 { margin: 8px 0 6px; font-size: clamp(30px, 6vw, 52px); letter-spacing: -.04em; line-height: 1.05; overflow-wrap: break-word; word-break: normal; hyphens: auto; }
+.member-profile-hero .profile-bio-display { max-width: 560px; font-size: 14px; }
+.member-profile-hero .connect-box { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin: 0; padding: 0 28px; width: auto; }
+.member-public-stats { margin: 18px 0; border-radius: 18px; overflow: hidden; }
+.member-public-stats .profile-stat strong { font-size: 34px; }
+@media (max-width: 620px) {
+  .member-profile-hero { border-radius: 18px; background: linear-gradient(180deg, rgba(200,241,105,.16) 0, rgba(200,241,105,.04) 90px, rgba(23,24,20,.7) 90px); }
+  .member-profile-hero .profile-identity { flex-direction: column; align-items: flex-start; gap: 16px; padding: 40px 20px 0; }
+  .member-profile-hero .profile-avatar { width: 112px; height: 140px; }
+  .member-profile-hero .profile-identity > div:last-child { width: 100%; flex: none; }
+  .member-profile-hero h1 { font-size: 34px; }
+  .member-profile-hero .connect-box { padding: 0 20px; }
+  .member-profile-hero .connect-box .button { width: 100%; justify-content: center; }
+}
+.member-public-stats .profile-stat { display: grid; gap: 8px; align-content: center; min-height: 0; padding: 20px 24px; }
+.member-public-stats .profile-stat strong { margin: 0; }
