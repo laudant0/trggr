@@ -976,3 +976,7 @@ body {
 .notif-item.unread{border-color:#c8ff3d}
 .notif-item span{font:500 11px "DM Mono",monospace;opacity:.65}
 .nav-badge{display:inline-block;min-width:18px;margin-left:6px;padding:2px 6px;border-radius:999px;background:#c8ff3d;color:#11120f;font:700 11px/1.2 "DM Mono",monospace;text-align:center}
+
+.notif-bell{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid rgba(220,234,216,.18);color:#e8efe5;text-decoration:none}
+.notif-bell:hover{border-color:#c8ff3d;color:#c8ff3d}
+.notif-bell .nav-badge{position:absolute;top:-5px;right:-5px;margin:0;min-width:18px;padding:2px 5px}
