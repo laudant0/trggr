@@ -368,7 +368,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       instagramButton.dataset.shareTitle = poll.question;
       instagramButton.dataset.shareText = shareText;
       instagramButton.dataset.shareUrl = url;
-      instagramButton.setAttribute("aria-label", "Share your vote using the device share sheet for Instagram");
+      instagramButton.dataset.instagram = "true";
+      instagramButton.setAttribute("aria-label", "Copy your vote and open Instagram to share it");
       share.append(shareButton, xLink, whatsappLink, instagramButton);
       card.append(share);
     }
@@ -416,6 +417,24 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   });
 
   grid.addEventListener("click", async (event) => {
+    const instagramShare = event.target.closest("[data-instagram]");
+    if (instagramShare) {
+      const label = "Instagram";
+      try {
+        await navigator.clipboard.writeText(`${instagramShare.dataset.shareText} ${instagramShare.dataset.shareUrl}`);
+        instagramShare.textContent = "Copied ✓ opening Instagram…";
+      } catch (error) {
+        instagramShare.textContent = "Opening Instagram…";
+      }
+      const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      window.setTimeout(() => {
+        if (mobile) window.location.href = "instagram://app";
+        else window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+        instagramShare.textContent = "Paste in your Story or DM";
+        window.setTimeout(() => { instagramShare.textContent = label; }, 4000);
+      }, 400);
+      return;
+    }
     const shareButton = event.target.closest(".poll-share-native, .poll-share-link[data-share-url]");
     if (shareButton) {
       const payload = {
