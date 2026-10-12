@@ -36,7 +36,38 @@ async function call(name, args) {
   if (error) throw error;
 }
 
+async function loadTakesQueue() {
+  const el = document.querySelector("#admin-takes");
+  const { data, error } = await backend.rpc("admin_get_reported_takes");
+  if (error) throw error;
+  el.replaceChildren();
+  if (!data.length) {
+    const empty = document.createElement("p");
+    empty.className = "profile-empty";
+    empty.textContent = "No reported takes.";
+    el.append(empty);
+    return;
+  }
+  data.forEach((row) => {
+    const card = document.createElement("article");
+    card.className = "admin-item";
+    const q = document.createElement("strong");
+    q.textContent = `“${row.body}”`;
+    const meta = document.createElement("span");
+    meta.textContent = `${row.status.toUpperCase()} · ${row.report_count} report(s) · by ${row.author_name} · on: ${row.poll_question}`;
+    const actions = document.createElement("div");
+    actions.className = "admin-actions";
+    actions.append(
+      button("Restore", () => call("admin_restore_take", { p_take_id: row.take_id })),
+      button("Delete", () => call("admin_delete_take", { p_take_id: row.take_id }), "button button-danger button-small")
+    );
+    card.append(q, meta, actions);
+    el.append(card);
+  });
+}
+
 async function loadQueue() {
+  await loadTakesQueue();
   const { data, error } = await backend.rpc("admin_get_queue");
   if (error) throw error;
   queueEl.replaceChildren();

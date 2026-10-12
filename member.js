@@ -53,7 +53,30 @@ async function setupConnection(profile) {
       label();
       paint();
     });
-    box.append(button, note);
+    const { data: blocks } = myId ? await backendClient.rpc("get_my_blocks") : { data: [] };
+    const iBlocked = (blocks || []).some((row) => row.id === memberId);
+    const blockButton = document.createElement("button");
+    blockButton.type = "button";
+    blockButton.className = "auth-signout block-button";
+    blockButton.textContent = iBlocked ? "Unblock" : "Block";
+    blockButton.addEventListener("click", async () => {
+      if (!myId) {
+        window.location.href = `login.html?next=${encodeURIComponent(`member.html?id=${memberId}`)}`;
+        return;
+      }
+      if (!iBlocked && !window.confirm("Block this member? They will no longer see your polls or follow you, and you will not see theirs. You can unblock them from your profile.")) return;
+      blockButton.disabled = true;
+      const { error } = await backendClient.rpc("toggle_block", { p_member_id: memberId });
+      if (error) {
+        console.error("Could not update the block.", error);
+        note.textContent = `Couldn't update: ${error.message}`;
+        blockButton.disabled = false;
+        return;
+      }
+      window.location.reload();
+    });
+    if (iBlocked) button.hidden = true;
+    box.append(button, note, blockButton);
   }
   hero.append(box);
 }

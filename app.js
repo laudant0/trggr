@@ -28,6 +28,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   let voted = {};
   let userId = null;
   let pins = new Set();
+  let takes = new Map();
   let loading = false;
   let category = new URLSearchParams(window.location.search).get("category") || "All";
   const sharedPollId = new URLSearchParams(window.location.search).get("poll");
@@ -148,8 +149,10 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       polls.forEach((poll) => {
         if (poll.votedPosition !== null) voted[poll.id] = poll.votedPosition;
       });
+      await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
       updateDailyPulse();
-      render();
+      const typing = [...grid.querySelectorAll(".take-input")].some((input) => input.value.trim() || input === document.activeElement);
+      if (!typing) render();
       if (sharedPollId) {
         const targetPoll = polls.find((poll) => poll.id === sharedPollId);
         if (targetPoll) {
@@ -168,6 +171,92 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     } finally {
       loading = false;
     }
+  }
+
+  function isTakesVisible(poll) {
+    const closed = Boolean(poll.closesAt) && poll.closesAt <= Date.now();
+    return closed || (poll.votedPosition !== undefined && poll.votedPosition !== null);
+  }
+
+  async function loadTakes(ids) {
+    if (!backend || !ids.length) return;
+    const { data, error } = await backend.rpc("get_takes", { p_poll_ids: ids.slice(0, 60) });
+    if (error) {
+      console.error("Could not load takes.", error);
+      return;
+    }
+    ids.forEach((id) => takes.delete(id));
+    (data || []).forEach((row) => {
+      if (!takes.has(row.poll_id)) takes.set(row.poll_id, []);
+      takes.get(row.poll_id).push(row);
+    });
+  }
+
+  function renderTakes(poll) {
+    const wrap = el("div", "takes");
+    wrap.dataset.poll = poll.id;
+    const rows = takes.get(poll.id) || [];
+    const closed = Boolean(poll.closesAt) && poll.closesAt <= Date.now();
+    const hasVoted = poll.votedPosition !== undefined && poll.votedPosition !== null;
+    if (rows.length) {
+      wrap.append(el("span", "takes-label", "TOP TAKES · MOST AGREED FIRST"));
+      rows.forEach((row) => {
+        const item = el("div", `take${row.mine ? " mine" : ""}`);
+        const body = el("p", "take-body", `“${row.body}”`);
+        const meta = el("div", "take-meta");
+        if (row.author_id && !row.mine) {
+          const link = el("a", "take-author", row.author_name);
+          link.href = `member.html?id=${encodeURIComponent(row.author_id)}`;
+          meta.append(link);
+        } else {
+          meta.append(el("span", "take-author", row.mine ? "YOU" : row.author_name));
+        }
+        if (row.mine) {
+          const remove = el("button", "take-delete", "DELETE");
+          remove.type = "button";
+          remove.dataset.poll = poll.id;
+          meta.append(remove);
+        } else if (userId) {
+          const agree = el("button", `take-agree${row.i_agreed ? " agreed" : ""}`, `AGREE · ${row.agrees}`);
+          agree.type = "button";
+          agree.dataset.take = row.take_id;
+          agree.dataset.poll = poll.id;
+          agree.setAttribute("aria-pressed", String(row.i_agreed));
+          const flag = el("button", "take-report", "REPORT");
+          flag.type = "button";
+          flag.dataset.take = row.take_id;
+          meta.append(agree, flag);
+        } else {
+          meta.append(el("span", "take-count", `${row.agrees} AGREE`));
+        }
+        if (row.mine) meta.append(el("span", "take-count", `${row.agrees} AGREE`));
+        item.append(body, meta);
+        wrap.append(item);
+      });
+    }
+    if (hasVoted && !rows.some((row) => row.mine)) {
+      const form = el("form", "take-form");
+      form.dataset.poll = poll.id;
+      const input = document.createElement("input");
+      input.className = "take-input";
+      input.maxLength = 100;
+      input.placeholder = "Add your take in one line…";
+      input.setAttribute("aria-label", "Your take");
+      const submit = el("button", "button button-lime button-small", "Post");
+      submit.type = "submit";
+      form.append(input, submit, el("span", "take-message"));
+      wrap.append(form);
+    } else if (!rows.length && closed) {
+      wrap.append(el("span", "takes-label", "NO TAKES YET"));
+    }
+    return wrap;
+  }
+
+  async function refreshTakesFor(pollId) {
+    await loadTakes([pollId]);
+    const poll = polls.find((item) => item.id === pollId);
+    const current = grid.querySelector(`.takes[data-poll="${CSS.escape(pollId)}"]`);
+    if (poll && current) current.replaceWith(renderTakes(poll));
   }
 
   function timeLeft(closesAt) {
@@ -318,6 +407,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       share.append(shareButton, xLink, whatsappLink, instagramButton);
       card.append(share);
     }
+    if (backend && isTakesVisible(poll)) card.append(renderTakes(poll));
     card.append(footer);
     return card;
   }
@@ -383,6 +473,30 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       }
       return;
     }
+    const agreeButton = event.target.closest(".take-agree");
+    if (agreeButton) {
+      agreeButton.disabled = true;
+      const { error } = await backend.rpc("toggle_take_agree", { p_take_id: agreeButton.dataset.take });
+      if (error) setStatus(error.message, "error");
+      await refreshTakesFor(agreeButton.dataset.poll);
+      return;
+    }
+    const deleteTake = event.target.closest(".take-delete");
+    if (deleteTake) {
+      deleteTake.disabled = true;
+      const { error } = await backend.rpc("delete_my_take", { p_poll_id: deleteTake.dataset.poll });
+      if (error) setStatus(error.message, "error");
+      await refreshTakesFor(deleteTake.dataset.poll);
+      return;
+    }
+    const reportTake = event.target.closest(".take-report");
+    if (reportTake) {
+      if (!window.confirm("Report this take as abusive or spam?")) return;
+      reportTake.disabled = true;
+      const { error } = await backend.rpc("report_take", { p_take_id: reportTake.dataset.take });
+      reportTake.textContent = error ? "FAILED" : "REPORTED ✓";
+      return;
+    }
     const pinButton = event.target.closest(".poll-pin");
     if (pinButton) {
       if (!userId) {
@@ -442,6 +556,24 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   });
 
   grid.addEventListener("submit", async (event) => {
+    const takeForm = event.target.closest(".take-form");
+    if (takeForm) {
+      event.preventDefault();
+      const input = takeForm.querySelector(".take-input");
+      const message = takeForm.querySelector(".take-message");
+      const submit = takeForm.querySelector("button[type=submit]");
+      if (!input.value.trim()) return;
+      submit.disabled = true;
+      const { error } = await backend.rpc("post_take", { p_poll_id: takeForm.dataset.poll, p_body: input.value });
+      if (error) {
+        message.textContent = error.message;
+        submit.disabled = false;
+        return;
+      }
+      input.value = "";
+      await refreshTakesFor(takeForm.dataset.poll);
+      return;
+    }
     const form = event.target.closest(".report-form");
     if (!form) return;
     event.preventDefault();
