@@ -1,4 +1,5 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
+import { avatarUrl, fillAvatar, loadAvatarPaths, resizeAvatar } from "./avatar.js";
 
 const status = document.querySelector("#profile-status");
 const signedOut = document.querySelector("#profile-signed-out");
@@ -9,6 +10,10 @@ const saveButton = document.querySelector("#profile-save");
 const signOutButton = document.querySelector("#profile-sign-out");
 const activityList = document.querySelector("#profile-activity");
 let backend;
+let myId = null;
+let myName = "";
+let myAvatarPath = null;
+let connectionKind = "following";
 
 function setStatus(message, mode = "info") {
   status.textContent = message;
@@ -76,6 +81,12 @@ function renderActivity(profile) {
   }));
 }
 
+function paintAvatar(fallbackUrl) {
+  const url = myAvatarPath ? avatarUrl(backend, myAvatarPath) : fallbackUrl || null;
+  fillAvatar(document.querySelector("#profile-avatar"), myName, url);
+  document.querySelector("#avatar-remove").hidden = !myAvatarPath;
+}
+
 function renderProfile(profile) {
   const name = profile.display_name || "TRGGA member";
   const bio = profile.bio || "";
@@ -88,20 +99,8 @@ function renderProfile(profile) {
   bioDisplay.textContent = bio;
   bioDisplay.hidden = !bio;
 
-  const avatar = document.querySelector("#profile-avatar");
-  avatar.replaceChildren();
-  if (profile.avatar_url) {
-    const image = document.createElement("img");
-    image.src = profile.avatar_url;
-    image.alt = "";
-    image.referrerPolicy = "no-referrer";
-    image.addEventListener("error", () => {
-      avatar.textContent = initials(name);
-    }, { once: true });
-    avatar.append(image);
-  } else {
-    avatar.textContent = initials(name);
-  }
+  myName = name;
+  paintAvatar(profile.avatar_url);
 
   document.querySelector("#stat-polls").textContent = Number(profile.stats.polls_created).toLocaleString();
   document.querySelector("#stat-votes").textContent = Number(profile.stats.votes_cast).toLocaleString();
@@ -123,7 +122,12 @@ async function loadProfile() {
   const data = profileResult.data;
   if (!data) throw new Error("Your profile could not be found. Try signing out and back in.");
   data.discoverable = discoveryResult.data;
+  const { data: sessionData } = await backend.auth.getSession();
+  myId = sessionData.session.user.id;
+  myAvatarPath = (await loadAvatarPaths(backend, [myId])).get(myId) || null;
   renderProfile(data);
+  loadCounts();
+  loadConnections();
 }
 
 async function initializeProfile() {
@@ -180,14 +184,116 @@ form.addEventListener("submit", async (event) => {
     const bioDisplay = document.querySelector("#profile-bio-display");
     bioDisplay.textContent = bio;
     bioDisplay.hidden = !bio;
-    const avatar = document.querySelector("#profile-avatar");
-    if (!avatar.querySelector("img")) avatar.textContent = initials(displayName);
+    myName = displayName;
+    if (!document.querySelector("#profile-avatar img")) paintAvatar(null);
     formStatus.textContent = "Profile saved.";
   } catch (error) {
     console.error("Could not update the TRGGA profile.", error);
     formStatus.textContent = `Couldn't save your profile: ${error.message}`;
   } finally {
     saveButton.disabled = false;
+  }
+});
+
+async function loadCounts() {
+  const { data } = await backend.rpc("get_connection_state", { p_member_id: myId });
+  if (!data) return;
+  document.querySelector("#stat-followers").textContent = Number(data.followers).toLocaleString();
+  document.querySelector("#stat-following").textContent = Number(data.following).toLocaleString();
+}
+
+async function loadConnections() {
+  const list = document.querySelector("#connection-list");
+  const { data, error } = await backend.rpc("get_my_connections", { p_kind: connectionKind });
+  if (error) {
+    console.error("Could not load connections.", error);
+    list.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Connections couldn't load right now." }));
+    return;
+  }
+  if (!data.length) {
+    list.replaceChildren(Object.assign(document.createElement("p"), {
+      className: "profile-empty",
+      textContent: connectionKind === "following"
+        ? "You're not following anyone yet. Visit a member's profile and tap Follow."
+        : "No followers yet. Share your polls and turn on discovery to be found."
+    }));
+    return;
+  }
+  list.replaceChildren(...data.map((member) => {
+    const card = document.createElement("a");
+    card.className = "member-card";
+    card.href = `member.html?id=${encodeURIComponent(member.id)}`;
+    const avatar = document.createElement("span");
+    avatar.className = "member-avatar";
+    fillAvatar(avatar, member.display_name, avatarUrl(backend, member.avatar_path));
+    const identity = document.createElement("span");
+    identity.className = "member-identity";
+    const name = document.createElement("strong");
+    name.textContent = member.display_name;
+    const detail = document.createElement("span");
+    detail.className = "member-bio";
+    detail.textContent = member.mutual ? "CONNECTED BOTH WAYS" : member.bio || "In the room.";
+    identity.append(name, detail);
+    card.append(avatar, identity);
+    return card;
+  }));
+}
+
+document.querySelectorAll(".connection-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    connectionKind = tab.dataset.kind;
+    document.querySelectorAll(".connection-tab").forEach((item) => {
+      item.classList.toggle("active", item === tab);
+      item.setAttribute("aria-selected", String(item === tab));
+    });
+    if (backend && myId) loadConnections();
+  });
+});
+
+const avatarStatus = document.querySelector("#avatar-status");
+
+async function removeAvatarFile(path) {
+  if (path) await backend.storage.from("avatars").remove([path]);
+}
+
+document.querySelector("#avatar-input").addEventListener("change", async (event) => {
+  const input = event.target;
+  const file = input.files[0];
+  input.value = "";
+  if (!file || !backend || !myId) return;
+  avatarStatus.textContent = "Uploading your photo...";
+  let uploadedPath = null;
+  try {
+    const blob = await resizeAvatar(file);
+    uploadedPath = `${myId}/${crypto.randomUUID()}.webp`;
+    const { error: uploadError } = await backend.storage.from("avatars").upload(uploadedPath, blob, { contentType: "image/webp", upsert: false });
+    if (uploadError) throw uploadError;
+    const { error } = await backend.rpc("set_my_avatar", { p_path: uploadedPath });
+    if (error) throw error;
+    const previous = myAvatarPath;
+    myAvatarPath = uploadedPath;
+    paintAvatar(null);
+    avatarStatus.textContent = "Photo updated.";
+    removeAvatarFile(previous).catch(() => {});
+  } catch (error) {
+    console.error("Could not update the profile photo.", error);
+    avatarStatus.textContent = `Couldn't update your photo: ${error.message}`;
+    if (uploadedPath) removeAvatarFile(uploadedPath).catch(() => {});
+  }
+});
+
+document.querySelector("#avatar-remove").addEventListener("click", async () => {
+  if (!myAvatarPath) return;
+  try {
+    const { error } = await backend.rpc("set_my_avatar", { p_path: null });
+    if (error) throw error;
+    const previous = myAvatarPath;
+    myAvatarPath = null;
+    paintAvatar(null);
+    avatarStatus.textContent = "Photo removed.";
+    removeAvatarFile(previous).catch(() => {});
+  } catch (error) {
+    avatarStatus.textContent = `Couldn't remove your photo: ${error.message}`;
   }
 });
 

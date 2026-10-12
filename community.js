@@ -1,4 +1,5 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
+import { avatarUrl, loadAvatarPaths } from "./avatar.js";
 
 const memberGrid = document.querySelector("#member-grid");
 const searchInput = document.querySelector("#member-search");
@@ -26,9 +27,9 @@ function renderMembers(profiles) {
     card.href = `member.html?id=${encodeURIComponent(profile.id)}`;
     const avatar = document.createElement("span");
     avatar.className = "member-avatar";
-    if (profile.avatar_url) {
+    if (profile.avatar_path || profile.avatar_url) {
       const image = document.createElement("img");
-      image.src = profile.avatar_url;
+      image.src = profile.avatar_path ? avatarUrl(backend, profile.avatar_path) : profile.avatar_url;
       image.alt = "";
       image.referrerPolicy = "no-referrer";
       image.addEventListener("error", () => { avatar.textContent = profileInitials(profile.display_name); }, { once: true });
@@ -67,7 +68,11 @@ async function loadMembers(query = "") {
       p_search: query.trim() || null
     });
     if (error) throw error;
-    if (currentRequest === requestNumber) renderMembers(data || []);
+    if (currentRequest === requestNumber) {
+      const paths = await loadAvatarPaths(backend, (data || []).map((profile) => profile.id));
+      (data || []).forEach((profile) => { profile.avatar_path = paths.get(profile.id) || null; });
+      if (currentRequest === requestNumber) renderMembers(data || []);
+    }
   } catch (error) {
     if (currentRequest !== requestNumber) return;
     console.error("Could not load the member directory.", error);
