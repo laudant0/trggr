@@ -950,3 +950,20 @@ body {
 }
 .member-public-stats .profile-stat { display: grid; gap: 8px; align-content: center; min-height: 0; padding: 20px 24px; }
 .member-public-stats .profile-stat strong { margin: 0; }
+
+/* Admin, timers, legal */
+.poll-label-wrap{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}
+.official-badge,.timer-badge{font:600 10px/1 "DM Mono",monospace;letter-spacing:.08em;padding:4px 7px;border-radius:999px}
+.official-badge{background:#c8ff3d;color:#11120f}
+.timer-badge{border:1px solid currentColor;opacity:.85}
+.timer-badge.closed{opacity:.6}
+.sort-select{min-height:44px;border-radius:999px;padding:0 14px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,.2);font:inherit}
+.admin-item{display:grid;gap:8px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;margin-bottom:10px}
+.admin-item span{font:500 12px "DM Mono",monospace;opacity:.7}
+.admin-actions{display:flex;flex-wrap:wrap;gap:8px}
+.admin-link{font-weight:700}
+.button-danger{background:#ff4d4d;color:#fff;border:0}
+.danger-zone{border-color:rgba(255,77,77,.4)}
+.legal h2{margin-top:22px;font-size:1.05rem}
+.legal p{max-width:70ch;line-height:1.6}
+.official-option{margin-top:6px}

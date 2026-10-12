@@ -61,6 +61,15 @@
         <label for="category">Put it in a lane
           <select id="category" name="category" required></select>
         </label>
+        <label for="duration">How long should voting stay open?
+          <select id="duration" name="duration">
+            <option value="">No time limit</option>
+            <option value="1">1 hour</option>
+            <option value="24">24 hours</option>
+            <option value="72">3 days</option>
+            <option value="168">7 days</option>
+          </select>
+        </label>
         <p class="create-disclaimer" id="create-mode-note">Your poll will be shared with the TRGGA community after you sign in.</p>
         <p class="form-note" id="form-note" role="status" aria-live="polite"></p>
         <button class="button button-lime create-submit" type="submit">Put it to the room <span aria-hidden="true">↗</span></button>
