@@ -79,7 +79,7 @@
         <div class="filter-list" id="filters" role="group" aria-label="Filter polls by category">
           <button class="filter-chip active" data-category="All">For you <span class="filter-count" id="poll-count">00</span></button>
         </div>
-        <label class="search-box"><span aria-hidden="true">⌕</span><input id="poll-search" type="search" placeholder="Find a conversation" aria-label="Search polls"></label>
+        <select class="sort-select" id="poll-sort" aria-label="Sort polls"><option value="newest">Newest</option><option value="trending">Trending</option><option value="closing">Closing soon</option></select><label class="search-box"><span aria-hidden="true">⌕</span><input id="poll-search" type="search" placeholder="Find a conversation" aria-label="Search polls"></label>
       </div>
       <div class="poll-grid" id="poll-grid" aria-live="polite"></div>
       <div class="empty-state" id="empty-state" hidden><span>Nothing on that frequency.</span><p>Try another search, or start a conversation of your own.</p><a class="button button-dark button-small" href="create.html">Create a poll <span aria-hidden="true">↗</span></a></div>

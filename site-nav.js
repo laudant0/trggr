@@ -18,6 +18,26 @@ document.querySelectorAll(".mobile-menu nav").forEach((nav) => {
   menuAuthItems.push(item);
 });
 
+let adminChecked = false;
+async function addAdminLink() {
+  if (adminChecked) return;
+  adminChecked = true;
+  try {
+    const backend = await getBackend();
+    const { data } = await backend.rpc("is_admin");
+    if (data !== true) return;
+    document.querySelectorAll(".main-nav, .mobile-menu nav").forEach((nav) => {
+      const link = document.createElement("a");
+      link.className = "admin-link";
+      link.href = "admin.html";
+      link.textContent = "Admin";
+      nav.insertBefore(link, nav.querySelector(".mobile-profile-link, .menu-auth"));
+    });
+  } catch (error) {
+    console.error("Admin check failed.", error);
+  }
+}
+
 async function signOut(event) {
   event.preventDefault();
   try {
@@ -38,6 +58,7 @@ function showSignedIn(session) {
     item.onclick = signedIn ? signOut : null;
   });
   document.body.classList.toggle("is-signed-in", signedIn);
+  if (signedIn) addAdminLink(); else document.querySelectorAll(".admin-link").forEach((a) => a.remove());
   document.body.classList.remove("auth-checking");
   loginLinks.forEach((link) => {
     link.hidden = signedIn;

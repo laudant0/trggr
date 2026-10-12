@@ -335,4 +335,19 @@ signOutButton.addEventListener("click", async () => {
   }
 });
 
+document.querySelector("#delete-account")?.addEventListener("click", async (event) => {
+  if (!window.confirm("Delete your TRGGA account permanently? This cannot be undone.")) return;
+  if (window.prompt("Type DELETE to confirm.") !== "DELETE") return;
+  event.currentTarget.disabled = true;
+  try {
+    const { error } = await backend.rpc("delete_my_account");
+    if (error) throw error;
+    await backend.auth.signOut().catch(() => {});
+    window.location.assign("index.html");
+  } catch (error) {
+    setStatus(`Could not delete account: ${error.message}`, "error");
+    event.currentTarget.disabled = false;
+  }
+});
+
 initializeProfile();

@@ -32,6 +32,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   let category = new URLSearchParams(window.location.search).get("category") || "All";
   const sharedPollId = new URLSearchParams(window.location.search).get("poll");
   let query = "";
+  let sortMode = "newest";
   let backend;
   const selectedFilter = document.querySelector(`[data-category="${CSS.escape(category)}"]`);
   if (selectedFilter) {
@@ -98,7 +99,9 @@ import { getBackend, isBackendConfigured } from "./backend.js";
         ? backend.storage.from("poll-option-images").getPublicUrl(option.image_path).data.publicUrl
         : null),
       votes: options.map((option) => Number(option.votes)),
-      votedPosition: row.my_option_position === null ? null : Number(row.my_option_position)
+      votedPosition: row.my_option_position === null ? null : Number(row.my_option_position),
+      closesAt: row.closes_at ? new Date(row.closes_at).getTime() : null,
+      official: Boolean(row.official)
     };
   }
 
@@ -167,14 +170,28 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     }
   }
 
+  function timeLeft(closesAt) {
+    const ms = closesAt - Date.now();
+    if (ms <= 0) return null;
+    const minutes = Math.ceil(ms / 60000);
+    if (minutes < 60) return `${minutes}M LEFT`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 48) return `${hours}H LEFT`;
+    return `${Math.floor(hours / 24)}D LEFT`;
+  }
+
   function renderPoll(poll) {
     const card = el("article", "poll-card");
     card.id = `poll-${poll.id}`;
     const top = el("div", "poll-card-top");
-    top.append(
-      el("span", "poll-label", poll.tag || `${poll.category.toUpperCase()} CHECK`),
-      el("span", "category-label", poll.category.toUpperCase())
-    );
+    const closed = Boolean(poll.closesAt) && poll.closesAt <= Date.now();
+    const remaining = poll.closesAt ? timeLeft(poll.closesAt) : null;
+    const labelWrap = el("span", "poll-label-wrap");
+    labelWrap.append(el("span", "poll-label", poll.tag || `${poll.category.toUpperCase()} CHECK`));
+    if (poll.official) labelWrap.append(el("span", "official-badge", "OFFICIAL"));
+    if (closed) labelWrap.append(el("span", "timer-badge closed", "CLOSED"));
+    else if (remaining) labelWrap.append(el("span", "timer-badge", remaining));
+    top.append(labelWrap, el("span", "category-label", poll.category.toUpperCase()));
 
     const title = el("h3", "poll-question", poll.question);
     const meta = el("p", "poll-meta");
@@ -193,11 +210,11 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       const percent = total ? Math.round((poll.votes[index] / total) * 100) : 0;
       const selected = votedPosition === index;
       const hasVoted = votedPosition !== undefined && votedPosition !== null;
-      const button = el("button", `poll-option${selected ? " selected" : ""}${hasVoted ? " show-results" : ""}`);
+      const button = el("button", `poll-option${selected ? " selected" : ""}${hasVoted || closed ? " show-results" : ""}`);
       button.type = "button";
       button.dataset.poll = poll.id;
       button.dataset.option = String(index);
-      button.disabled = hasVoted;
+      button.disabled = hasVoted || closed;
       button.setAttribute("aria-pressed", String(selected));
       const optionTop = el("span", "option-top");
       optionTop.append(el("span", "option-name", choice), el("span", "option-percent", `${percent}%`));
@@ -215,7 +232,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       }
       const track = el("span", "option-track");
       const fill = el("span", "option-fill");
-      fill.style.width = hasVoted ? `${percent}%` : "0%";
+      fill.style.width = hasVoted || closed ? `${percent}%` : "0%";
       track.append(fill);
       button.append(content, track);
       options.append(button);
@@ -224,7 +241,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     const footer = el("div", "poll-card-footer");
     footer.append(
       el("span", "vote-count", `${total.toLocaleString()} ${backend ? "VOTES" : "LOCAL VOTES"}`),
-      el("span", "vote-hint", votedPosition !== undefined && votedPosition !== null ? "YOUR VOTE IS IN ✓" : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
+      el("span", "vote-hint", closed ? "VOTING CLOSED" : votedPosition !== undefined && votedPosition !== null ? "YOUR VOTE IS IN ✓" : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
     );
     if (backend) {
       const pinned = pins.has(poll.id);
@@ -311,6 +328,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       const matchesQuery = `${poll.question} ${poll.category} ${poll.creator || ""}`.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
+    const now = Date.now();
+    if (sortMode === "trending") {
+      visible.sort((a, b) => b.votes.reduce((s, c) => s + c, 0) - a.votes.reduce((s, c) => s + c, 0));
+    } else if (sortMode === "closing") {
+      const open = visible.filter((poll) => poll.closesAt && poll.closesAt > now).sort((a, b) => a.closesAt - b.closesAt);
+      visible.length = 0;
+      visible.push(...open);
+    }
     grid.replaceChildren(...visible.map(renderPoll));
     document.querySelector("#empty-state").hidden = visible.length > 0;
     document.querySelector("#poll-count").textContent = String(visible.length).padStart(2, "0");
@@ -321,6 +346,11 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     if (!button) return;
     category = button.dataset.category;
     document.querySelectorAll(".filter-chip").forEach((chip) => chip.classList.toggle("active", chip === button));
+    render();
+  });
+
+  document.querySelector("#poll-sort")?.addEventListener("change", (event) => {
+    sortMode = event.target.value;
     render();
   });
 

@@ -358,11 +358,14 @@ form.addEventListener("submit", async (event) => {
         optionImages.push(path);
       }
       note.textContent = "Publishing your poll…";
+      const hours = Number(document.querySelector("#duration")?.value || 0);
+      const closesAt = hours ? new Date(Date.now() + hours * 3600000).toISOString() : null;
       const { error } = await backend.rpc("create_poll_with_options", {
         p_question: question,
         p_category: category,
         p_options: options,
-        p_option_images: optionImages.some(Boolean) ? optionImages : null
+        p_option_images: optionImages.some(Boolean) ? optionImages : null,
+        p_closes_at: closesAt
       });
       if (error) throw error;
       uploadedImagePaths.length = 0;
