@@ -84,6 +84,44 @@ async function loadMembers(query = "") {
   }
 }
 
+async function loadTrending() {
+  const grid = document.querySelector("#trending-grid");
+  if (!grid) return;
+  try {
+    const { data, error } = await backend.rpc("get_public_polls");
+    if (error) throw error;
+    const ranked = (data || []).map((row) => ({
+      row,
+      total: (Array.isArray(row.options) ? row.options : []).reduce((sum, option) => sum + Number(option.votes || 0), 0)
+    })).sort((a, b) => b.total - a.total).slice(0, 4);
+    if (!ranked.length) {
+      grid.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "No polls yet. Be the first to start one." }));
+      return;
+    }
+    grid.replaceChildren(...ranked.map(({ row, total }, index) => {
+      const card = document.createElement("a");
+      card.className = "member-card";
+      card.href = "index.html#polls";
+      const rank = document.createElement("span");
+      rank.className = "member-avatar";
+      rank.textContent = `#${index + 1}`;
+      const identity = document.createElement("span");
+      identity.className = "member-identity";
+      const title = document.createElement("strong");
+      title.textContent = row.question;
+      const meta = document.createElement("span");
+      meta.className = "member-stats";
+      meta.textContent = `${total.toLocaleString()} VOTES · ${String(row.category || "").toUpperCase()}`;
+      identity.append(title, meta);
+      card.append(rank, identity);
+      return card;
+    }));
+  } catch (error) {
+    console.error("Could not load trending polls.", error);
+    grid.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Trending polls are unavailable right now." }));
+  }
+}
+
 async function initializeDirectory() {
   if (!isBackendConfigured()) {
     memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
@@ -95,6 +133,7 @@ async function initializeDirectory() {
   try {
     backend = await getBackend();
     await loadMembers();
+    loadTrending();
   } catch (error) {
     console.error("Could not connect to public member discovery.", error);
     memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
