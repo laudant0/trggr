@@ -98,11 +98,15 @@ function showSignedIn(session) {
         link.hidden = !signedIn;
         return;
       }
-      const label = document.createTextNode(signedIn ? "My profile " : "Sign in ");
-      const arrow = document.createElement("span");
-      arrow.setAttribute("aria-hidden", "true");
-      arrow.textContent = "↗";
-      link.replaceChildren(label, arrow);
+      link.classList.toggle("icon-only", signedIn);
+      if (signedIn) {
+        link.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+      } else {
+        const arrow = document.createElement("span");
+        arrow.setAttribute("aria-hidden", "true");
+        arrow.textContent = "↗";
+        link.replaceChildren(document.createTextNode("Sign in "), arrow);
+      }
       link.href = signedIn ? "profile.html" : "login.html";
       link.setAttribute("aria-label", signedIn ? "Open your profile" : "Sign in");
     }

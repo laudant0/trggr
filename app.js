@@ -106,36 +106,89 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     };
   }
 
-  function updateDailyPulse() {
-    const dailyPoll = polls.find((poll) => poll.tag === "THE DAILY PULSE");
-    const strip = document.querySelector("#pulse-strip");
+  let featuredSignature = "";
+  let featuredTimer = null;
+
+  function scrollToPoll(pollId) {
+    const card = document.querySelector(`#poll-${pollId}`);
+    (card || document.querySelector("#polls"))?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function buildFeaturedSlide(poll) {
+    const total = poll.votes.reduce((sum, count) => sum + count, 0);
+    const slide = el("article", "featured-slide");
+    const head = el("div", "featured-head");
+    head.append(el("span", "featured-tag", poll.tag || "OFFICIAL POLL"), el("span", "featured-official", "OFFICIAL"));
+    const bars = el("div", "featured-bars");
+    poll.choices.forEach((choice, index) => {
+      const percent = total ? Math.round((poll.votes[index] / total) * 100) : 0;
+      const row = el("div", "featured-bar");
+      const fill = el("span", "featured-fill");
+      fill.style.width = `${percent}%`;
+      row.append(fill, el("b", "", choice), el("em", "", total ? `${percent}%` : "—"));
+      bars.append(row);
+    });
+    const foot = el("div", "featured-foot");
+    const vote = el("button", "button button-lime button-small", "Vote now ↗");
+    vote.type = "button";
+    vote.addEventListener("click", () => scrollToPoll(poll.id));
+    foot.append(el("span", "", `${total.toLocaleString()} ${total === 1 ? "vote" : "votes"}`), vote);
+    slide.append(head, el("h2", "featured-question", poll.question), bars, foot);
+    return slide;
+  }
+
+  function updateFeatured() {
+    const box = document.querySelector("#featured");
+    const track = document.querySelector("#featured-track");
+    const dots = document.querySelector("#featured-dots");
     const stats = document.querySelector("#live-stats");
     if (stats) {
       const votes = polls.reduce((sum, poll) => sum + poll.votes.reduce((a, b) => a + b, 0), 0);
       stats.textContent = polls.length ? `${polls.length} polls live · ${votes.toLocaleString()} votes cast` : "";
     }
-    if (strip) strip.hidden = !dailyPoll;
-    if (!dailyPoll || !strip) return;
-    const total = dailyPoll.votes.reduce((sum, count) => sum + count, 0);
-    const firstPercent = total ? Math.round((dailyPoll.votes[0] / total) * 100) : 0;
-    const question = document.querySelector("#daily-pulse-question");
-    const label = document.querySelector("#daily-pulse-label");
-    const result = document.querySelector("#daily-pulse-result");
-    const majority = document.querySelector("#daily-pulse-majority");
-    const fill = document.querySelector("#daily-pulse-fill");
-    const firstOption = document.querySelector("#daily-pulse-option-one");
-    const secondOption = document.querySelector("#daily-pulse-option-two");
-    const words = dailyPoll.question.trim().split(/\s+/);
-    const finalWord = el("span", "serif-italic", words.pop() || "");
-    question.replaceChildren(document.createTextNode(`${words.join(" ")} `), finalWord);
-    label.textContent = total ? "THE ROOM SAYS" : "WAITING ON FIRST VOTE";
-    result.textContent = total ? `${firstPercent}%` : "—";
-    majority.textContent = total ? dailyPoll.choices[firstPercent >= 50 ? 0 : 1] : "NO VOTES";
-    fill.style.width = `${firstPercent}%`;
-    firstOption.textContent = dailyPoll.choices[0];
-    secondOption.textContent = dailyPoll.choices[1];
+    if (!box || !track || !dots) return;
+    const now = Date.now();
+    const featured = polls
+      .filter((poll) => poll.official && !(poll.closesAt && poll.closesAt <= now))
+      .slice(0, 6);
+    box.hidden = !featured.length;
+    const signature = featured.map((poll) => `${poll.id}:${poll.votes.join(",")}`).join("|");
+    if (signature === featuredSignature) return;
+    featuredSignature = signature;
+    const position = track.scrollLeft;
+    track.replaceChildren(...featured.map(buildFeaturedSlide));
+    track.scrollLeft = position;
+    dots.replaceChildren(...featured.map((poll, index) => {
+      const dot = el("button", "featured-dot");
+      dot.type = "button";
+      dot.setAttribute("aria-label", `Show featured poll ${index + 1}`);
+      dot.addEventListener("click", () => track.scrollTo({ left: index * track.clientWidth, behavior: "smooth" }));
+      return dot;
+    }));
+    dots.hidden = featured.length < 2;
+    syncFeaturedDots();
+    if (!track.dataset.ready) {
+      track.dataset.ready = "1";
+      track.addEventListener("scroll", syncFeaturedDots, { passive: true });
+      ["pointerenter", "focusin", "touchstart"].forEach((name) => box.addEventListener(name, () => { box.dataset.paused = "1"; }, { passive: true }));
+      ["pointerleave", "focusout", "touchend"].forEach((name) => box.addEventListener(name, () => { delete box.dataset.paused; }, { passive: true }));
+    }
+    if (!featuredTimer && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      featuredTimer = window.setInterval(() => {
+        const count = track.children.length;
+        if (count < 2 || box.dataset.paused || document.hidden) return;
+        const next = (Math.round(track.scrollLeft / track.clientWidth) + 1) % count;
+        track.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
+      }, 5500);
+    }
   }
 
+  function syncFeaturedDots() {
+    const track = document.querySelector("#featured-track");
+    const dots = document.querySelectorAll("#featured-dots .featured-dot");
+    const active = track.clientWidth ? Math.round(track.scrollLeft / track.clientWidth) : 0;
+    dots.forEach((dot, index) => dot.classList.toggle("active", index === active));
+  }
   async function refreshPolls() {
     if (!backend || loading) return;
     loading = true;
@@ -157,7 +210,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
         if (poll.votedPosition !== null) voted[poll.id] = poll.votedPosition;
       });
       await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
-      updateDailyPulse();
+      updateFeatured();
       const typing = [...grid.querySelectorAll(".take-input")].some((input) => input.value.trim() || input === document.activeElement);
       if (!typing) render();
       if (sharedPollId) {
@@ -386,7 +439,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   }
 
   function render() {
-    updateDailyPulse();
+    updateFeatured();
     const visible = polls.filter((poll) => {
       const matchesCategory = category === "All" || poll.category.toLowerCase() === category.toLowerCase();
       const matchesQuery = `${poll.question} ${poll.category} ${poll.creator || ""}`.toLowerCase().includes(query);

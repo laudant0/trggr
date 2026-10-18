@@ -1086,3 +1086,34 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
   .site-header .main-nav{justify-content:space-between;gap:4px;padding:0}
   .site-header .main-nav a{flex:1 1 auto;text-align:center;padding:6px 8px}
 }
+
+/* Featured official polls carousel */
+.featured{margin-top:18px;position:relative}
+.featured[hidden]{display:none}
+.featured-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;scrollbar-width:none;border-radius:24px}
+.featured-track::-webkit-scrollbar{display:none}
+.featured-slide{flex:0 0 100%;scroll-snap-align:start;box-sizing:border-box;padding:28px clamp(20px,4vw,44px) 34px;background:linear-gradient(135deg,#d9ff7a,#bff04f);color:#111;display:flex;flex-direction:column;gap:14px}
+.featured-head{display:flex;gap:10px;align-items:center;font-size:11px;letter-spacing:.12em;font-weight:700}
+.featured-official{padding:3px 10px;border-radius:99px;background:#111;color:var(--lime,#c8f750)}
+.featured-question{margin:0;font-size:clamp(26px,4.6vw,52px);line-height:1.05;max-width:22ch}
+.featured-bars{display:grid;gap:8px;max-width:620px}
+.featured-bar{position:relative;display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-radius:12px;background:rgba(0,0,0,.1);overflow:hidden;font-size:15px}
+.featured-bar b,.featured-bar em{position:relative;font-style:normal}
+.featured-fill{position:absolute;inset:0 auto 0 0;background:rgba(0,0,0,.18)}
+.featured-foot{display:flex;align-items:center;gap:16px;font-size:13px;font-weight:600}
+.featured-foot .button{background:#111;color:var(--lime,#c8f750)}
+.featured-dots{display:flex;justify-content:center;gap:8px;margin-top:10px}
+.featured-dots[hidden]{display:none}
+.featured-dot{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.3);cursor:pointer;transition:width .2s}
+.featured-dot.active{width:24px;background:var(--lime,#c8f750)}
+
+/* Profile icon + sign out */
+.button-profile.icon-only{width:40px;height:40px;min-height:0;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.profile-signout-row{display:flex;justify-content:center;padding:28px 0 8px}
+.profile-signout{min-height:40px;padding:0 24px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--paper);font-size:13px;cursor:pointer}
+.profile-signout:hover{border-color:var(--lime)}
+.profile-signout:disabled{opacity:.6;cursor:wait}
+@media(max-width:760px){
+  .header-actions .button-profile.icon-only{width:36px;height:36px;padding:0}
+  .featured-slide{padding:22px 18px 26px}
+}
