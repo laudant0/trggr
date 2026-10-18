@@ -18,14 +18,10 @@
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
     <nav class="main-nav" aria-label="Main navigation">
       <a class="active" href="index.html">Lobby</a>
-      <a href="topics.html">Explore</a>
-      <a href="explore.html">Topics</a>
+      <a href="explore.html">Explore</a>
+      <a href="topics.html">Topics</a>
       <a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a>
     </nav>
-    <details class="mobile-menu">
-      <summary>Menu <span aria-hidden="true">☰</span></summary>
-      <nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav>
-    </details>
     <div class="header-actions">
       <a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a>
       <a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a>
@@ -38,44 +34,26 @@
       <span class="backend-message"></span>
       <a href="login.html">Sign in ↗</a>
     </div>
-    <section class="hero shell">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> THE CULTURE, IN REAL TIME</div>
-        <h1>The group chat<br>has <span class="highlight">receipts.</span></h1>
-        <p class="hero-description">The takes are loud. The numbers don't lie. Vote on what's moving culture and see where everyone actually stands.</p>
-        <div class="hero-actions">
-          <a class="button button-lime" href="#polls">Get in the mix <span aria-hidden="true">↘</span></a>
-          <a class="text-link" href="topics.html">See what's trending <span aria-hidden="true">→</span></a>
+    <section class="lobby-top shell" aria-label="Live now">
+      <div class="lobby-heading">
+        <div>
+          <div class="eyebrow"><span class="live-dot"></span> LIVE NOW</div>
+          <h1>Pick a side. <span class="highlight">See the room.</span></h1>
         </div>
-        <div class="hero-proof">
-          <div class="avatar-stack" aria-hidden="true"><span>J</span><span>M</span><span>A</span><span>+</span></div>
-          <p><strong>Culture moves when you do.</strong><br><span>One vote. One real signal.</span></p>
-        </div>
+        <p class="live-stats" id="live-stats" aria-live="polite"></p>
       </div>
-
-      <aside class="pulse-card" aria-label="Today's culture pulse">
-        <div class="pulse-topline"><span class="eyebrow">THE DAILY PULSE</span><span class="pulse-date">VOL. 01 / TODAY</span></div>
-        <div class="pulse-question" id="daily-pulse-question">Is the internet<br>over celebrity<br><span class="serif-italic">culture?</span></div>
-        <div class="pulse-meter">
-          <div class="meter-label"><span id="daily-pulse-label">THE ROOM SAYS</span><strong><span id="daily-pulse-result">68%</span> <small id="daily-pulse-majority">YES</small></strong></div>
-          <div class="meter-track"><span id="daily-pulse-fill" style="width:68%"></span></div>
-          <div class="meter-caption"><span id="daily-pulse-option-one">Yes, let it go</span><span id="daily-pulse-option-two">No, give us more</span></div>
-        </div>
-        <div class="pulse-bottom"><span><i class="live-dot"></i> A CULTURE CHECK</span><a href="#polls">CAST YOUR VOTE <span aria-hidden="true">↗</span></a></div>
-        <span class="pulse-stamp" aria-hidden="true">T</span>
-      </aside>
-      <div class="hero-index" aria-hidden="true">01 — 04&nbsp;&nbsp; / &nbsp; YOUR OPINION IS THE DATA</div>
+      <a class="pulse-strip" id="pulse-strip" href="#polls" hidden>
+        <span class="pulse-strip-tag">THE DAILY PULSE</span>
+        <strong class="pulse-strip-question" id="daily-pulse-question"></strong>
+        <span class="pulse-strip-meter"><span class="pulse-strip-track"><span id="daily-pulse-fill"></span></span><span class="pulse-strip-caption"><span id="daily-pulse-option-one"></span><span id="daily-pulse-option-two"></span></span></span>
+        <span class="pulse-strip-result"><span id="daily-pulse-label"></span><strong><span id="daily-pulse-result"></span> <small id="daily-pulse-majority"></small></strong></span>
+      </a>
     </section>
-
     <div class="ticker" aria-label="Popular topics">
       <div class="ticker-track"><span>SPORTS <b>✳</b></span><span>INTERNET CULTURE <b>✳</b></span><span>MUSIC <b>✳</b></span><span>TECH <b>✳</b></span><span>EVERYTHING ELSE <b>✳</b></span><span>SPORTS <b>✳</b></span><span>INTERNET CULTURE <b>✳</b></span><span>MUSIC <b>✳</b></span><span>TECH <b>✳</b></span><span>EVERYTHING ELSE <b>✳</b></span></div>
     </div>
 
-    <section class="content-section shell" id="polls">
-      <div class="section-heading">
-        <div><div class="eyebrow section-kicker"><span class="live-dot"></span> OUT IN THE WILD</div><h2>The conversation<br>is <span class="highlight">happening.</span></h2></div>
-        <p class="section-aside">No hot takes from the sidelines.<br>Pick a side and move the needle.</p>
-      </div>
+    <section class="content-section lobby-polls shell" id="polls">
       <div class="feed-toolbar">
         <div class="filter-list" id="filters" role="group" aria-label="Filter polls by category">
           <button class="filter-chip active" data-category="All">For you <span class="filter-count" id="poll-count">00</span></button>
@@ -84,7 +62,7 @@
       </div>
       <div class="poll-grid" id="poll-grid" aria-live="polite"></div>
       <div class="empty-state" id="empty-state" hidden><span>Nothing on that frequency.</span><p>Try another search, or start a conversation of your own.</p><a class="button button-dark button-small" href="create.html">Create a poll <span aria-hidden="true">↗</span></a></div>
-      <div class="feed-footer"><span>THAT'S THE CURRENT FREQUENCY.</span><a href="topics.html">Explore the whole conversation <span aria-hidden="true">→</span></a></div>
+      <div class="feed-footer"><span>THAT'S THE CURRENT FREQUENCY.</span><a href="explore.html">Explore the whole conversation <span aria-hidden="true">→</span></a></div>
     </section>
 
     <section class="manifesto">
@@ -98,7 +76,7 @@
     </section>
 
     <section class="topics-section shell">
-      <div class="topics-intro"><div class="eyebrow">YOUR CORNER OF THE INTERNET</div><h2>Find your<br><span class="highlight">frequency.</span></h2><a class="text-link" href="explore.html">All the topics <span aria-hidden="true">→</span></a></div>
+      <div class="topics-intro"><div class="eyebrow">YOUR CORNER OF THE INTERNET</div><h2>Find your<br><span class="highlight">frequency.</span></h2><a class="text-link" href="topics.html">All the topics <span aria-hidden="true">→</span></a></div>
       <div class="topic-grid">
         <a class="topic-tile topic-culture" href="index.html?category=Culture#polls"><span class="topic-number">01 / CULTURE</span><span class="topic-art" aria-hidden="true">✳</span><strong>Culture<br>moves fast.</strong><span class="topic-link">Get into it ↗</span></a>
         <a class="topic-tile topic-sports" href="index.html?category=Sports#polls"><span class="topic-number">02 / SPORTS</span><span class="topic-art" aria-hidden="true">◉</span><strong>Everybody's<br>a coach.</strong><span class="topic-link">Prove it ↗</span></a>

@@ -94,7 +94,108 @@ async function loadTakesQueue() {
   });
 }
 
+function textEl(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  node.textContent = text;
+  return node;
+}
+
+function emptyNote(el, text) {
+  el.replaceChildren(textEl("p", "profile-empty", text));
+}
+
+function pollStatsCard(row) {
+  const card = document.createElement("article");
+  card.className = "admin-item";
+  const closed = row.closes_at && new Date(row.closes_at) <= new Date();
+  const flags = [row.official ? "OFFICIAL" : null, row.status.toUpperCase(), closed ? "CLOSED" : null].filter(Boolean).join(" · ");
+  card.append(textEl("strong", "", row.question));
+  card.append(textEl("span", "", `${flags} · ${row.total_votes} votes (${row.votes_24h} today) · ${row.take_count} takes · ${row.report_count} reports`));
+  const total = Number(row.total_votes);
+  const bars = document.createElement("div");
+  bars.className = "option-bars";
+  (row.options || []).forEach((option) => {
+    const pct = total ? Math.round((option.votes / total) * 100) : 0;
+    const line = document.createElement("div");
+    line.className = "option-bar";
+    const fill = document.createElement("span");
+    fill.style.width = `${pct}%`;
+    const track = document.createElement("i");
+    track.append(fill);
+    line.append(textEl("small", "", option.label), track, textEl("b", "", `${pct}% · ${option.votes}`));
+    bars.append(line);
+  });
+  card.append(bars);
+  const actions = document.createElement("div");
+  actions.className = "admin-actions";
+  if (!closed) actions.append(button("Close now", () => call("admin_close_poll", { p_poll_id: row.poll_id })));
+  actions.append(
+    row.status === "hidden"
+      ? button("Restore", () => call("admin_set_poll_status", { p_poll_id: row.poll_id, p_status: "published" }))
+      : button("Hide", () => call("admin_set_poll_status", { p_poll_id: row.poll_id, p_status: "hidden" })),
+    button("Delete", () => {
+      if (!window.confirm("Delete this poll and its votes permanently?")) return Promise.resolve();
+      return call("admin_delete_poll", { p_poll_id: row.poll_id });
+    })
+  );
+  card.append(actions);
+  return card;
+}
+
+async function loadDashboard() {
+  const { data: overview, error } = await backend.rpc("admin_get_overview");
+  if (error) throw error;
+  const stats = [
+    ["Members", overview.members, `+${overview.new_members_7d} this week`],
+    ["Live polls", overview.polls, `${overview.official_polls} official`],
+    ["Votes", overview.votes, `${overview.votes_24h} today · ${overview.votes_7d} this week`],
+    ["Takes", overview.takes, ""],
+    ["Open reports", Number(overview.open_member_reports) + Number(overview.reported_polls), `${overview.open_member_reports} member · ${overview.reported_polls} polls`]
+  ];
+  document.querySelector("#admin-stats").replaceChildren(...stats.map(([label, value, note]) => {
+    const card = document.createElement("div");
+    card.className = "stat-card";
+    card.append(textEl("small", "", label), textEl("strong", "", Number(value).toLocaleString()), textEl("span", "", note));
+    return card;
+  }));
+  const max = Math.max(1, ...overview.daily.map((d) => d.votes));
+  document.querySelector("#admin-chart").replaceChildren(...overview.daily.map((d) => {
+    const col = document.createElement("div");
+    col.className = "daily-col";
+    col.title = `${d.day}: ${d.votes} votes, ${d.members} new members`;
+    const bar = document.createElement("span");
+    bar.style.height = `${Math.max(3, (d.votes / max) * 100)}%`;
+    col.append(bar, textEl("small", "", d.day.slice(8)));
+    return col;
+  }));
+
+  const { data: official, error: officialError } = await backend.rpc("admin_get_poll_stats", { p_official_only: true });
+  if (officialError) throw officialError;
+  const officialEl = document.querySelector("#admin-official");
+  if (official.length) officialEl.replaceChildren(...official.map(pollStatsCard));
+  else emptyNote(officialEl, "No official polls yet. Publish one below.");
+
+  const { data: all, error: allError } = await backend.rpc("admin_get_poll_stats", { p_official_only: false });
+  if (allError) throw allError;
+  const pollsEl = document.querySelector("#admin-polls");
+  if (all.length) pollsEl.replaceChildren(...all.map(pollStatsCard));
+  else emptyNote(pollsEl, "No polls yet.");
+
+  const { data: members, error: membersError } = await backend.rpc("admin_get_new_members");
+  if (membersError) throw membersError;
+  const membersEl = document.querySelector("#admin-members");
+  if (members.length) {
+    membersEl.replaceChildren(...members.map((m) => {
+      const card = document.createElement("article");
+      card.className = "admin-item";
+      card.append(textEl("strong", "", m.display_name || "Member"), textEl("span", "", `Joined ${new Date(m.created_at).toLocaleDateString()} · ${m.votes} votes`));
+      return card;
+    }));
+  } else emptyNote(membersEl, "No members yet.");
+}
 async function loadQueue() {
+  await loadDashboard();
   await loadSupportReports();
   await loadTakesQueue();
   const { data, error } = await backend.rpc("admin_get_queue");
