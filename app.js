@@ -107,6 +107,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     };
   }
 
+  const PAGE_SIZE = 6;
+  let shownCount = PAGE_SIZE;
   let featuredTimer = null;
 
   function isFeatured(poll) {
@@ -430,26 +432,37 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     const featured = showFeatured ? visible.filter(isFeatured).slice(0, 6) : [];
     const featuredIds = new Set(featured.map((poll) => poll.id));
     renderFeatured(featured);
-    grid.replaceChildren(...visible.filter((poll) => !featuredIds.has(poll.id)).map(renderPoll));
+    const rest = visible.filter((poll) => !featuredIds.has(poll.id));
+    grid.replaceChildren(...rest.slice(0, shownCount).map(renderPoll));
+    const seeMore = document.querySelector("#see-more");
+    if (seeMore) seeMore.hidden = rest.length <= shownCount;
     document.querySelector("#empty-state").hidden = visible.length > 0;
     document.querySelector("#poll-count").textContent = String(visible.length).padStart(2, "0");
   }
+
+  document.querySelector("#see-more")?.addEventListener("click", () => {
+    shownCount += PAGE_SIZE;
+    render();
+  });
 
   document.querySelector("#filters").addEventListener("click", (event) => {
     const button = event.target.closest("[data-category]");
     if (!button) return;
     category = button.dataset.category;
+    shownCount = PAGE_SIZE;
     document.querySelectorAll(".filter-chip").forEach((chip) => chip.classList.toggle("active", chip === button));
     render();
   });
 
   document.querySelector("#poll-sort")?.addEventListener("change", (event) => {
     sortMode = event.target.value;
+    shownCount = PAGE_SIZE;
     render();
   });
 
   document.querySelector("#poll-search").addEventListener("input", (event) => {
     query = event.target.value.trim().toLowerCase();
+    shownCount = PAGE_SIZE;
     render();
   });
 
