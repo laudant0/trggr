@@ -108,7 +108,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 
   function updateDailyPulse() {
     const dailyPoll = polls.find((poll) => poll.tag === "THE DAILY PULSE");
-    if (!dailyPoll) return;
+    const strip = document.querySelector("#pulse-strip");
+    const stats = document.querySelector("#live-stats");
+    if (stats) {
+      const votes = polls.reduce((sum, poll) => sum + poll.votes.reduce((a, b) => a + b, 0), 0);
+      stats.textContent = polls.length ? `${polls.length} polls live · ${votes.toLocaleString()} votes cast` : "";
+    }
+    if (strip) strip.hidden = !dailyPoll;
+    if (!dailyPoll || !strip) return;
     const total = dailyPoll.votes.reduce((sum, count) => sum + count, 0);
     const firstPercent = total ? Math.round((dailyPoll.votes[0] / total) * 100) : 0;
     const question = document.querySelector("#daily-pulse-question");

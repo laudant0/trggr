@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Explore live polls and see where the TRGGA community stands.">
-    <title>TRGGA | Explore</title>
+    <meta name="description" content="Explore every TRGGA topic and find your place in the conversation.">
+    <title>TRGGA | Topics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -14,25 +14,23 @@
 <body>
 <header class="site-header">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
-    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">Lobby</a><a class="active" href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a></nav>
-    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav></details>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">Lobby</a><a href="explore.html">Explore</a><a class="active" href="topics.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a></nav>
     <div class="header-actions"><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
 </header>
+
 <main>
 <section class="hero-small shell supporting-hero">
-    <span class="eyebrow"><span class="live-dot"></span> THE CULTURE IS ALWAYS MOVING</span>
-    <h1>Explore what<br><span class="highlight">moves the room.</span></h1>
-    <p>See the conversations people are already weighing in on. Cast your vote, then share the result with your people.</p>
+    <span class="eyebrow"><span class="live-dot"></span> EVERY CORNER OF THE CONVERSATION</span>
+    <h1>Find your<br><span class="highlight">topics.</span></h1>
+    <p>Sports, style, science, society, and whatever else is on your mind. Pick a lane—or make a new one. The room has range.</p>
 </section>
 
-<section class="topic-list shell" id="topic-list" aria-live="polite">
-    <p class="profile-empty">Loading the latest questions…</p>
-</section>
+<section class="card-grid shell" id="category-grid" aria-live="polite"></section>
 </main>
-<footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>ALL THE LANES. ONE ROOM.</span><span><a href="profile.html">YOUR PROFILE ↗</a></span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
-<script src="poll-data.js"></script>
+<footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>EVERY TAKE HAS A PLACE.</span><span><a href="community.html#members">MEET THE ROOM ↗</a></span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
 <script src="auth-config.js"></script>
-<script type="module" src="topics.js"></script>
+<script src="poll-data.js"></script>
+<script type="module" src="explore.js"></script>
 <script type="module" src="site-nav.js"></script>
 </body>
 </html>

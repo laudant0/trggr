@@ -15,9 +15,8 @@
   <header class="site-header">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
     <nav class="main-nav" aria-label="Main navigation">
-      <a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a>
+      <a href="index.html">Lobby</a><a href="explore.html">Explore</a><a href="topics.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a>
     </nav>
-    <details class="mobile-menu"><summary>Menu <span aria-hidden="true">☰</span></summary><nav aria-label="Mobile navigation"><a href="index.html">Lobby</a><a href="topics.html">Explore</a><a href="explore.html">Topics</a><a href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a><a class="mobile-profile-link" href="profile.html">Your profile ↗</a></nav></details>
     <div class="header-actions"><a class="button button-profile" href="profile.html">Profile <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
   </header>
 
@@ -26,6 +25,10 @@
     <section class="profile-signed-out" id="admin-gate" hidden><h1>Not authorised</h1><p>This area is for TRGGA admins only.</p><a class="button button-lime" href="index.html">Back to the Lobby</a></section>
     <div class="profile-dashboard" id="admin-panel" hidden>
       <section class="profile-hero"><div><span class="eyebrow"><span class="live-dot"></span> ADMIN ONLY</span><h1>Control room</h1><p class="profile-member-since">Moderate reported polls and publish official ones.</p></div></section>
+      <section class="profile-panel"><div class="profile-panel-heading"><div><span class="eyebrow">AT A GLANCE</span><h2>Platform overview</h2></div></div><div class="stat-grid" id="admin-stats"></div><div class="daily-chart" id="admin-chart" aria-label="Votes per day, last 14 days"></div></section>
+      <section class="profile-panel"><div class="profile-panel-heading"><div><span class="eyebrow">TRGGA DESK</span><h2>Official polls: how they are doing</h2></div></div><div class="admin-queue" id="admin-official"></div></section>
+      <section class="profile-panel"><div class="profile-panel-heading"><div><span class="eyebrow">ALL POLLS</span><h2>Poll performance</h2></div></div><div class="admin-queue" id="admin-polls"></div></section>
+      <section class="profile-panel"><div class="profile-panel-heading"><div><span class="eyebrow">COMMUNITY</span><h2>Newest members</h2></div></div><div class="admin-queue" id="admin-members"></div></section>
       <section class="profile-panel"><div class="profile-panel-heading"><div><span class="eyebrow">OFFICIAL POLL</span><h2>Publish from the TRGGA desk</h2></div></div>
         <form class="profile-form" id="official-form">
           <label for="official-question">Question<input id="official-question" maxlength="110" required></label>

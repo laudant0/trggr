@@ -30,11 +30,13 @@ The Supabase migrations create profiles, polls, options, votes, and reports; ena
 12. Apply `supabase/migrations/20261011001000_blocks_takes_results.sql` for blocking, one-line takes (ranked by agrees), creator poll results and take moderation.
 13. Apply `supabase/migrations/20261011001100_report_limits.sql` to cap reports at 10 per member per day.
 14. Apply `supabase/migrations/20261011001200_footer_reports.sql` for the footer Report page (5 reports per member per day, admin review queue).
+$116. Apply `supabase/migrations/20261011001400_admin_dashboard.sql` for the admin overview, per-poll stats, close-now and newest-members tools.
 15. Apply `supabase/migrations/20261011001300_x_handle.sql` for the optional X and Instagram handles on profiles.
-16. Copy the project's **Project URL** and **publishable key** into `auth-config.js` as `supabaseUrl` and `supabasePublishableKey`. A legacy `anon` public key can also be used. Never put a Supabase `service_role` or provider secret key in browser code.
-17. Add your final HTTPS website URL to Supabase **Authentication → URL Configuration**, along with `http://localhost:8081/login.html` for local testing.
-18. In Supabase **Authentication → Sign In / Providers**, enable Google, Facebook, and X and add their OAuth client credentials. For Facebook sign-in, configure a Meta app and its Supabase callback URL; the `public_profile` and `email` permissions are required by Supabase's Facebook login flow.
-19. Test sign-in on each provider, verify the user lands on their editable profile, confirm profile changes persist after refresh, verify opted-in members can be discovered and individual votes remain private, create polls with two through four options and optional thumbnails, verify poll creation and voting from separate accounts/devices, confirm duplicate votes and reports are rejected, and confirm anonymous direct database writes are denied. Reports are stored privately in `public.poll_reports`; review and moderation still need an assigned person and operating process.
+16. Apply `supabase/migrations/20261011001400_admin_dashboard.sql` for the admin overview, per-poll stats, close-now and newest-members tools.
+17. Copy the project's **Project URL** and **publishable key** into `auth-config.js` as `supabaseUrl` and `supabasePublishableKey`. A legacy `anon` public key can also be used. Never put a Supabase `service_role` or provider secret key in browser code.
+18. Add your final HTTPS website URL to Supabase **Authentication → URL Configuration**, along with `http://localhost:8081/login.html` for local testing.
+19. In Supabase **Authentication → Sign In / Providers**, enable Google, Facebook, and X and add their OAuth client credentials. For Facebook sign-in, configure a Meta app and its Supabase callback URL; the `public_profile` and `email` permissions are required by Supabase's Facebook login flow.
+20. Test sign-in on each provider, verify the user lands on their editable profile, confirm profile changes persist after refresh, verify opted-in members can be discovered and individual votes remain private, create polls with two through four options and optional thumbnails, verify poll creation and voting from separate accounts/devices, confirm duplicate votes and reports are rejected, and confirm anonymous direct database writes are denied. Reports are stored privately in `public.poll_reports`; review and moderation still need an assigned person and operating process.
 
 The Google button uses Google sign-in (commonly a Gmail account); Facebook authenticates Facebook accounts, **not Instagram**; X uses X OAuth. Instagram profile linking or Threads integration is a separate feature, with separate Meta eligibility, review, and permissions. Neither is implemented by these sign-in buttons.
 
@@ -44,7 +46,7 @@ The initial migration publishes eight sample questions into the shared database 
 
 The seeded topic list spans arts, automotive, books, business, creators, culture, education, entertainment, environment, fashion, finance, food, gaming, health, lifestyle, music, news, politics, relationships, science, sports, technology, travel, world, and Other. The Topics page reads categories from the database, while Explore shows the shared poll feed. To expand the list, add a row to `public.poll_categories` in the Supabase SQL Editor; the site will include it automatically.
 
-On the website, the Explore and Topics labels are intentionally distinct from their legacy HTML filenames: `topics.html` is the live poll feed, and `explore.html` is the topic directory.
+On the website, the Explore and Topics labels are intentionally distinct from their legacy HTML filenames: `explore.html` is the live poll feed, and `topics.html` is the topic directory.
 
 After voting, members can share the poll results to X and WhatsApp. The Instagram button uses the device's native share sheet when available; otherwise it copies the share text so it can be pasted into Instagram. Individual vote identities are never included in public profiles or public poll results.
 
