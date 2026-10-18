@@ -1,6 +1,7 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { avatarUrl, fillAvatar, loadAvatarPaths } from "./avatar.js";
 import { instagramLink, xLink } from "./xhandle.js";
+import { setLinkedText } from "./linkify.js";
 
 async function setupConnection(profile) {
   const avatar = document.querySelector(".member-profile-hero .profile-avatar");
@@ -132,7 +133,7 @@ function render(profile) {
   addText(heading, "span", "eyebrow", "A MEMBER OF THE ROOM");
   addText(heading, "h1", "", profile.display_name);
   addText(heading, "p", "profile-member-since", `IN THE ROOM SINCE ${new Date(profile.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" }).toUpperCase()}`);
-  if (profile.bio) addText(heading, "p", "profile-bio-display", profile.bio);
+  if (profile.bio) setLinkedText(addText(heading, "p", "profile-bio-display", ""), profile.bio);
   identity.append(avatar, heading);
   hero.append(identity);
 

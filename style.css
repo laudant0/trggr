@@ -1111,3 +1111,6 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 .featured-slide{flex:0 0 100%;scroll-snap-align:start;box-sizing:border-box;min-width:0}
 .featured-slide .poll-card{margin:0;height:100%}
 .featured-track{border-radius:0;gap:0;padding-top:4px}
+
+.text-link{color:var(--lime,#c8f760);text-decoration:underline;text-underline-offset:2px;word-break:break-all}
+.text-link:hover{opacity:.8}

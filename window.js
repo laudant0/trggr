@@ -1,4 +1,5 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
+import { setLinkedText } from "./linkify.js";
 
 const status = document.querySelector("#window-status");
 const signedOut = document.querySelector("#window-signed-out");
@@ -68,6 +69,20 @@ function render(data) {
     }));
   }
 
+  const bold = document.querySelector("#win-bold");
+  const stands = data.recent.filter((row) => !row.with_room && row.my_percent !== null && row.my_percent !== undefined);
+  if (bold) {
+    if (!stands.length) {
+      bold.replaceChildren(node("p", "profile-empty", total ? "You've been with the room on your recent votes. Pick a side nobody else would." : "Vote against the grain and your boldest stand shows up here."));
+    } else {
+      const pick = stands.reduce((a, b) => (Number(b.my_percent) < Number(a.my_percent) ? b : a));
+      const link = node("a", "profile-activity-item");
+      link.href = `index.html?poll=${encodeURIComponent(pick.poll_id)}`;
+      link.append(node("strong", "", pick.question), node("span", "", `YOU PICKED ${pick.my_label} · ONLY ${pick.my_percent}% AGREED`.toUpperCase()));
+      bold.replaceChildren(link);
+    }
+  }
+
   const recent = document.querySelector("#win-recent");
   if (!data.recent.length) {
     recent.replaceChildren(node("p", "profile-empty", "No votes yet. Head to the Lobby and pick a side."));
@@ -124,7 +139,7 @@ async function loadNotes() {
     const item = node("article", `window-note${note.mine ? " mine" : ""}`);
     const head = node("div", "window-note-head");
     head.append(node("strong", "", note.mine ? "You" : note.author_name), node("time", "", new Date(note.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })));
-    const body = node("p", "window-note-body", note.body);
+    const body = setLinkedText(node("p", "window-note-body"), note.body);
     item.append(head, body);
     if (note.mine) {
       const remove = node("button", "window-note-delete", "Delete");
