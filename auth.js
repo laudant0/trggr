@@ -85,7 +85,7 @@ signInButtons.forEach((button) => {
       const redirectTo = window.location.href.split(/[?#]/, 1)[0];
       const { error } = await supabase.auth.signInWithOAuth({
         provider: button.dataset.provider,
-        options: { redirectTo }
+        options: { redirectTo, queryParams: { prompt: "select_account" } }
       });
       if (error) throw error;
     } catch (error) {
