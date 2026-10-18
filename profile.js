@@ -1,3 +1,4 @@
+import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { avatarUrl, fillAvatar, loadAvatarPaths, resizeAvatar } from "./avatar.js";
 import { instagramLink, parseInstagramHandle, parseXHandle, xLink } from "./xhandle.js";
@@ -110,7 +111,7 @@ function renderProfile(profile) {
   document.querySelector("#profile-discoverable").checked = Boolean(profile.discoverable);
   document.querySelector("#profile-member-since").textContent = `IN THE ROOM SINCE ${formatDate(profile.created_at)}`;
   const bioDisplay = document.querySelector("#profile-bio-display");
-  bioDisplay.textContent = bio;
+  setLinkedText(bioDisplay, bio);
   bioDisplay.hidden = !bio;
   paintSocials(profile.x_handle, profile.instagram_handle);
 
@@ -219,7 +220,7 @@ form.addEventListener("submit", async (event) => {
     paintSocials(savedHandle, savedIg);
     document.querySelector("#profile-name").textContent = displayName;
     const bioDisplay = document.querySelector("#profile-bio-display");
-    bioDisplay.textContent = bio;
+    setLinkedText(bioDisplay, bio);
     bioDisplay.hidden = !bio;
     myName = displayName;
     if (!document.querySelector("#profile-avatar img")) paintAvatar(null);

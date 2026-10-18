@@ -1,3 +1,4 @@
+import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
 
 (() => {
@@ -233,7 +234,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       wrap.append(el("span", "takes-label", "TOP TAKES · MOST AGREED FIRST"));
       rows.forEach((row) => {
         const item = el("div", `take${row.mine ? " mine" : ""}`);
-        const body = el("p", "take-body", `“${row.body}”`);
+        const body = setLinkedText(el("p", "take-body"), `“${row.body}”`);
         const meta = el("div", "take-meta");
         if (row.author_id && !row.mine) {
           const link = el("a", "take-author", row.author_name);
