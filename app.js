@@ -166,27 +166,25 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     if (!backend || loading) return;
     loading = true;
     try {
-      const { data, error } = await backend.rpc("get_public_polls");
-      if (error) throw error;
-      const { data: links } = await backend.rpc("get_poll_creator_links");
-      const creatorByPoll = new Map((links || []).map((link) => [link.poll_id, link.creator_id]));
-      if (userId) {
-        const { data: pinRows } = await backend.rpc("get_my_pins");
-        pins = new Set((pinRows || []).map((row) => row.poll_id));
-      } else {
-        pins = new Set();
-      }
-      polls = (data || []).map(mapPoll);
+      const [pollsResult, linksResult, pinsResult] = await Promise.all([
+        backend.rpc("get_public_polls"),
+        backend.rpc("get_poll_creator_links"),
+        userId ? backend.rpc("get_my_pins") : Promise.resolve({ data: [] })
+      ]);
+      if (pollsResult.error) throw pollsResult.error;
+      const creatorByPoll = new Map((linksResult.data || []).map((link) => [link.poll_id, link.creator_id]));
+      pins = new Set((pinsResult.data || []).map((row) => row.poll_id));
+      polls = (pollsResult.data || []).map(mapPoll);
       polls.forEach((poll) => { poll.creatorId = creatorByPoll.get(poll.id) || null; });
       voted = {};
       polls.forEach((poll) => {
         if (poll.votedPosition !== null) voted[poll.id] = poll.votedPosition;
       });
-      await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
       updateStats();
-      const typing = [...document.querySelectorAll("#poll-grid .take-input, #featured-track .take-input")].some((input) => input.value.trim() || input === document.activeElement);
-      if (!typing) render();
-      if (sharedPollId) {
+      const isTyping = () => [...document.querySelectorAll("#poll-grid .take-input, #featured-track .take-input")].some((input) => input.value.trim() || input === document.activeElement);
+      if (!isTyping()) render();
+      await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
+      if (!isTyping()) render();      if (sharedPollId) {
         const targetPoll = polls.find((poll) => poll.id === sharedPollId);
         if (targetPoll) {
           category = targetPoll.category;
@@ -344,7 +342,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
         const image = el("img", "option-image");
         image.src = imageUrl;
         image.alt = `${choice} option`;
-        image.loading = "lazy";
+        image.loading = poll.official ? "eager" : "lazy";
+        if (poll.official) image.fetchPriority = "high";
         image.decoding = "async";
         image.referrerPolicy = "no-referrer";
         content.prepend(image);
