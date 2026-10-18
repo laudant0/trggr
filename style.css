@@ -1064,3 +1064,10 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 .option-bar{display:grid;grid-template-columns:minmax(70px,140px) 1fr auto;gap:10px;align-items:center;font-size:12px}
 .option-bar i{display:block;height:8px;border-radius:99px;background:rgba(128,128,128,.3);overflow:hidden}
 .option-bar i span{display:block;height:100%;background:var(--lime)}
+
+@media(max-width:760px){
+  .header-actions{display:contents}
+  .header-actions>*{order:2}
+  .header-actions .button-profile{margin-left:auto;padding:8px 16px;font-size:13px;min-height:0;height:auto}
+  .header-actions a[href="create.html"]{position:fixed;right:16px;bottom:18px;z-index:50;order:0;padding:14px 20px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.45);background:var(--lime);color:#111}
+}
