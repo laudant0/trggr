@@ -1080,3 +1080,9 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
   .site-header .header-actions{order:2;flex:0 0 auto}
   .site-header .main-nav{order:3}
 }
+
+@media(max-width:760px){
+  .site-header{row-gap:4px;padding-bottom:4px}
+  .site-header .main-nav{justify-content:space-between;gap:4px;padding:0}
+  .site-header .main-nav a{flex:1 1 auto;text-align:center;padding:6px 8px}
+}
