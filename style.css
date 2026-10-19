@@ -1123,3 +1123,10 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 @media(min-width:761px) and (max-width:1000px){
   .featured-slide{flex:0 0 calc((100% - 16px)/2)}
 }
+
+.install-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:transparent;color:inherit;font:600 .8rem inherit;cursor:pointer;opacity:.8}
+.install-btn:hover{opacity:1;border-color:#c6f432}
+@media(max-width:480px){.install-btn span{display:none}.install-btn{width:34px;padding:0;justify-content:center}}
+.site-footer .install-btn{height:28px;font-size:.72rem;letter-spacing:.06em;opacity:.55}
+.site-footer .install-btn span{display:inline}
+.site-footer .install-btn{width:auto;padding:0 10px}

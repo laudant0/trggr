@@ -137,3 +137,33 @@ initializeNavigation();
 if ("serviceWorker" in navigator && window.location.protocol === "https:") {
   navigator.serviceWorker.register("sw.js").catch((error) => console.warn("Could not register the offline cache.", error));
 }
+
+let installPrompt = null;
+const installed = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+function addInstallButton() {
+  const actions = document.querySelector(".site-footer");
+  if (!actions || installed || actions.querySelector(".install-btn")) return;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "install-btn";
+  button.setAttribute("aria-label", "Install Trgga");
+  button.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg><span>Install</span>';
+  button.addEventListener("click", async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      await installPrompt.userChoice.catch(() => null);
+      installPrompt = null;
+      button.remove();
+    } else {
+      window.alert("To install Trgga: tap Share, then 'Add to Home Screen' (iPhone), or open the browser menu and choose 'Install app'.");
+    }
+  });
+  actions.append(button);
+}
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  addInstallButton();
+});
+window.addEventListener("appinstalled", () => document.querySelectorAll(".install-btn").forEach((b) => b.remove()));
+if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) addInstallButton();
