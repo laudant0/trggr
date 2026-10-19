@@ -141,7 +141,7 @@ if ("serviceWorker" in navigator && window.location.protocol === "https:") {
 let installPrompt = null;
 const installed = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
 function addInstallButton() {
-  const actions = document.querySelector(".header-actions");
+  const actions = document.querySelector(".site-footer");
   if (!actions || installed || actions.querySelector(".install-btn")) return;
   const button = document.createElement("button");
   button.type = "button";
@@ -158,7 +158,7 @@ function addInstallButton() {
       window.alert("To install Trgga: tap Share, then 'Add to Home Screen' (iPhone), or open the browser menu and choose 'Install app'.");
     }
   });
-  actions.prepend(button);
+  actions.append(button);
 }
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
