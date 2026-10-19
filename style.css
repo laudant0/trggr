@@ -1114,3 +1114,12 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 
 .text-link{color:var(--lime,#c8f760);text-decoration:underline;text-underline-offset:2px;word-break:break-all}
 .text-link:hover{opacity:.8}
+
+/* Featured slides match the regular poll-card width on larger screens */
+@media(min-width:761px){
+  .featured-track{gap:16px}
+  .featured-slide{flex:0 0 calc((100% - 32px)/3)}
+}
+@media(min-width:761px) and (max-width:1000px){
+  .featured-slide{flex:0 0 calc((100% - 16px)/2)}
+}

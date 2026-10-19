@@ -122,10 +122,23 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     stats.textContent = polls.length ? `${polls.length} polls live · ${votes.toLocaleString()} votes cast` : "";
   }
 
+  function featuredStep(track) {
+    const [first, second] = track.children;
+    if (first && second) return second.offsetLeft - first.offsetLeft;
+    return first ? first.offsetWidth : track.clientWidth;
+  }
+
+  function featuredPages(track) {
+    const step = featuredStep(track);
+    const perView = step ? Math.max(1, Math.round(track.clientWidth / step)) : 1;
+    return Math.max(1, track.children.length - perView + 1);
+  }
+
   function syncFeaturedDots() {
     const track = document.querySelector("#featured-track");
     const dots = document.querySelectorAll("#featured-dots .featured-dot");
-    const active = track.clientWidth ? Math.round(track.scrollLeft / track.clientWidth) : 0;
+    const step = featuredStep(track);
+    const active = step ? Math.min(dots.length - 1, Math.round(track.scrollLeft / step)) : 0;
     dots.forEach((dot, index) => dot.classList.toggle("active", index === active));
   }
 
@@ -141,14 +154,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       return slide;
     }));
     track.scrollLeft = position;
-    dots.replaceChildren(...featured.map((poll, index) => {
+    dots.replaceChildren(...Array.from({ length: featuredPages(track) }, (_, index) => {
       const dot = el("button", "featured-dot");
       dot.type = "button";
       dot.setAttribute("aria-label", `Show official poll ${index + 1}`);
-      dot.addEventListener("click", () => track.scrollTo({ left: index * track.clientWidth, behavior: "smooth" }));
+      dot.addEventListener("click", () => track.scrollTo({ left: index * featuredStep(track), behavior: "smooth" }));
       return dot;
     }));
-    dots.hidden = featured.length < 2;
+    dots.hidden = dots.children.length < 2;
     syncFeaturedDots();
     if (!track.dataset.ready) {
       track.dataset.ready = "1";
@@ -157,10 +170,11 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       ["pointerleave", "focusout", "touchend"].forEach((name) => box.addEventListener(name, () => { delete box.dataset.paused; }, { passive: true }));
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         featuredTimer = window.setInterval(() => {
-          const count = track.children.length;
+          const count = featuredPages(track);
           if (count < 2 || box.dataset.paused || document.hidden) return;
-          const next = (Math.round(track.scrollLeft / track.clientWidth) + 1) % count;
-          track.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
+          const step = featuredStep(track);
+          const next = (Math.round(track.scrollLeft / step) + 1) % count;
+          track.scrollTo({ left: next * step, behavior: "smooth" });
         }, 6000);
       }
     }
@@ -405,7 +419,12 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       instagramButton.dataset.shareUrl = url;
       instagramButton.dataset.instagram = "true";
       instagramButton.setAttribute("aria-label", "Copy your vote and open Instagram to share it");
-      share.append(shareButton, xLink, whatsappLink, instagramButton);
+      const snapchatLink = el("a", "poll-share-link", "Snapchat");
+      snapchatLink.href = `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(url)}`;
+      snapchatLink.target = "_blank";
+      snapchatLink.rel = "noopener noreferrer";
+      snapchatLink.setAttribute("aria-label", "Share your vote on Snapchat");
+      share.append(shareButton, xLink, whatsappLink, instagramButton, snapchatLink);
       card.append(share);
     }
     if (backend && isTakesVisible(poll)) card.append(renderTakes(poll));
