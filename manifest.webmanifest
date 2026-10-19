@@ -1,6 +1,6 @@
 {
-  "name": "TRGGA",
-  "short_name": "TRGGA",
+  "name": "Trgga",
+  "short_name": "Trgga",
   "description": "Pick a side. See the room.",
   "start_url": "index.html",
   "scope": "./",
