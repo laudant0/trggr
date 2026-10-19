@@ -133,3 +133,7 @@ async function initializeNavigation() {
 }
 
 initializeNavigation();
+
+if ("serviceWorker" in navigator && window.location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch((error) => console.warn("Could not register the offline cache.", error));
+}

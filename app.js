@@ -29,6 +29,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   let voted = {};
   let userId = null;
   let pins = new Set();
+  let followingIds = new Set();
   let takes = new Map();
   let loading = false;
   let category = new URLSearchParams(window.location.search).get("category") || "All";
@@ -65,6 +66,21 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     });
     allButton.classList.toggle("active", category === "All");
     document.querySelector("#filters").replaceChildren(allButton, ...buttons);
+    ensureFollowingChip();
+  }
+
+  function ensureFollowingChip() {
+    const filters = document.querySelector("#filters");
+    const existing = filters.querySelector("[data-category=Following]");
+    if (!userId) {
+      existing?.remove();
+      return;
+    }
+    if (existing) return;
+    const chip = el("button", `filter-chip${category === "Following" ? " active" : ""}`, "Following");
+    chip.type = "button";
+    chip.dataset.category = "Following";
+    filters.querySelector("[data-category=All]")?.after(chip);
   }
 
   function displayDemoPolls() {
@@ -183,11 +199,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     if (!backend || loading) return;
     loading = true;
     try {
-      const [pollsResult, linksResult, pinsResult] = await Promise.all([
+      const [pollsResult, linksResult, pinsResult, followingResult] = await Promise.all([
         backend.rpc("get_public_polls"),
         backend.rpc("get_poll_creator_links"),
-        userId ? backend.rpc("get_my_pins") : Promise.resolve({ data: [] })
+        userId ? backend.rpc("get_my_pins") : Promise.resolve({ data: [] }),
+        userId ? backend.rpc("get_my_connections", { p_kind: "following" }) : Promise.resolve({ data: [] })
       ]);
+      followingIds = new Set((followingResult.data || []).map((row) => row.id));
+      ensureFollowingChip();
       if (pollsResult.error) throw pollsResult.error;
       const creatorByPoll = new Map((linksResult.data || []).map((link) => [link.poll_id, link.creator_id]));
       pins = new Set((pinsResult.data || []).map((row) => row.poll_id));
@@ -435,7 +454,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
   function render() {
     updateStats();
     const visible = polls.filter((poll) => {
-      const matchesCategory = category === "All" || poll.category.toLowerCase() === category.toLowerCase();
+      const matchesCategory = category === "All"
+        || (category === "Following" ? Boolean(poll.creatorId && followingIds.has(poll.creatorId)) : poll.category.toLowerCase() === category.toLowerCase());
       const matchesQuery = `${poll.question} ${poll.category} ${poll.creator || ""}`.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
@@ -455,6 +475,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     grid.replaceChildren(...rest.slice(0, shownCount).map(renderPoll));
     const seeMore = document.querySelector("#see-more");
     if (seeMore) seeMore.hidden = rest.length <= shownCount;
+    const emptyNote = document.querySelector("#empty-state span");
+    if (emptyNote) emptyNote.textContent = category === "Following" ? "Nothing from people you follow yet." : "Nothing on that frequency.";
     document.querySelector("#empty-state").hidden = visible.length > 0;
     document.querySelector("#poll-count").textContent = String(visible.length).padStart(2, "0");
   }
