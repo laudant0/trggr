@@ -120,13 +120,13 @@ async function loadTrending() {
     }));
   } catch (error) {
     console.error("Could not load trending polls.", error);
-    grid.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Trending polls are unavailable right now." }));
+    grid.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Popular polls are unavailable right now." }));
   }
 }
 
 document.querySelector("#share-trending")?.addEventListener("click", async (event) => {
   const button = event.currentTarget;
-  const payload = { title: "Trending This Week on Trgga", text: "See what the room is voting on this week.", url: `${window.location.origin}${window.location.pathname}#trending` };
+  const payload = { title: "Popular This Week on Trgga", text: "See what the room is voting on this week.", url: `${window.location.origin}${window.location.pathname}#trending` };
   try {
     if (navigator.share) await navigator.share(payload);
     else {
