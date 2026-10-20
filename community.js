@@ -90,7 +90,9 @@ async function loadTrending() {
   try {
     const { data, error } = await backend.rpc("get_public_polls");
     if (error) throw error;
-    const ranked = (data || []).map((row) => ({
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recent = (data || []).filter((row) => new Date(row.created_at).getTime() >= weekAgo);
+    const ranked = (recent.length ? recent : data || []).map((row) => ({
       row,
       total: (Array.isArray(row.options) ? row.options : []).reduce((sum, option) => sum + Number(option.votes || 0), 0)
     })).sort((a, b) => b.total - a.total).slice(0, 4);
@@ -101,7 +103,7 @@ async function loadTrending() {
     grid.replaceChildren(...ranked.map(({ row, total }, index) => {
       const card = document.createElement("a");
       card.className = "member-card";
-      card.href = "index.html#polls";
+      card.href = `index.html?poll=${encodeURIComponent(row.id)}`;
       const rank = document.createElement("span");
       rank.className = "member-avatar";
       rank.textContent = `#${index + 1}`;
@@ -121,6 +123,21 @@ async function loadTrending() {
     grid.replaceChildren(Object.assign(document.createElement("p"), { className: "profile-empty", textContent: "Trending polls are unavailable right now." }));
   }
 }
+
+document.querySelector("#share-trending")?.addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  const payload = { title: "Trending This Week on Trgga", text: "See what the room is voting on this week.", url: `${window.location.origin}${window.location.pathname}#trending` };
+  try {
+    if (navigator.share) await navigator.share(payload);
+    else {
+      await navigator.clipboard.writeText(`${payload.text} ${payload.url}`);
+      button.textContent = "Link Copied ✓";
+      window.setTimeout(() => { button.textContent = "Share This Week ↗"; }, 3000);
+    }
+  } catch (error) {
+    if (error.name !== "AbortError") console.error("Could not share.", error);
+  }
+});
 
 async function initializeDirectory() {
   if (!isBackendConfigured()) {

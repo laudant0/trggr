@@ -1130,3 +1130,7 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 .site-footer .install-btn{height:28px;font-size:.72rem;letter-spacing:.06em;opacity:.55}
 .site-footer .install-btn span{display:inline}
 .site-footer .install-btn{width:auto;padding:0 10px}
+
+.ticker{margin-top:28px}
+.site-footer .install-btn{height:34px;padding:0 16px;gap:8px;border:1px solid #c6f432;border-radius:999px;background:linear-gradient(135deg,rgba(198,244,50,.18),rgba(198,244,50,.04));color:#c6f432;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:1;box-shadow:0 0 18px rgba(198,244,50,.18);transition:transform .15s,box-shadow .15s}
+.site-footer .install-btn:hover{transform:translateY(-1px);background:#c6f432;color:#11120f;box-shadow:0 0 26px rgba(198,244,50,.4)}
