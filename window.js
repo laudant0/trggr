@@ -105,15 +105,17 @@ async function loadNotifications() {
     return;
   }
   if (!data.length) {
-    list.replaceChildren(node("p", "profile-empty", "Nothing yet. New followers and vote milestones on your polls show up here."));
+    list.replaceChildren(node("p", "profile-empty", "Nothing yet. New followers, polls from people you follow and vote milestones show up here."));
     return;
   }
   list.replaceChildren(...data.map((item) => {
     const isFollow = item.kind === "follow";
+    const isPoll = item.kind === "poll";
     const link = node("a", `notif-item${item.is_read ? "" : " unread"}`);
     link.href = isFollow ? `member.html?id=${encodeURIComponent(item.actor_id)}` : `index.html?poll=${encodeURIComponent(item.poll_id)}`;
     const title = isFollow
       ? `${item.actor_name || "Someone"} started following you`
+      : isPoll ? `${item.actor_name || "Someone you follow"} posted a new poll: ${item.poll_question || ""}`
       : `Your poll hit ${item.detail} votes: ${item.poll_question || ""}`;
     link.append(node("strong", "", title), node("span", "", new Date(item.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }).toUpperCase()));
     return link;

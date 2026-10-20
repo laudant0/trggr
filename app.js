@@ -511,14 +511,6 @@ import { getBackend, isBackendConfigured } from "./backend.js";
     const instagramShare = event.target.closest("[data-instagram]");
     if (instagramShare) {
       const label = "Instagram";
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: instagramShare.dataset.shareTitle, text: instagramShare.dataset.shareText, url: instagramShare.dataset.shareUrl });
-        } catch (error) {
-          if (error.name !== "AbortError") console.error("Could not share.", error);
-        }
-        return;
-      }
       try {
         await navigator.clipboard.writeText(`${instagramShare.dataset.shareText} ${instagramShare.dataset.shareUrl}`);
         instagramShare.textContent = "Copied ✓ opening Instagram…";
@@ -527,8 +519,8 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       }
       const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       window.setTimeout(() => {
-        if (mobile) window.location.href = "instagram://app";
-        else window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+        if (mobile) window.location.href = "instagram://story-camera";
+        else window.open("https://www.instagram.com/direct/new/", "_blank", "noopener,noreferrer");
         instagramShare.textContent = "Paste in your Story or DM";
         window.setTimeout(() => { instagramShare.textContent = label; }, 4000);
       }, 400);
