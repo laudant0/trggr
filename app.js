@@ -384,11 +384,19 @@ import { getBackend, isBackendConfigured } from "./backend.js";
         image.referrerPolicy = "no-referrer";
         content.prepend(image);
       }
-      const track = el("span", "option-track");
-      const fill = el("span", "option-fill");
-      fill.style.width = hasVoted || closed ? `${percent}%` : "0%";
-      track.append(fill);
-      button.append(content, track);
+      if (hasVoted || closed) {
+        const meter = el("span", "option-meter");
+        const meterFill = el("span", "option-meter-fill");
+        meterFill.style.width = "0%";
+        meter.append(meterFill);
+        content.append(meter);
+        if (selected) {
+          const badge = el("span", "option-yours", "YOUR PICK");
+          optionTop.prepend(badge);
+        }
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => { meterFill.style.width = `${percent}%`; }));
+      }
+      button.append(content);
       options.append(button);
     });
 

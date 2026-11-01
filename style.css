@@ -1134,3 +1134,56 @@ a.take-author:hover{color:#c8ff3d;opacity:1}
 .ticker{margin-top:28px}
 .site-footer .install-btn{height:34px;padding:0 16px;gap:8px;border:1px solid #c6f432;border-radius:999px;background:linear-gradient(135deg,rgba(198,244,50,.18),rgba(198,244,50,.04));color:#c6f432;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:1;box-shadow:0 0 18px rgba(198,244,50,.18);transition:transform .15s,box-shadow .15s}
 .site-footer .install-btn:hover{transform:translateY(-1px);background:#c6f432;color:#11120f;box-shadow:0 0 26px rgba(198,244,50,.4)}
+
+/* Result meters */
+.option-track{display:none}
+.option-meter{display:block;height:8px;border-radius:99px;background:rgba(240,240,233,.09);overflow:hidden}
+.option-meter-fill{display:block;height:100%;border-radius:99px;background:rgba(240,240,233,.32);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.poll-option.selected .option-meter-fill{background:linear-gradient(90deg,#8fd13a,var(--lime));box-shadow:0 0 12px rgba(200,241,105,.5)}
+.poll-option.show-results .option-percent{font-size:15px;font-weight:700;color:var(--paper);font-family:var(--display)}
+.poll-option.selected .option-percent{color:var(--lime)}
+.poll-option.show-results .option-top{align-items:center}
+.option-yours{margin-right:8px;padding:2px 7px;border-radius:99px;background:var(--lime);color:#14160f;font:600 7px var(--mono);letter-spacing:.1em;vertical-align:middle}
+
+/* Creator name */
+.poll-meta{font-size:10px}
+.poll-creator-link{font:700 13px var(--body);letter-spacing:0}
+
+/* Fluid app feel */
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:contain}
+body{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+.site-header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);background:rgba(17,18,15,.78)}
+.poll-card{animation:rise .5s cubic-bezier(.2,.8,.2,1) both;will-change:transform,opacity}
+.poll-grid>.poll-card:nth-child(2){animation-delay:.05s}.poll-grid>.poll-card:nth-child(3){animation-delay:.1s}.poll-grid>.poll-card:nth-child(4){animation-delay:.15s}.poll-grid>.poll-card:nth-child(n+5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+button,.button,.filter-chip,.poll-option{transition:transform .15s ease,background .2s,border-color .2s,color .2s,box-shadow .2s}
+button:active,.button:active,.filter-chip:active{transform:scale(.96)}
+.poll-option:not(:disabled):active{transform:scale(.985)}
+.featured-track,.filter-list{-webkit-overflow-scrolling:touch;scroll-behavior:smooth;overscroll-behavior-x:contain}
+.filter-list{scroll-snap-type:x proximity}
+.filter-chip{scroll-snap-align:start}
+@media(prefers-reduced-motion:reduce){html,.featured-track,.filter-list{scroll-behavior:auto}.poll-card{animation:none}.option-meter-fill{transition:none}}
+
+/* Theme toggle */
+.theme-toggle{display:inline-grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--paper);cursor:pointer}
+.theme-toggle:hover{border-color:var(--lime)}
+
+/* Day mode */
+html[data-theme="light"]{color-scheme:light;--ink:#f4f3ec;--paper:#161812;--muted:#5d6056;--line:rgba(22,24,18,.16);--lime:#3f7d00}
+html[data-theme="light"] body{background:#f4f3ec;color:#161812}
+html[data-theme="light"] .site-header{background:rgba(244,243,236,.82)}
+html[data-theme="light"] .poll-card,html[data-theme="light"] .glass-card,html[data-theme="light"] .profile-panel,html[data-theme="light"] .report-form,html[data-theme="light"] .choice-field,html[data-theme="light"] .member-card,html[data-theme="light"] .profile-stat,html[data-theme="light"] .create-tip,html[data-theme="light"] .faq{background:#fff;border-color:rgba(22,24,18,.12);color:#161812}
+html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea{background:#fff !important;color:#161812 !important;border-color:rgba(22,24,18,.2) !important}
+html[data-theme="light"] .poll-option{border-color:rgba(22,24,18,.16);color:#161812}
+html[data-theme="light"] .poll-meta,html[data-theme="light"] .poll-card-footer{color:#6a6d62}
+html[data-theme="light"] .option-meter{background:rgba(22,24,18,.08)}
+html[data-theme="light"] .option-meter-fill{background:rgba(22,24,18,.28)}
+html[data-theme="light"] .poll-option.selected .option-meter-fill{background:linear-gradient(90deg,#5aa300,#8fd13a);box-shadow:none}
+html[data-theme="light"] .button-lime,html[data-theme="light"] .primary-btn,html[data-theme="light"] .filter-chip.active,html[data-theme="light"] .main-nav a.active,html[data-theme="light"] .option-yours{background:#c8f169;color:#14160f}
+html[data-theme="light"] .button-dark{background:#161812;color:#f4f3ec}
+html[data-theme="light"] .highlight,html[data-theme="light"] .poll-creator-link,html[data-theme="light"] .eyebrow .live-dot{color:#3f7d00}
+html[data-theme="light"] .live-dot{background:#4f9a00;box-shadow:0 0 10px rgba(79,154,0,.5)}
+html[data-theme="light"] .site-footer,html[data-theme="light"] .site-header{border-color:rgba(22,24,18,.12)}
+html[data-theme="light"] .mobile-menu,html[data-theme="light"] .hero,html[data-theme="light"] main{background-color:transparent}
+html[data-theme="light"] .install-btn{color:#3f7d00;border-color:#3f7d00;background:rgba(63,125,0,.08)}
+html[data-theme="light"] .site-footer .install-btn:hover{background:#3f7d00;color:#fff}
