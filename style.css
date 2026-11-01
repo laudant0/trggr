@@ -1187,3 +1187,18 @@ html[data-theme="light"] .site-footer,html[data-theme="light"] .site-header{bord
 html[data-theme="light"] .mobile-menu,html[data-theme="light"] .hero,html[data-theme="light"] main{background-color:transparent}
 html[data-theme="light"] .install-btn{color:#3f7d00;border-color:#3f7d00;background:rgba(63,125,0,.08)}
 html[data-theme="light"] .site-footer .install-btn:hover{background:#3f7d00;color:#fff}
+
+/* Day mode: override remaining dark surfaces */
+html[data-theme="light"] .glass-card,html[data-theme="light"] .profile-panel,html[data-theme="light"] .create-panel,html[data-theme="light"] .auth-panel,html[data-theme="light"] .auth-card,html[data-theme="light"] .member-card,html[data-theme="light"] .community-card,html[data-theme="light"] .choice-field{background:#fff !important;border-color:rgba(22,24,18,.12) !important;box-shadow:0 10px 30px rgba(22,24,18,.07) !important;color:#161812}
+html[data-theme="light"] .community-card-lime{background:linear-gradient(145deg,#dcff94,#c1f25e) !important}
+html[data-theme="light"] .oauth-button{background:#161812 !important;color:#f4f3ec !important;border-color:#161812 !important}
+html[data-theme="light"] .oauth-button:hover:not(:disabled){background:#2a2d22 !important;border-color:#3f7d00 !important}
+html[data-theme="light"] .oauth-button small,html[data-theme="light"] .oauth-arrow{color:#c9cbc0 !important}
+html[data-theme="light"] .auth-panel h2,html[data-theme="light"] .auth-panel h1,html[data-theme="light"] .auth-panel .wordmark,html[data-theme="light"] .profile-panel h2,html[data-theme="light"] .profile-panel h3,html[data-theme="light"] .profile-stat strong{color:#161812}
+html[data-theme="light"] .auth-panel p,html[data-theme="light"] .auth-panel-copy,html[data-theme="light"] .profile-panel p,html[data-theme="light"] .profile-stat>span{color:#5d6056}
+html[data-theme="light"] .profile-stat strong{color:#3f7d00}
+html[data-theme="light"] .supporting-hero p,html[data-theme="light"] .hero-small p{color:#5d6056}
+html[data-theme="light"] .notif-item,html[data-theme="light"] .profile-activity-list>*{color:#161812}
+html[data-theme="light"] .site-footer,html[data-theme="light"] .site-footer a,html[data-theme="light"] .site-footer span{color:#5d6056}
+html[data-theme="light"] .site-footer .wordmark{color:#161812}
+html[data-theme="light"] .mobile-menu{background:#f4f3ec}
