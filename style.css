@@ -1202,3 +1202,71 @@ html[data-theme="light"] .notif-item,html[data-theme="light"] .profile-activity-
 html[data-theme="light"] .site-footer,html[data-theme="light"] .site-footer a,html[data-theme="light"] .site-footer span{color:#5d6056}
 html[data-theme="light"] .site-footer .wordmark{color:#161812}
 html[data-theme="light"] .mobile-menu{background:#f4f3ec}
+
+/* Readability: larger small text */
+.eyebrow{font-size:11px}
+.poll-meta{font-size:12px}
+.poll-card-footer{font-size:10px;align-items:center}
+.option-percent{font-size:12px}
+.poll-share-native,.poll-share-link{min-height:34px;padding:0 13px;font-size:11px;letter-spacing:.04em}
+.poll-pin{font-size:10px}
+.filter-chip{font-size:12px}
+.filter-count{font-size:10px}
+.profile-stat>span,.member-stats{font-size:10px}
+.option-top{font-size:13px}
+.vote-hint{font-size:10px}
+
+/* Rooms */
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.room-card{display:grid;gap:10px;padding:20px;border:1px solid var(--line);border-radius:20px;background:#171814}
+.room-card.is-live{border-color:rgba(200,241,105,.5);box-shadow:0 0 0 1px rgba(200,241,105,.12),0 14px 36px rgba(200,241,105,.06)}
+.room-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.room-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:99px;border:1px solid var(--line);font:600 10px var(--mono);letter-spacing:.1em;color:var(--muted)}
+.room-card.is-live .room-badge,.room-badge.live{background:var(--lime);border-color:var(--lime);color:#14160f}
+.room-host{font-size:12px;color:var(--muted)}
+.room-title{margin:0;font:600 20px/1.2 var(--display);letter-spacing:-.03em}
+.room-poll{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.room-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.poll-room{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border:1px solid rgba(200,241,105,.4);border-radius:99px;background:transparent;color:var(--lime);font:600 10px var(--mono);letter-spacing:.08em;cursor:pointer;text-decoration:none}
+.poll-room.live{background:var(--lime);color:#14160f;border-color:var(--lime)}
+.room-shell{padding-block:24px 60px}
+.room-stage{display:grid;gap:20px;margin-top:18px}
+.room-header{display:grid;gap:10px;justify-items:start}
+.room-heading{margin:0;font:600 clamp(28px,5vw,46px)/1.05 var(--display);letter-spacing:-.05em}
+.room-body{display:grid;gap:14px;justify-items:start}
+.room-note{margin:0;color:var(--muted);font-size:13px}
+.room-frame{width:100%;height:min(70vh,560px);border:1px solid var(--line);border-radius:20px;background:#000}
+.room-message{display:grid;gap:14px;justify-items:start}
+
+/* Day mode refinement */
+html[data-theme="light"] .poll-share-native,html[data-theme="light"] .poll-share-link{background:#161812;border-color:#161812;color:#f4f3ec;font-weight:600}
+html[data-theme="light"] .poll-share-native:hover,html[data-theme="light"] .poll-share-link:hover{background:#3f7d00;border-color:#3f7d00;color:#fff}
+html[data-theme="light"] .poll-pin{color:#161812;border-color:rgba(22,24,18,.35)}
+html[data-theme="light"] .poll-pin.pinned{background:#c8f169;color:#14160f;border-color:#8fd13a}
+html[data-theme="light"] .poll-report summary{color:#4a4d44}
+html[data-theme="light"] .vote-hint,html[data-theme="light"] .vote-count{color:#3b3e35}
+html[data-theme="light"] .poll-card-footer{color:#3b3e35}
+html[data-theme="light"] .poll-meta{color:#4a4d44}
+html[data-theme="light"] .option-percent{color:#3b3e35}
+html[data-theme="light"] .poll-option.selected{border-color:#3f7d00;background:rgba(143,209,58,.12)}
+html[data-theme="light"] .poll-option.selected .option-percent{color:#2f6000}
+html[data-theme="light"] .filter-chip{color:#3b3e35}
+html[data-theme="light"] .filter-chip.active{background:#161812;color:#f4f3ec;border-color:#161812}
+html[data-theme="light"] .filter-count{color:#3f7d00}
+html[data-theme="light"] .eyebrow,html[data-theme="light"] .poll-label{color:#3b3e35}
+html[data-theme="light"] .poll-label{color:#2f6000;font-weight:600}
+html[data-theme="light"] .take-input,html[data-theme="light"] .take-form button{color:#161812}
+html[data-theme="light"] .take-form button{background:#161812;color:#f4f3ec}
+html[data-theme="light"] .text-link,html[data-theme="light"] .text-link span{color:#2f6000}
+html[data-theme="light"] .ticker{background:#c8f169;color:#14160f}
+html[data-theme="light"] .room-card{background:#fff;border-color:rgba(22,24,18,.12);box-shadow:0 10px 30px rgba(22,24,18,.07)}
+html[data-theme="light"] .room-card.is-live{border-color:#3f7d00}
+html[data-theme="light"] .room-badge{color:#3b3e35;border-color:rgba(22,24,18,.25)}
+html[data-theme="light"] .room-card.is-live .room-badge,html[data-theme="light"] .room-badge.live{color:#14160f}
+html[data-theme="light"] .poll-room{color:#2f6000;border-color:#3f7d00}
+html[data-theme="light"] .poll-room.live{background:#3f7d00;color:#fff}
+html[data-theme="light"] .room-host,html[data-theme="light"] .room-poll,html[data-theme="light"] .room-note{color:#4a4d44}
+html[data-theme="light"] .announcement{color:#14160f}
+html[data-theme="light"] .main-nav a{color:#3b3e35}
+html[data-theme="light"] .main-nav a.active{color:#14160f}
+html[data-theme="light"] .live-stats,html[data-theme="light"] .section-aside{color:#3b3e35}
