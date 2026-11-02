@@ -228,9 +228,11 @@ let hostablePolls = new Set();
       });
       updateStats();
       const isTyping = () => [...document.querySelectorAll("#poll-grid .take-input, #featured-track .take-input")].some((input) => input.value.trim() || input === document.activeElement);
-      if (!isTyping()) render();
+      const firstPaint = !document.documentElement.classList.contains("polls-settled");
+      if (firstPaint && !isTyping()) render();
       await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
-      if (!isTyping()) render();      if (sharedPollId) {
+      if (!isTyping()) render();
+      document.documentElement.classList.add("polls-settled");      if (sharedPollId) {
         const targetPoll = polls.find((poll) => poll.id === sharedPollId);
         if (targetPoll) {
           category = targetPoll.category;

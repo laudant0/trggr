@@ -56,7 +56,7 @@
         });
       }, { threshold: 0.08 });
       var watch = function (root) {
-        root.querySelectorAll(".member-directory, .community-guidelines, .profile-panel, .room-card, .member-card, .hero-small").forEach(function (item) {
+        root.querySelectorAll(".member-directory, .community-guidelines").forEach(function (item) {
           if (item.dataset.reveal) return;
           item.dataset.reveal = "1";
           item.classList.add("reveal");
@@ -64,7 +64,6 @@
         });
       };
       watch(document);
-      new MutationObserver(function () { watch(document); }).observe(document.body, { childList: true, subtree: true });
     }
 
     document.addEventListener("click", function (event) {

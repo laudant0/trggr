@@ -1,4 +1,4 @@
-const CACHE = "trgga-shell-v1";
+const CACHE = "trgga-shell-v2";
 const SHELL = ["index.html", "style.css", "icon-192.png"];
 
 self.addEventListener("install", (event) => {
