@@ -1379,3 +1379,8 @@ html[data-theme="light"] .theme-toggle,html[data-theme="light"] .header-actions 
 .streak-chip.pop{animation:streakpop .7s cubic-bezier(.2,1.4,.4,1)}
 @keyframes streakpop{0%{transform:scale(.6)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
 html[data-theme="light"] .streak-chip{color:#8a4b00;background:#fff1dc;border-color:#e08a00}
+
+/* Vote verdict */
+.vote-hint{white-space:nowrap}
+.streak-chip{border-color:rgba(200,241,105,.5);background:rgba(200,241,105,.1);color:var(--lime)}
+html[data-theme="light"] .streak-chip{color:#2f6000;background:#eef8d6;border-color:#3f7d00}

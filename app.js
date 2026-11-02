@@ -112,6 +112,16 @@ let hostablePolls = new Set();
     setStatus("LOCAL MODE — polls and votes stay in this browser. Sign in to use the shared TRGGA feed.", "demo");
   }
 
+  function verdictFor(poll, position, total) {
+    if (total < 5) return "YOUR VOTE IS IN ✓";
+    const mine = poll.votes[position] || 0;
+    const share = Math.round((mine / total) * 100);
+    const top = Math.max(...poll.votes);
+    if (mine === top && poll.votes.filter((count) => count === top).length === 1) return `WITH THE ROOM · ${share}% ✓`;
+    if (share <= 25) return `BOLD PICK · ONLY ${share}% ✓`;
+    return `SPLIT ROOM · ${share}% WITH YOU ✓`;
+  }
+
   function streakState() {
     try { return JSON.parse(localStorage.getItem("trgga-streak") || "{}"); } catch (error) { return {}; }
   }
@@ -132,7 +142,7 @@ let hostablePolls = new Set();
       chip = el("span", "streak-chip");
       actions.prepend(chip);
     }
-    chip.textContent = `🔥 ${state.count}`;
+    chip.textContent = `🗳️ ${state.count}`;
     chip.title = `${state.count}-day voting streak. Vote every day to keep it alive.`;
     if (celebrate) {
       chip.classList.remove("pop");
@@ -467,7 +477,7 @@ let hostablePolls = new Set();
     const footer = el("div", "poll-card-footer");
     footer.append(
       el("span", "vote-count", `${total.toLocaleString()} ${backend ? "VOTES" : "LOCAL VOTES"}`),
-      el("span", "vote-hint", closed ? "VOTING CLOSED" : votedPosition !== undefined && votedPosition !== null ? "YOUR VOTE IS IN ✓" : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
+      el("span", "vote-hint", closed ? "VOTING CLOSED" : votedPosition !== undefined && votedPosition !== null ? verdictFor(poll, votedPosition, total) : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
     );
     if (backend && userId) {
       const liveRoom = roomsByPoll.get(poll.id);
