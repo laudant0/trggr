@@ -1,5 +1,6 @@
 import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
+import { startRoomFlow } from "./rooms.js";
 
 (() => {
   const storageKey = "trggr-polls-v1";
@@ -27,6 +28,7 @@ import { getBackend, isBackendConfigured } from "./backend.js";
 
   let polls = [];
   let voted = {};
+let roomsByPoll = new Map();
   let userId = null;
   let pins = new Set();
   let followingIds = new Set();
@@ -205,6 +207,11 @@ import { getBackend, isBackendConfigured } from "./backend.js";
         userId ? backend.rpc("get_my_pins") : Promise.resolve({ data: [] }),
         userId ? backend.rpc("get_my_connections", { p_kind: "following" }) : Promise.resolve({ data: [] })
       ]);
+      roomsByPoll = new Map();
+      if (userId) {
+        const roomsResult = await backend.rpc("get_rooms");
+        (roomsResult.data || []).forEach((room) => { if (!roomsByPoll.has(room.poll_id)) roomsByPoll.set(room.poll_id, room); });
+      }
       followingIds = new Set((followingResult.data || []).map((row) => row.id));
       ensureFollowingChip();
       if (pollsResult.error) throw pollsResult.error;
@@ -405,6 +412,20 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       el("span", "vote-count", `${total.toLocaleString()} ${backend ? "VOTES" : "LOCAL VOTES"}`),
       el("span", "vote-hint", closed ? "VOTING CLOSED" : votedPosition !== undefined && votedPosition !== null ? "YOUR VOTE IS IN ✓" : backend && !userId ? "SIGN IN TO VOTE ↗" : "PICK A SIDE ↗")
     );
+    if (backend && userId) {
+      const liveRoom = roomsByPoll.get(poll.id);
+      if (liveRoom) {
+        const join = el("a", "poll-room live", liveRoom.status === "live" ? "LIVE ROOM · JOIN" : "ROOM SOON · VIEW");
+        join.href = `room.html?id=${encodeURIComponent(liveRoom.id)}`;
+        footer.append(join);
+      } else {
+        const start = el("button", "poll-room", "START A ROOM");
+        start.type = "button";
+        start.dataset.roomStart = poll.id;
+        start.dataset.roomQuestion = poll.question;
+        footer.append(start);
+      }
+    }
     if (backend) {
       const pinned = pins.has(poll.id);
       const pin = el("button", `poll-pin${pinned ? " pinned" : ""}`, pinned ? "PINNED ✓" : "PIN");
@@ -570,6 +591,14 @@ import { getBackend, isBackendConfigured } from "./backend.js";
       const { error } = await backend.rpc("delete_my_take", { p_poll_id: deleteTake.dataset.poll });
       if (error) setStatus(error.message, "error");
       await refreshTakesFor(deleteTake.dataset.poll);
+      return;
+    }
+    const roomStart = event.target.closest("[data-room-start]");
+    if (roomStart) {
+      roomStart.disabled = true;
+      const roomId = await startRoomFlow(backend, roomStart.dataset.roomStart, roomStart.dataset.roomQuestion);
+      if (roomId) window.location.href = `room.html?id=${encodeURIComponent(roomId)}`;
+      else roomStart.disabled = false;
       return;
     }
     const pinButton = event.target.closest(".poll-pin");
