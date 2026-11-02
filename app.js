@@ -1,3 +1,4 @@
+import { liveStreak, recordVote, openStreakModal } from "./streak.js";
 import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { startRoomFlow } from "./rooms.js";
@@ -122,28 +123,19 @@ let hostablePolls = new Set();
     return `SPLIT ROOM · ${share}% WITH YOU ✓`;
   }
 
-  function streakState() {
-    try { return JSON.parse(localStorage.getItem("trgga-streak") || "{}"); } catch (error) { return {}; }
-  }
-
-  function dayKey(date) {
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  }
-
   function paintStreak(celebrate) {
-    const state = streakState();
     const actions = document.querySelector(".header-actions");
-    if (!actions || !state.count) return;
-    const yesterday = new Date(Date.now() - 86400000);
-    const alive = state.last === dayKey(new Date()) || state.last === dayKey(yesterday);
+    const count = liveStreak();
     let chip = document.querySelector(".streak-chip");
-    if (!alive) { chip?.remove(); return; }
+    if (!actions || !count) { chip?.remove(); return; }
     if (!chip) {
-      chip = el("span", "streak-chip");
+      chip = el("button", "streak-chip");
+      chip.type = "button";
+      chip.addEventListener("click", openStreakModal);
       actions.prepend(chip);
     }
-    chip.textContent = `🗳️ ${state.count}`;
-    chip.title = `${state.count}-day voting streak. Vote every day to keep it alive.`;
+    chip.textContent = `🗳️ ${count}`;
+    chip.setAttribute("aria-label", `${count}-day voting streak. Tap for stats.`);
     if (celebrate) {
       chip.classList.remove("pop");
       void chip.offsetWidth;
@@ -152,15 +144,8 @@ let hostablePolls = new Set();
   }
 
   function bumpStreak() {
-    const state = streakState();
-    const today = dayKey(new Date());
-    if (state.last === today) return;
-    const continued = state.last === dayKey(new Date(Date.now() - 86400000));
-    const next = { count: continued ? (state.count || 0) + 1 : 1, last: today };
-    try { localStorage.setItem("trgga-streak", JSON.stringify(next)); } catch (error) { /* private mode */ }
-    paintStreak(true);
+    if (recordVote()) paintStreak(true);
   }
-
   function mapPoll(row) {
     const options = Array.isArray(row.options) ? row.options : [];
     return {
@@ -287,7 +272,7 @@ let hostablePolls = new Set();
       const isTyping = () => [...document.querySelectorAll("#poll-grid .take-input, #featured-track .take-input")].some((input) => input.value.trim() || input === document.activeElement);
       paintStreak(false);
       const firstPaint = !document.documentElement.classList.contains("polls-settled");
-      if (firstPaint && userId && !sharedPollId && !new URLSearchParams(window.location.search).get("category") && Object.keys(voted).length) {
+      if (firstPaint && userId && localStorage.getItem("trgga-pref-foryou") !== "off" && !sharedPollId && !new URLSearchParams(window.location.search).get("category") && Object.keys(voted).length) {
         category = "For You";
         document.querySelectorAll(".filter-chip").forEach((chip) => chip.classList.toggle("active", chip.dataset.category === "For You"));
       }
