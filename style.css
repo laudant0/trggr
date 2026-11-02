@@ -1356,3 +1356,14 @@ html[data-theme="light"] input::placeholder,html[data-theme="light"] textarea::p
 html[data-theme="light"] .notif-bell{color:#161812;border-color:rgba(22,24,18,.35);background:#fff}
 html[data-theme="light"] .notif-bell:hover{color:#2f6000;border-color:#3f7d00}
 html[data-theme="light"] .theme-toggle,html[data-theme="light"] .header-actions a:not(.button):not(.install-btn){color:#161812;border-color:rgba(22,24,18,.35)}
+
+/* Header: hides on scroll down, returns on scroll up; roomier spacing */
+.site-header{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .25s,background .25s}
+.site-header.nav-hidden{transform:translateY(-110%)}
+@media (max-width:900px){
+.site-header{row-gap:10px;padding:max(10px,env(safe-area-inset-top)) 16px 10px}
+.site-header .main-nav{gap:8px;padding:2px 0 4px}
+.site-header .main-nav a{padding:8px 15px;font-size:13px}
+.header-actions{gap:10px}
+}
+@media (prefers-reduced-motion:reduce){.site-header{transition:none}}

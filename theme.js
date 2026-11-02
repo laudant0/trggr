@@ -2,8 +2,27 @@
   var root = document.documentElement;
   var stored = null;
   try { stored = localStorage.getItem("trgga-theme"); } catch (error) { stored = null; }
-  var prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
-  root.dataset.theme = stored || (prefersLight ? "light" : "dark");
+  var lightQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: light)") : null;
+  var darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  function autoTheme() {
+    if (lightQuery && lightQuery.matches) return "light";
+    if (darkQuery && darkQuery.matches) return "dark";
+    var hour = new Date().getHours();
+    return hour >= 7 && hour < 19 ? "light" : "dark";
+  }
+  root.dataset.theme = stored || autoTheme();
+  function followSystem() {
+    var saved = null;
+    try { saved = localStorage.getItem("trgga-theme"); } catch (error) { saved = null; }
+    if (saved) return;
+    root.dataset.theme = autoTheme();
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", root.dataset.theme === "light" ? "#f4f3ec" : "#11120f");
+    var toggle = document.querySelector(".theme-toggle");
+    if (toggle) sync(toggle);
+  }
+  if (lightQuery && lightQuery.addEventListener) lightQuery.addEventListener("change", followSystem);
+  setInterval(followSystem, 600000);
 
   var sun = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
   var moon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
@@ -40,10 +59,18 @@
     bar.className = "scroll-progress";
     document.body.prepend(bar);
     var ticking = false;
+    var lastY = window.scrollY;
     function paint() {
       var max = document.documentElement.scrollHeight - window.innerHeight;
       bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ")";
       document.querySelector(".site-header") && document.querySelector(".site-header").classList.toggle("is-scrolled", window.scrollY > 8);
+      var header = document.querySelector(".site-header");
+      var y = window.scrollY;
+      if (header) {
+        if (y > lastY + 6 && y > 120) header.classList.add("nav-hidden");
+        else if (y < lastY - 6 || y <= 120) header.classList.remove("nav-hidden");
+      }
+      lastY = y;
       ticking = false;
     }
     window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(paint); } }, { passive: true });

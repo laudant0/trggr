@@ -77,7 +77,14 @@ let hostablePolls = new Set();
     const existing = filters.querySelector("[data-category=Following]");
     if (!userId) {
       existing?.remove();
+      filters.querySelector("[data-category=\"For You\"]")?.remove();
       return;
+    }
+    if (!filters.querySelector("[data-category=\"For You\"]")) {
+      const forYou = el("button", `filter-chip${category === "For You" ? " active" : ""}`, "For You");
+      forYou.type = "button";
+      forYou.dataset.category = "For You";
+      filters.querySelector("[data-category=All]")?.before(forYou);
     }
     if (existing) return;
     const chip = el("button", `filter-chip${category === "Following" ? " active" : ""}`, "Following");
@@ -110,6 +117,7 @@ let hostablePolls = new Set();
     return {
       id: row.id,
       category: row.category,
+      createdMs: new Date(row.created_at).getTime(),
       question: row.question,
       tag: row.tag,
       creator: row.creator,
@@ -229,6 +237,10 @@ let hostablePolls = new Set();
       updateStats();
       const isTyping = () => [...document.querySelectorAll("#poll-grid .take-input, #featured-track .take-input")].some((input) => input.value.trim() || input === document.activeElement);
       const firstPaint = !document.documentElement.classList.contains("polls-settled");
+      if (firstPaint && userId && !sharedPollId && !new URLSearchParams(window.location.search).get("category") && Object.keys(voted).length) {
+        category = "For You";
+        document.querySelectorAll(".filter-chip").forEach((chip) => chip.classList.toggle("active", chip.dataset.category === "For You"));
+      }
       if (firstPaint && !isTyping()) render();
       await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
       if (!isTyping()) render();
@@ -488,20 +500,36 @@ let hostablePolls = new Set();
   function render() {
     updateStats();
     const visible = polls.filter((poll) => {
-      const matchesCategory = category === "All"
+      const matchesCategory = category === "All" || category === "For You"
         || (category === "Following" ? Boolean(poll.creatorId && followingIds.has(poll.creatorId)) : poll.category.toLowerCase() === category.toLowerCase());
       const matchesQuery = `${poll.question} ${poll.category} ${poll.creator || ""}`.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
     const now = Date.now();
-    if (sortMode === "trending") {
+    if (category === "For You") {
+      const affinity = new Map();
+      polls.forEach((poll) => {
+        if (voted[poll.id] !== undefined) affinity.set(poll.category, (affinity.get(poll.category) || 0) + 1);
+      });
+      const total = [...affinity.values()].reduce((sum, count) => sum + count, 0) || 1;
+      const score = (poll) => {
+        const taste = (affinity.get(poll.category) || 0) / total;
+        const hours = Math.max(0, (now - (poll.createdMs || now)) / 3600000);
+        const hot = Math.log10(2 + poll.votes.reduce((sum, count) => sum + count, 0));
+        const fresh = 1 / (1 + hours / 36);
+        const unseen = voted[poll.id] === undefined ? 2 : -1;
+        const followed = poll.creatorId && followingIds.has(poll.creatorId) ? 0.8 : 0;
+        return taste * 4 + hot + fresh * 1.5 + unseen + followed;
+      };
+      visible.sort((a, b) => score(b) - score(a));
+    } else if (sortMode === "trending") {
       visible.sort((a, b) => b.votes.reduce((s, c) => s + c, 0) - a.votes.reduce((s, c) => s + c, 0));
     } else if (sortMode === "closing") {
       const open = visible.filter((poll) => poll.closesAt && poll.closesAt > now).sort((a, b) => a.closesAt - b.closesAt);
       visible.length = 0;
       visible.push(...open);
     }
-    const showFeatured = category === "All" && !query && sortMode !== "closing";
+    const showFeatured = (category === "All" || category === "For You") && !query && sortMode !== "closing";
     const featured = showFeatured ? visible.filter(isFeatured).slice(0, 6) : [];
     const featuredIds = new Set(featured.map((poll) => poll.id));
     renderFeatured(featured);
