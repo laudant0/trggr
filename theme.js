@@ -46,20 +46,7 @@
     if (meta) meta.setAttribute("content", light ? "#f4f3ec" : "#11120f");
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    var actions = document.querySelector(".header-actions");
-    if (!actions) return;
-    var button = document.createElement("button");
-    button.type = "button";
-    button.className = "theme-toggle";
-    sync(button);
-    button.addEventListener("click", function () {
-      root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
-      try { localStorage.setItem("trgga-theme", root.dataset.theme); } catch (error) { /* private mode */ }
-      sync(button);
-    });
-    actions.prepend(button);
-  });
+
 })();
 
 /* App-wide vibes: scroll progress, reveal on scroll, vote confetti */
