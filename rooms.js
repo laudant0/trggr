@@ -36,22 +36,58 @@ function roomCard(room, onEnd) {
   return card;
 }
 
+function askRoomDetails(suggested) {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "room-dialog";
+    const form = node("form", "room-dialog-form");
+    form.method = "dialog";
+    form.append(node("span", "eyebrow", "START A ROOM"), node("h2", "room-dialog-title", "Talk it out, live."));
+    const titleLabel = node("label", "room-field");
+    titleLabel.append(node("span", "", "Room name"));
+    const title = node("input", "");
+    title.maxLength = 80;
+    title.value = suggested;
+    title.required = true;
+    titleLabel.append(title);
+    const whenLabel = node("label", "room-field");
+    whenLabel.append(node("span", "", "When"));
+    const when = node("select", "");
+    [["0", "Go live now"], ["15", "In 15 minutes"], ["60", "In 1 hour"], ["180", "In 3 hours"], ["1440", "Tomorrow"]].forEach(([value, label]) => {
+      const option = node("option", "", label);
+      option.value = value;
+      when.append(option);
+    });
+    whenLabel.append(when);
+    const actions = node("div", "room-actions");
+    const cancel = node("button", "button button-dark button-small", "Cancel");
+    cancel.type = "button";
+    const go = node("button", "button button-lime button-small", "Start room");
+    go.type = "submit";
+    actions.append(go, cancel);
+    form.append(titleLabel, whenLabel, actions);
+    dialog.append(form);
+    document.body.append(dialog);
+    let result = null;
+    cancel.addEventListener("click", () => dialog.close());
+    form.addEventListener("submit", () => { result = { title: title.value, minutes: Number(when.value) }; });
+    dialog.addEventListener("close", () => { dialog.remove(); resolve(result); });
+    dialog.showModal();
+    title.select();
+  });
+}
+
 export async function startRoomFlow(backend, pollId, pollQuestion) {
-  const suggested = `Let's talk: ${pollQuestion}`.slice(0, 80);
-  const title = window.prompt("Name your room", suggested);
-  if (title === null) return null;
-  const when = window.prompt("Start now? Leave blank to go live now, or enter minutes from now (e.g. 30).", "");
-  if (when === null) return null;
-  const minutes = Number(when);
-  const startsAt = when.trim() && Number.isFinite(minutes) && minutes > 0 ? new Date(Date.now() + minutes * 60000).toISOString() : null;
-  const { data, error } = await backend.rpc("create_room", { p_poll_id: pollId, p_title: title, p_starts_at: startsAt });
+  const details = await askRoomDetails(`Let's talk: ${pollQuestion}`.slice(0, 80));
+  if (!details) return null;
+  const startsAt = details.minutes > 0 ? new Date(Date.now() + details.minutes * 60000).toISOString() : null;
+  const { data, error } = await backend.rpc("create_room", { p_poll_id: pollId, p_title: details.title, p_starts_at: startsAt });
   if (error) {
     window.alert(error.message || "Could not create the room.");
     return null;
   }
   return data;
 }
-
 async function loadGrid() {
   if (!grid) return;
   if (!isBackendConfigured()) {
@@ -70,7 +106,7 @@ async function loadGrid() {
     return;
   }
   if (!data.length) {
-    grid.replaceChildren(node("p", "profile-empty", "No rooms open right now. Open any poll and tap Start a room to get one going."));
+    grid.replaceChildren(node("p", "profile-empty", "No rooms open right now. Authors can start one from their own poll."));
     return;
   }
   const onEnd = async (room, button) => {

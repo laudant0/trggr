@@ -29,6 +29,7 @@ import { startRoomFlow } from "./rooms.js";
   let polls = [];
   let voted = {};
 let roomsByPoll = new Map();
+let hostablePolls = new Set();
   let userId = null;
   let pins = new Set();
   let followingIds = new Set();
@@ -208,8 +209,10 @@ let roomsByPoll = new Map();
         userId ? backend.rpc("get_my_connections", { p_kind: "following" }) : Promise.resolve({ data: [] })
       ]);
       roomsByPoll = new Map();
+      hostablePolls = new Set();
       if (userId) {
-        const roomsResult = await backend.rpc("get_rooms");
+        const [roomsResult, hostResult] = await Promise.all([backend.rpc("get_rooms"), backend.rpc("get_my_hostable_polls")]);
+        (hostResult.data || []).forEach((row) => hostablePolls.add(row.poll_id));
         (roomsResult.data || []).forEach((room) => { if (!roomsByPoll.has(room.poll_id)) roomsByPoll.set(room.poll_id, room); });
       }
       followingIds = new Set((followingResult.data || []).map((row) => row.id));
@@ -418,7 +421,7 @@ let roomsByPoll = new Map();
         const join = el("a", "poll-room live", liveRoom.status === "live" ? "LIVE ROOM · JOIN" : "ROOM SOON · VIEW");
         join.href = `room.html?id=${encodeURIComponent(liveRoom.id)}`;
         footer.append(join);
-      } else {
+      } else if (hostablePolls.has(poll.id)) {
         const start = el("button", "poll-room", "START A ROOM");
         start.type = "button";
         start.dataset.roomStart = poll.id;

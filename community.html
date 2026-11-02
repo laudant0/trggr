@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRGGA | Community</title>
+    <title>TRGGA | Rooms</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
 <body>
 <header class="site-header">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
-    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">Lobby</a><a href="topics.html">Topics</a><a class="active" href="community.html">Community</a><a class="iwindow-link" href="window.html">Window</a></nav>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html">Lobby</a><a href="topics.html">Topics</a><a class="active" href="community.html">Rooms</a><a class="iwindow-link" href="window.html">Window</a></nav>
     <div class="header-actions"><a class="button button-profile icon-only" href="profile.html" aria-label="Open your profile"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></a><a class="button button-dark button-small" href="create.html">＋ <span>Start a poll</span></a></div>
 </header>
 <main>
@@ -24,7 +24,7 @@
 </section>
 
 <section class="member-directory shell" id="rooms">
-    <div class="directory-heading"><div><span class="eyebrow"><span class="live-dot"></span> TALK IT OUT, LIVE</span><h2>Rooms.</h2><p>Live audio conversations on a poll. Hop in and say your piece, or open a poll and start your own.</p></div></div>
+    <div class="directory-heading"><div><span class="eyebrow"><span class="live-dot"></span> TALK IT OUT, LIVE</span><h2>Rooms.</h2><p>Live voice conversations on a poll, hosted by the person who asked. Hop in, raise your hand and say your piece.</p></div></div>
     <div class="room-grid" id="rooms-grid" aria-live="polite"><p class="profile-empty">Loading rooms...</p></div>
 </section>
 
@@ -34,7 +34,7 @@
 </section>
 
 <section class="member-directory shell" id="members">
-    <div class="directory-heading"><div><span class="eyebrow"><span class="live-dot"></span> PEOPLE BEHIND THE POLLS</span><h2>Meet The Room.</h2><p>Discover members who chose to make their profile public. Votes remain private.</p></div><label class="directory-search"><span aria-hidden="true">⌕</span><input id="member-search" type="search" placeholder="Find a member" aria-label="Search members"></label></div>
+    <div class="directory-heading"><div><span class="eyebrow"><span class="live-dot"></span> PEOPLE BEHIND THE POLLS</span><h2>Meet The Community.</h2><p>Discover members who chose to make their profile public. Votes remain private.</p></div><label class="directory-search"><span aria-hidden="true">⌕</span><input id="member-search" type="search" placeholder="Find a member" aria-label="Search members"></label></div>
     <div class="member-grid" id="member-grid" aria-live="polite"><p class="profile-empty">Loading public profiles…</p></div>
 </section>
 
@@ -46,7 +46,7 @@
 <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE ROOM IS BETTER WITH YOU IN IT.</span><span><a href="profile.html">YOUR PROFILE ↗</a></span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
 <script src="auth-config.js"></script>
 <script type="module" src="community.js"></script>
-<script type="module" src="rooms.js?v=1"></script>
+<script type="module" src="rooms.js?v=2"></script>
 <script type="module" src="site-nav.js?v=7"></script>
 </body>
 </html>
