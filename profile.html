@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-<script src="theme.js?v=5"></script></head>
+<script src="theme.js?v=6"></script></head>
 <body class="profile-page">
   <header class="site-header">
     <a class="wordmark" href="index.html" aria-label="TRGGA home">TRGGA</a>
@@ -87,6 +87,15 @@
         <div class="profile-panel-heading"><div><span class="eyebrow">ONLY YOU SEE THIS</span><h2>Blocked members</h2></div></div>
         <div class="profile-activity-list" id="blocked-list"><p class="profile-empty">Loading…</p></div>
       </section>
+      <section class="profile-panel" id="settings">
+        <div class="profile-panel-heading"><div><span class="eyebrow">ONLY ON THIS DEVICE</span><h2>Settings</h2></div></div>
+        <div class="settings-block"><h3>Appearance</h3><div class="segmented" id="set-theme" role="group" aria-label="Appearance"><button type="button" data-mode="auto"><span aria-hidden="true">&#128421;&#65039;</span> System</button><button type="button" data-mode="light"><span aria-hidden="true">&#9728;&#65039;</span> Day</button><button type="button" data-mode="dark"><span aria-hidden="true">&#127769;</span> Night</button></div></div>
+        <div class="settings-block"><h3>Feed</h3>
+          <label class="setting-row"><input type="checkbox" id="set-foryou"><span><strong>Open on For You</strong><small>Start on the feed tuned to how you vote.</small></span></label>
+          <label class="setting-row"><input type="checkbox" id="set-calm"><span><strong>Calm mode</strong><small>Turn off animations, glow and confetti.</small></span></label>
+        </div>
+        <div class="settings-block"><h3>Voting streak</h3><div id="set-streak"></div></div>
+      </section>
       <div class="profile-content">
         <section class="profile-panel">
           <div class="profile-panel-heading">
@@ -137,6 +146,7 @@
   <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
   <script src="auth-config.js"></script>
   <script type="module" src="profile.js?v=4"></script>
+  <script type="module" src="settings.js"></script>
   <script type="module" src="site-nav.js?v=7"></script>
 </body>
 </html>

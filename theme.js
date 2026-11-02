@@ -21,6 +21,17 @@
     var toggle = document.querySelector(".theme-toggle");
     if (toggle) sync(toggle);
   }
+  window.trggaSetTheme = function (mode) {
+    try {
+      if (mode === "auto") localStorage.removeItem("trgga-theme"); else localStorage.setItem("trgga-theme", mode);
+    } catch (error) { /* private mode */ }
+    root.dataset.theme = mode === "auto" ? autoTheme() : mode;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", root.dataset.theme === "light" ? "#f4f3ec" : "#11120f");
+    var toggle = document.querySelector(".theme-toggle");
+    if (toggle) sync(toggle);
+  };
+  try { if (localStorage.getItem("trgga-pref-calm") === "on") root.classList.add("calm"); } catch (error) { /* private mode */ }
   if (lightQuery && lightQuery.addEventListener) lightQuery.addEventListener("change", followSystem);
   setInterval(followSystem, 600000);
 
@@ -95,7 +106,7 @@
 
     document.addEventListener("click", function (event) {
       var option = event.target.closest && event.target.closest(".poll-option:not(:disabled)");
-      if (!option) return;
+      if (!option || root.classList.contains("calm")) return;
       var rect = option.getBoundingClientRect();
       var colors = ["#c8f169", "#8fd13a", "#f4f3ec", "#ffd166", "#7cf0c9"];
       for (var i = 0; i < 18; i++) {
