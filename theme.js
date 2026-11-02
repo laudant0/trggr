@@ -31,3 +31,59 @@
     actions.prepend(button);
   });
 })();
+
+/* App-wide vibes: scroll progress, reveal on scroll, vote confetti */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.addEventListener("DOMContentLoaded", function () {
+    var bar = document.createElement("div");
+    bar.className = "scroll-progress";
+    document.body.prepend(bar);
+    var ticking = false;
+    function paint() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ")";
+      document.querySelector(".site-header") && document.querySelector(".site-header").classList.toggle("is-scrolled", window.scrollY > 8);
+      ticking = false;
+    }
+    window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(paint); } }, { passive: true });
+    paint();
+
+    if (!reduce && "IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { entry.target.classList.add("in-view"); io.unobserve(entry.target); }
+        });
+      }, { threshold: 0.08 });
+      var watch = function (root) {
+        root.querySelectorAll(".member-directory, .community-guidelines, .profile-panel, .room-card, .member-card, .hero-small").forEach(function (item) {
+          if (item.dataset.reveal) return;
+          item.dataset.reveal = "1";
+          item.classList.add("reveal");
+          io.observe(item);
+        });
+      };
+      watch(document);
+      new MutationObserver(function () { watch(document); }).observe(document.body, { childList: true, subtree: true });
+    }
+
+    document.addEventListener("click", function (event) {
+      var option = event.target.closest && event.target.closest(".poll-option:not(:disabled)");
+      if (!option || reduce) return;
+      var rect = option.getBoundingClientRect();
+      var colors = ["#c8f169", "#8fd13a", "#f4f3ec", "#ffd166", "#7cf0c9"];
+      for (var i = 0; i < 18; i++) {
+        var bit = document.createElement("i");
+        bit.className = "confetti-bit";
+        bit.style.left = (event.clientX || rect.left + rect.width / 2) + "px";
+        bit.style.top = (event.clientY || rect.top + rect.height / 2) + "px";
+        bit.style.background = colors[i % colors.length];
+        bit.style.setProperty("--dx", (Math.random() * 220 - 110).toFixed(0) + "px");
+        bit.style.setProperty("--dy", (-40 - Math.random() * 130).toFixed(0) + "px");
+        bit.style.setProperty("--rot", (Math.random() * 540 - 270).toFixed(0) + "deg");
+        document.body.append(bit);
+        setTimeout(function (el) { el.remove(); }.bind(null, bit), 900);
+      }
+    });
+  });
+})();
