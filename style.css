@@ -1367,3 +1367,15 @@ html[data-theme="light"] .theme-toggle,html[data-theme="light"] .header-actions 
 .header-actions{gap:10px}
 }
 @media (prefers-reduced-motion:reduce){.site-header{transition:none}}
+
+/* Logo-only header mark */
+.site-header .wordmark{font-size:0 !important;gap:0 !important;letter-spacing:0}
+.site-header .wordmark::before{width:38px !important;height:38px !important;font-size:21px !important;border-width:1.5px;box-shadow:0 0 18px rgba(200,241,105,.25)}
+@media (max-width:900px){.site-header .wordmark::before{width:36px !important;height:36px !important}}
+.confetti-bit{z-index:9999}
+
+/* Streak */
+.streak-chip{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid rgba(255,170,60,.5);border-radius:99px;background:rgba(255,170,60,.12);color:#ffb347;font:700 13px var(--display);cursor:default}
+.streak-chip.pop{animation:streakpop .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes streakpop{0%{transform:scale(.6)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+html[data-theme="light"] .streak-chip{color:#8a4b00;background:#fff1dc;border-color:#e08a00}

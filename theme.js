@@ -95,7 +95,7 @@
 
     document.addEventListener("click", function (event) {
       var option = event.target.closest && event.target.closest(".poll-option:not(:disabled)");
-      if (!option || reduce) return;
+      if (!option) return;
       var rect = option.getBoundingClientRect();
       var colors = ["#c8f169", "#8fd13a", "#f4f3ec", "#ffd166", "#7cf0c9"];
       for (var i = 0; i < 18; i++) {
@@ -108,8 +108,8 @@
         bit.style.setProperty("--dy", (-40 - Math.random() * 130).toFixed(0) + "px");
         bit.style.setProperty("--rot", (Math.random() * 540 - 270).toFixed(0) + "deg");
         document.body.append(bit);
-        setTimeout(function (el) { el.remove(); }.bind(null, bit), 900);
+        setTimeout(function (el) { el.remove(); }.bind(null, bit), 1100);
       }
-    });
+    }, true);
   });
 })();
