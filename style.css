@@ -1331,3 +1331,28 @@ html[data-theme="light"] .highlight{background:linear-gradient(100deg,#2f6000,#1
 html[data-theme="light"] .site-header.is-scrolled{box-shadow:0 8px 24px rgba(22,24,18,.1)}
 html[data-theme="light"] .poll-card:hover,html[data-theme="light"] .member-card:hover,html[data-theme="light"] .room-card:hover{box-shadow:0 16px 36px rgba(22,24,18,.12),0 0 0 1px rgba(63,125,0,.25)}
 @media (prefers-reduced-motion:reduce){body::before,.highlight,.live-dot{animation:none}.reveal{opacity:1;transform:none}}
+
+/* Calm + full-view fixes */
+html,body{min-height:100%;overflow-x:clip}
+body{min-height:100vh;min-height:100dvh;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
+.site-header{padding-top:env(safe-area-inset-top)}
+body::before{inset:0 !important;height:70vh}
+.polls-settled .poll-card{animation:none !important}
+.reveal{will-change:auto}
+
+/* Form text is always readable (--paper is the readable colour in both themes) */
+input,select,textarea{color:var(--paper)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+.room-dialog{color:var(--paper)}
+.room-field input,.room-field select{color:var(--paper);background:rgba(240,240,233,.06)}
+.room-field select option{background:#171814;color:#f0f0e9}
+.take-input,.directory-search input,.auth-form input,.create-form input,.create-form textarea,.create-form select{color:var(--paper)}
+html[data-theme="light"] .room-field select option{background:#fff;color:#161812}
+html[data-theme="light"] .room-field input,html[data-theme="light"] .room-field select{background:#fff}
+html[data-theme="light"] input,html[data-theme="light"] textarea,html[data-theme="light"] select{color:#161812}
+html[data-theme="light"] input::placeholder,html[data-theme="light"] textarea::placeholder{color:#5d6056}
+
+/* Notification bell in day mode */
+html[data-theme="light"] .notif-bell{color:#161812;border-color:rgba(22,24,18,.35);background:#fff}
+html[data-theme="light"] .notif-bell:hover{color:#2f6000;border-color:#3f7d00}
+html[data-theme="light"] .theme-toggle,html[data-theme="light"] .header-actions a:not(.button):not(.install-btn){color:#161812;border-color:rgba(22,24,18,.35)}
