@@ -168,6 +168,12 @@ async function init() {
     document.body.append(audio);
     const peer = { pc, audio, sender: transceiver.sender };
     pc.onicecandidate = (event) => { if (event.candidate) send(id, "ice", event.candidate.toJSON()); };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState !== "failed" || peers.get(id)?.pc !== pc) return;
+      closePeer(id);
+      if (!people.has(id)) return;
+      if (me.id < id) connectTo(id).catch(() => {}); else send(id, "reconnect", {});
+    };
     pc.ontrack = (event) => {
       const stream = new MediaStream([event.track]);
       audio.srcObject = stream;
@@ -200,6 +206,8 @@ async function init() {
         if (!peer) return;
         await peer.pc.setRemoteDescription(payload);
         await flushIce(from, peer.pc);
+      } else if (kind === "reconnect") {
+        if (me.id < from && people.has(from)) await connectTo(from);
       } else if (kind === "ice") {
         const peer = peers.get(from);
         if (peer?.pc.remoteDescription) await peer.pc.addIceCandidate(payload).catch(() => {});
@@ -220,7 +228,9 @@ async function init() {
   function syncPeople() {
     const state = channel.presenceState();
     people = new Map();
-    Object.entries(state).forEach(([id, metas]) => { if (metas[0]) people.set(id, metas[0]); });
+    Object.entries(state).forEach(([id, metas]) => { if (metas && metas[0]) people.set(id, metas[0]); });
+    const hostMeta = people.get(room.host_id);
+    if (!isHost && hostMeta && Array.isArray(hostMeta.speakers)) applySpeakers(hostMeta.speakers);
     people.forEach((_, id) => {
       if (id !== me.id && !peers.has(id) && me.id < id) connectTo(id).catch((error) => console.warn("Could not connect.", error));
     });
@@ -229,11 +239,7 @@ async function init() {
   }
 
   function announce() {
-    return channel.track({ name: myName, hand, mic: micOn });
-  }
-
-  function broadcastSpeakers() {
-    channel.send({ type: "broadcast", event: "speakers", payload: { ids: [...speakers] } });
+    return channel.track(isHost ? { name: myName, hand, mic: micOn, speakers: [...speakers] } : { name: myName, hand, mic: micOn });
   }
 
   async function setMic(on) {
@@ -260,11 +266,13 @@ async function init() {
     render();
   }
 
-  function setSpeakers(ids) {
-    speakers = new Set([room.host_id, ...ids]);
+  function applySpeakers(ids) {
+    const next = new Set([room.host_id, ...ids]);
+    if (next.size === speakers.size && [...next].every((id) => speakers.has(id))) return;
+    speakers = next;
     if (!canSpeak() && micOn) setMic(false);
-    if (canSpeak()) { hand = false; announce(); }
-    render();
+    if (canSpeak()) hand = false;
+    announce();
   }
 
   function tile(id, info) {
@@ -285,7 +293,7 @@ async function init() {
       action.type = "button";
       action.addEventListener("click", () => {
         if (speakers.has(id)) speakers.delete(id); else speakers.add(id);
-        broadcastSpeakers();
+        announce();
         render();
       });
       if (speakers.has(id) || info.hand) person.append(action);
@@ -294,6 +302,10 @@ async function init() {
   }
 
   function render() {
+    try { paint(); } catch (error) { console.warn("Room paint failed.", error); }
+  }
+
+  function paint() {
     if (!ui) return;
     const onStage = [];
     const audience = [];
@@ -319,7 +331,15 @@ async function init() {
     channel = null;
   }
 
+  function unlockAudio() {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    peers.forEach((peer) => peer.audio.play().catch(() => {}));
+  }
+
   function startSession() {
+    try { unlockAudio(); } catch (error) { /* audio unlock is best effort */ }
+    ["pointerdown", "touchend"].forEach((name) => document.addEventListener(name, () => { try { unlockAudio(); } catch (error) { /* ignore */ } }, { passive: true }));
     const root = node("div", "room-live");
     const stageTitle = node("h2", "room-section-title", "On stage");
     const stageGrid = node("div", "room-people");
@@ -344,18 +364,15 @@ async function init() {
 
     channel = backend.channel(`trgga-room-${room.id}`, { config: { broadcast: { self: false }, presence: { key: me.id } } });
     channel.on("broadcast", { event: "sig" }, ({ payload }) => onSignal(payload));
-    channel.on("broadcast", { event: "speakers" }, ({ payload }) => setSpeakers(payload.ids || []));
     channel.on("broadcast", { event: "ended" }, () => {
       cleanup();
       message("The host ended this room. Thanks for being part of it.", "community.html#rooms", "Back to rooms");
     });
     channel.on("presence", { event: "sync" }, syncPeople);
-    channel.on("presence", { event: "join" }, () => { if (isHost) broadcastSpeakers(); });
     channel.subscribe(async (status) => {
       if (status === "SUBSCRIBED") {
         await announce();
         startMeter();
-        if (isHost) broadcastSpeakers();
       }
     });
     window.addEventListener("pagehide", cleanup);

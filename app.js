@@ -276,10 +276,10 @@ let hostablePolls = new Set();
         category = "For You";
         document.querySelectorAll(".filter-chip").forEach((chip) => chip.classList.toggle("active", chip.dataset.category === "For You"));
       }
-      if (firstPaint && !isTyping()) render();
+      if (firstPaint && !isTyping()) renderIfChanged();
       await loadTakes(polls.filter((poll) => isTakesVisible(poll)).map((poll) => poll.id));
-      if (!isTyping()) render();
-      document.documentElement.classList.add("polls-settled");      if (sharedPollId) {
+      document.documentElement.classList.add("polls-settled");
+      if (!isTyping()) renderIfChanged();      if (sharedPollId) {
         const targetPoll = polls.find((poll) => poll.id === sharedPollId);
         if (targetPoll) {
           category = targetPoll.category;
@@ -532,7 +532,23 @@ let hostablePolls = new Set();
     return card;
   }
 
+  let lastSignature = null;
+  const frozenOrder = { key: null, ids: [] };
+
+  function renderIfChanged() {
+    const signature = JSON.stringify([
+      polls.map((poll) => [poll.id, poll.votes, poll.votedPosition, poll.closesAt]),
+      [...pins], [...roomsByPoll.keys()], [...hostablePolls], [...followingIds], [...takes], userId
+    ]);
+    if (signature === lastSignature) return;
+    const y = window.scrollY;
+    render();
+    lastSignature = signature;
+    if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+  }
+
   function render() {
+    lastSignature = null;
     updateStats();
     const visible = polls.filter((poll) => {
       const matchesCategory = category === "All" || category === "For You"
@@ -564,6 +580,16 @@ let hostablePolls = new Set();
       visible.length = 0;
       visible.push(...open);
     }
+    // Keep cards where they are while the user stays on this view, so a vote never makes its card jump away.
+    const orderKey = `${category}|${sortMode}|${query}`;
+    if (frozenOrder.key === orderKey) {
+      const rank = new Map(frozenOrder.ids.map((id, index) => [id, index]));
+      const unknown = category === "For You" ? 1e9 : -1;
+      const place = (poll) => (rank.has(poll.id) ? rank.get(poll.id) : unknown);
+      visible.sort((a, b) => place(a) - place(b));
+    }
+    frozenOrder.key = orderKey;
+    frozenOrder.ids = visible.map((poll) => poll.id);
     const showFeatured = (category === "All" || category === "For You") && !query && sortMode !== "closing";
     const featured = showFeatured ? visible.filter(isFeatured).slice(0, 6) : [];
     const featuredIds = new Set(featured.map((poll) => poll.id));
@@ -720,8 +746,12 @@ let hostablePolls = new Set();
         setStatus("You've already voted in this poll. One account, one vote.", "info");
       } else {
         bumpStreak();
+        poll.votes[optionIndex] += 1;
+        poll.votedPosition = optionIndex;
+        voted[poll.id] = optionIndex;
+        renderIfChanged();
       }
-      await refreshPolls();
+      refreshPolls();
     } catch (error) {
       console.error("Could not submit the vote.", error);
       setStatus(`Your vote wasn't recorded: ${error.message}. Try again.`, "error");
