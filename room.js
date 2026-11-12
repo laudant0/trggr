@@ -225,7 +225,7 @@ async function init() {
       audio.srcObject = stream;
       audio.play().catch((error) => {
         console.warn("Room audio needs a tap to play.", error);
-        setRoomStatus("Tap anywhere in the room to enable audio.");
+        setRoomStatus("Tap Enable audio to hear the room.");
       });
       watchLevel(id, stream);
     };
@@ -247,6 +247,7 @@ async function init() {
         await peer.pc.setRemoteDescription(payload);
         const audioTransceiver = peer.pc.getTransceivers().find((item) => item.receiver.track.kind === "audio");
         if (!audioTransceiver) throw new Error("The voice offer has no audio channel.");
+        audioTransceiver.direction = "sendrecv";
         peer.sender = audioTransceiver.sender;
         await peer.sender.replaceTrack(micOn ? localTrack : null);
         await flushIce(from, peer.pc);
@@ -421,22 +422,30 @@ async function init() {
     if (localTrack) localTrack.stop();
     if (channel) backend.removeChannel(channel);
     channel = null;
-    ["pointerdown", "touchend"].forEach((name) => document.removeEventListener(name, unlockAudio));
     if (audioCtx) audioCtx.close().catch((error) => console.warn("Could not close room audio.", error));
     audioCtx = null;
   }
 
-  function unlockAudio() {
+  async function unlockAudio(showFeedback = false) {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === "suspended") audioCtx.resume().catch((error) => console.warn("Could not resume room audio.", error));
     } catch (error) {
       console.warn("Could not unlock room audio.", error);
     }
-    peers.forEach((peer) => peer.audio.play().catch((error) => {
-      console.warn("Could not play room audio.", error);
-      setRoomStatus("Audio could not start. Tap Enable audio to try again.");
-    }));
+    const audio = [...peers.values()].map((peer) => peer.audio).filter((element) => element.srcObject);
+    if (!audio.length) {
+      if (showFeedback) setRoomStatus("Waiting for a speaker's audio. Tap Enable audio again if you can't hear them.");
+      return;
+    }
+    const results = await Promise.allSettled(audio.map((element) => element.play()));
+    const failures = results.filter((result) => result.status === "rejected");
+    if (failures.length) {
+      failures.forEach((result) => console.warn("Could not play room audio.", result.reason));
+      setRoomStatus("Audio could not start. Check your device volume and tap Enable audio again.");
+    } else if (showFeedback) {
+      setRoomStatus("Audio enabled. If it's quiet, check whether the speaker is unmuted.");
+    }
   }
 
   function setRoomStatus(text) {
@@ -445,13 +454,12 @@ async function init() {
 
   function startSession() {
     unlockAudio();
-    ["pointerdown", "touchend"].forEach((name) => document.addEventListener(name, unlockAudio, { passive: true }));
     const root = node("div", "room-live");
     const roomStatus = node("p", "room-connection", "Connecting to the room…");
     roomStatus.setAttribute("role", "status");
     const audioButton = node("button", "button button-dark button-small", "Enable audio");
     audioButton.type = "button";
-    audioButton.addEventListener("click", unlockAudio);
+    audioButton.addEventListener("click", () => unlockAudio(true));
     const stageTitle = node("h2", "room-section-title", "On stage");
     const stageGrid = node("div", "room-people");
     const audienceTitle = node("h2", "room-section-title", "Audience");
@@ -487,7 +495,7 @@ async function init() {
         const announced = await announce();
         if (channel !== activeChannel) return;
         startMeter();
-        if (announced) setRoomStatus("Connected · Voice only");
+        if (announced) setRoomStatus("Room joined · Voice connects as people join");
       } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
         setRoomStatus("Connection interrupted. Reconnecting…");
       }
