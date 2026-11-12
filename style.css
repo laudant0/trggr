@@ -1447,7 +1447,7 @@ html[data-theme="light"] .pulse-filter:focus-visible{outline-color:#315e13}
 @media(max-width:600px){.pulse-panel{padding:16px}.pulse-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.pulse-filter{min-height:58px}}
 
 .poll-share-link{width:44px;min-height:44px;padding:0}
-.poll-share-link svg{width:19px;height:19px;fill:currentColor}
+.poll-share-link svg{width:16px;height:16px;fill:currentColor}
 .poll-share-link svg[fill="none"]{fill:none}
 .poll-share-link:focus-visible,.poll-share-native:focus-visible,.room-person-action:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
 .poll-share-feedback{flex-basis:100%;color:var(--paper);font:500 12px/1.4 var(--body)}
