@@ -55,7 +55,8 @@ async function initializeAuth() {
         }
         const allowedDestinations = new Set(["index.html", "index.html#polls", "create.html", "profile.html", "window.html", "admin.html", "report.html"]);
         const memberDestination = /^(member|room)\.html\?id=[0-9a-f-]{36}$/i.test(next || "");
-        if (next && (allowedDestinations.has(next) || memberDestination)) {
+        const pulseDestination = /^index\.html\?pulse=(voted|pinned)#polls$/.test(next || "");
+        if (next && (allowedDestinations.has(next) || memberDestination || pulseDestination)) {
           sessionStorage.removeItem("trggr-auth-next");
           window.location.replace(next);
         } else if (!next) {

@@ -2,6 +2,7 @@ import { liveStreak, recordVote, openStreakModal } from "./streak.js";
 import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { startRoomFlow } from "./rooms.js";
+import { matchesPulse } from "./pulse-filters.mjs";
 
 (() => {
   const storageKey = "trggr-polls-v1";
@@ -33,13 +34,16 @@ let roomsByPoll = new Map();
 let hostablePolls = new Set();
   let userId = null;
   let pins = new Set();
+  let pinError = null;
   let followingIds = new Set();
   let takes = new Map();
   let loading = false;
   let category = new URLSearchParams(window.location.search).get("category") || "All";
   const sharedPollId = new URLSearchParams(window.location.search).get("poll");
+  const requestedPulse = new URLSearchParams(window.location.search).get("pulse");
   let query = "";
   let sortMode = "newest";
+  let pulseFilter = ["closing", "voted", "pinned"].includes(requestedPulse) ? requestedPulse : "all";
   let backend;
   const selectedFilter = document.querySelector(`[data-category="${CSS.escape(category)}"]`);
   if (selectedFilter) {
@@ -261,6 +265,8 @@ let hostablePolls = new Set();
       ensureFollowingChip();
       if (pollsResult.error) throw pollsResult.error;
       const creatorByPoll = new Map((linksResult.data || []).map((link) => [link.poll_id, link.creator_id]));
+      pinError = pinsResult.error || null;
+      if (pinError) console.error("Could not load pinned polls.", pinError);
       pins = new Set((pinsResult.data || []).map((row) => row.poll_id));
       polls = (pollsResult.data || []).map(mapPoll);
       polls.forEach((poll) => { poll.creatorId = creatorByPoll.get(poll.id) || null; });
@@ -272,7 +278,7 @@ let hostablePolls = new Set();
       const isTyping = () => [...document.querySelectorAll("#poll-grid .take-input, #featured-track .take-input")].some((input) => input.value.trim() || input === document.activeElement);
       paintStreak(false);
       const firstPaint = !document.documentElement.classList.contains("polls-settled");
-      if (firstPaint && userId && localStorage.getItem("trgga-pref-foryou") !== "off" && !sharedPollId && !new URLSearchParams(window.location.search).get("category") && Object.keys(voted).length) {
+      if (firstPaint && userId && localStorage.getItem("trgga-pref-foryou") !== "off" && !sharedPollId && pulseFilter === "all" && !new URLSearchParams(window.location.search).get("category") && Object.keys(voted).length) {
         category = "For You";
         document.querySelectorAll(".filter-chip").forEach((chip) => chip.classList.toggle("active", chip.dataset.category === "For You"));
       }
@@ -290,7 +296,8 @@ let hostablePolls = new Set();
           document.getElementById(`poll-${targetPoll.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
-      status.hidden = true;
+      if (pinError) setStatus("Pinned polls couldn't load. Try refreshing the page.", "error");
+      else status.hidden = true;
     } catch (error) {
       console.error("Could not load the shared poll feed.", error);
       setStatus(`The shared feed could not load: ${error.message}. Refresh to try again.`, "error");
@@ -538,7 +545,8 @@ let hostablePolls = new Set();
   function renderIfChanged() {
     const signature = JSON.stringify([
       polls.map((poll) => [poll.id, poll.votes, poll.votedPosition, poll.closesAt]),
-      [...pins], [...roomsByPoll.keys()], [...hostablePolls], [...followingIds], [...takes], userId
+      polls.filter((poll) => matchesPulse(poll, "closing", voted, pins, Date.now())).map((poll) => poll.id),
+      [...pins], Boolean(pinError), [...roomsByPoll.keys()], [...hostablePolls], [...followingIds], [...takes], userId
     ]);
     if (signature === lastSignature) return;
     const y = window.scrollY;
@@ -550,13 +558,17 @@ let hostablePolls = new Set();
   function render() {
     lastSignature = null;
     updateStats();
-    const visible = polls.filter((poll) => {
+    const now = Date.now();
+    const matching = polls.filter((poll) => {
       const matchesCategory = category === "All" || category === "For You"
         || (category === "Following" ? Boolean(poll.creatorId && followingIds.has(poll.creatorId)) : poll.category.toLowerCase() === category.toLowerCase());
       const matchesQuery = `${poll.question} ${poll.category} ${poll.creator || ""}`.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
-    const now = Date.now();
+    const visible = matching.filter((poll) => matchesPulse(poll, pulseFilter, voted, pins, now));
+    const activeLabels = { closing: "Closing in 24 hours", voted: "Your votes", pinned: "Pinned polls" };
+    document.querySelector("#pulse-active").hidden = pulseFilter === "all";
+    document.querySelector("#pulse-active-label").textContent = activeLabels[pulseFilter] || "";
     if (category === "For You") {
       const affinity = new Map();
       polls.forEach((poll) => {
@@ -581,7 +593,7 @@ let hostablePolls = new Set();
       visible.push(...open);
     }
     // Keep cards where they are while the user stays on this view, so a vote never makes its card jump away.
-    const orderKey = `${category}|${sortMode}|${query}`;
+    const orderKey = `${category}|${sortMode}|${query}|${pulseFilter}`;
     if (frozenOrder.key === orderKey) {
       const rank = new Map(frozenOrder.ids.map((id, index) => [id, index]));
       const unknown = category === "For You" ? 1e9 : -1;
@@ -590,7 +602,7 @@ let hostablePolls = new Set();
     }
     frozenOrder.key = orderKey;
     frozenOrder.ids = visible.map((poll) => poll.id);
-    const showFeatured = (category === "All" || category === "For You") && !query && sortMode !== "closing";
+    const showFeatured = pulseFilter === "all" && (category === "All" || category === "For You") && !query && sortMode !== "closing";
     const featured = showFeatured ? visible.filter(isFeatured).slice(0, 6) : [];
     const featuredIds = new Set(featured.map((poll) => poll.id));
     renderFeatured(featured);
@@ -599,13 +611,32 @@ let hostablePolls = new Set();
     const seeMore = document.querySelector("#see-more");
     if (seeMore) seeMore.hidden = rest.length <= shownCount;
     const emptyNote = document.querySelector("#empty-state span");
-    if (emptyNote) emptyNote.textContent = category === "Following" ? "Nothing from people you follow yet." : "Nothing on that frequency.";
+    if (emptyNote) {
+      const emptyMessages = {
+        closing: "No polls closing in the next 24 hours here.",
+        voted: backend && !userId ? "Sign in to find your votes here." : "You haven't voted on any polls here yet.",
+        pinned: pinError ? "Pinned polls couldn't load. Try refreshing the page." : userId ? "No pinned polls here yet. Tap PIN on a poll to save it." : backend ? "Sign in and pin a poll to find it here." : "Pinned polls are available when connected to your account."
+      };
+      emptyNote.textContent = emptyMessages[pulseFilter] || (category === "Following" ? "Nothing from people you follow yet." : "Nothing on that frequency.");
+    }
     document.querySelector("#empty-state").hidden = visible.length > 0;
+    const pulseSignIn = document.querySelector("#pulse-sign-in");
+    pulseSignIn.hidden = !(backend && !userId && (pulseFilter === "voted" || pulseFilter === "pinned"));
+    pulseSignIn.href = `login.html?next=${encodeURIComponent(`index.html?pulse=${pulseFilter}#polls`)}`;
     document.querySelector("#poll-count").textContent = String(visible.length).padStart(2, "0");
   }
 
   document.querySelector("#see-more")?.addEventListener("click", () => {
     shownCount += PAGE_SIZE;
+    render();
+  });
+
+  document.querySelector("#pulse-clear").addEventListener("click", () => {
+    pulseFilter = "all";
+    shownCount = PAGE_SIZE;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("pulse");
+    window.history.replaceState(window.history.state, "", url);
     render();
   });
 

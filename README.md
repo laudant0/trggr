@@ -46,6 +46,8 @@ The initial migration publishes eight sample questions into the shared database 
 
 The seeded topic list spans arts, automotive, books, business, creators, culture, education, entertainment, environment, fashion, finance, food, gaming, health, lifestyle, music, news, politics, relationships, science, sports, technology, travel, world, and Other. The Topics page reads categories from the database, while Explore shows the shared poll feed. To expand the list, add a row to `public.poll_categories` in the Supabase SQL Editor; the site will include it automatically.
 
+Window's Your Pulse shortcuts open the Lobby with filters for polls closing within 24 hours, your votes, or your pinned polls. These filters can be combined with a topic or search and cleared in the Lobby. Pins require a signed-in account; local-mode votes remain in that browser.
+
 On the website, the Explore and Topics labels are intentionally distinct from their legacy HTML filenames: `explore.html` is the live poll feed, and `topics.html` is the topic directory.
 
 After voting, members can share the poll results to X and WhatsApp. The Instagram button uses the device's native share sheet when available; otherwise it copies the share text so it can be pasted into Instagram. Individual vote identities are never included in public profiles or public poll results.

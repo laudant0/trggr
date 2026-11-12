@@ -54,12 +54,13 @@
     <section class="content-section lobby-polls shell" id="polls">
       <div class="feed-toolbar">
         <div class="filter-list" id="filters" role="group" aria-label="Filter polls by category">
-          <button class="filter-chip active" data-category="All">For you <span class="filter-count" id="poll-count">00</span></button>
+          <button class="filter-chip active" data-category="All">All <span class="filter-count" id="poll-count">00</span></button>
         </div>
+        <div class="pulse-active" id="pulse-active" hidden><span id="pulse-active-label"></span><button type="button" id="pulse-clear">Show all polls</button></div>
         <select class="sort-select" id="poll-sort" aria-label="Sort polls"><option value="newest">Newest</option><option value="trending">Trending</option><option value="closing">Closing soon</option></select><label class="search-box"><span aria-hidden="true">⌕</span><input id="poll-search" type="search" placeholder="Find a conversation" aria-label="Search polls"></label>
       </div>
       <div class="poll-grid" id="poll-grid" aria-live="polite"></div>
-      <div class="empty-state" id="empty-state" hidden><span>Nothing on that frequency.</span><p>Try another search, or start a conversation of your own.</p><a class="button button-dark button-small" href="create.html">Create a poll <span aria-hidden="true">↗</span></a></div>
+      <div class="empty-state" id="empty-state" hidden><span>Nothing on that frequency.</span><p>Try another search, or start a conversation of your own.</p><a class="button button-dark button-small" id="pulse-sign-in" href="login.html?next=index.html%23polls" hidden>Sign in <span aria-hidden="true">↗</span></a><a class="button button-dark button-small" href="create.html">Create a poll <span aria-hidden="true">↗</span></a></div>
       <div class="feed-footer"><span>THAT'S THE CURRENT FREQUENCY.</span><button class="button button-dark button-small" id="see-more" type="button" hidden>See more <span aria-hidden="true">↓</span></button></div>
     </section>
 
@@ -68,7 +69,7 @@
   <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE PULSE IS NOTHING WITHOUT YOU.</span><span>MADE FOR THE TAKES THAT MOVE US.</span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
   <script src="poll-data.js"></script>
   <script src="auth-config.js"></script>
-  <script type="module" src="app.js?v=18"></script>
+  <script type="module" src="app.js?v=19"></script>
   <script type="module" src="site-nav.js?v=7"></script>
 </body>
 </html>

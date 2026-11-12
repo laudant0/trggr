@@ -1,5 +1,6 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { setLinkedText } from "./linkify.js";
+import { pulseCounts } from "./pulse-filters.mjs";
 
 const status = document.querySelector("#window-status");
 const signedOut = document.querySelector("#window-signed-out");
@@ -42,9 +43,36 @@ async function init() {
     setupNotes();
     loadNotes();
     loadNotifications();
+    loadPulse();
   } catch (error) {
     console.error("Could not open Window.", error);
     status.textContent = `Window couldn't load: ${error.message}`;
+  }
+}
+
+async function loadPulse() {
+  const context = document.querySelector("#pulse-context");
+  try {
+    const [pollsResult, pinsResult] = await Promise.all([
+      myBackend.rpc("get_public_polls"),
+      myBackend.rpc("get_my_pins")
+    ]);
+    if (pollsResult.error) throw pollsResult.error;
+    const pins = new Set((pinsResult.data || []).map((pin) => pin.poll_id));
+    const counts = pulseCounts(pollsResult.data || [], pins, Date.now());
+    ["all", "closing", "voted"].forEach((filter) => {
+      document.querySelector(`#pulse-count-${filter}`).textContent = counts[filter].toLocaleString();
+    });
+    if (pinsResult.error) {
+      console.error("Could not load pinned polls.", pinsResult.error);
+      context.textContent = "Pinned poll count couldn't load. Your shortcuts still work.";
+    } else {
+      document.querySelector("#pulse-count-pinned").textContent = counts.pinned.toLocaleString();
+      context.textContent = "Choose a shortcut to explore these polls in the Lobby.";
+    }
+  } catch (error) {
+    console.error("Could not load Your Pulse.", error);
+    context.textContent = "Poll counts couldn't load. Try refreshing Window; your shortcuts still work.";
   }
 }
 
