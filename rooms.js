@@ -62,6 +62,7 @@ function askRoomDetails(suggested) {
     const actions = node("div", "room-actions");
     const cancel = node("button", "button button-dark button-small", "Cancel");
     cancel.type = "button";
+    cancel.autofocus = true;
     const go = node("button", "button button-lime button-small", "Start room");
     go.type = "submit";
     actions.append(go, cancel);
@@ -73,7 +74,7 @@ function askRoomDetails(suggested) {
     form.addEventListener("submit", () => { result = { title: title.value, minutes: Number(when.value) }; });
     dialog.addEventListener("close", () => { dialog.remove(); resolve(result); });
     dialog.showModal();
-    title.select();
+    if (window.matchMedia("(hover: hover)").matches) title.select();
   });
 }
 
@@ -81,12 +82,15 @@ export async function startRoomFlow(backend, pollId, pollQuestion) {
   const details = await askRoomDetails(`Let's talk: ${pollQuestion}`.slice(0, 80));
   if (!details) return null;
   const startsAt = details.minutes > 0 ? new Date(Date.now() + details.minutes * 60000).toISOString() : null;
-  const { data, error } = await backend.rpc("create_room", { p_poll_id: pollId, p_title: details.title, p_starts_at: startsAt });
-  if (error) {
-    window.alert(error.message || "Could not create the room.");
+  try {
+    const { data, error } = await backend.rpc("create_room", { p_poll_id: pollId, p_title: details.title, p_starts_at: startsAt });
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Could not create the room.", error);
+    window.alert(error.message || "Could not create the room. Please try again.");
     return null;
   }
-  return data;
 }
 async function loadGrid() {
   if (!grid) return;
@@ -111,8 +115,15 @@ async function loadGrid() {
   }
   const onEnd = async (room, button) => {
     button.disabled = true;
-    await backend.rpc("end_room", { p_id: room.id });
-    loadGrid();
+    try {
+      const { error } = await backend.rpc("end_room", { p_id: room.id });
+      if (error) throw error;
+      await loadGrid();
+    } catch (error) {
+      console.error("Could not end the room.", error);
+      window.alert("The room couldn't be ended. Please try again.");
+      button.disabled = false;
+    }
   };
   grid.replaceChildren(...data.map((room) => roomCard(room, onEnd)));
 }

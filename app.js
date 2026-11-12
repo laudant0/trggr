@@ -1,8 +1,9 @@
 import { liveStreak, recordVote, openStreakModal } from "./streak.js";
 import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
-import { startRoomFlow } from "./rooms.js";
+import { startRoomFlow } from "./rooms.js?v=3";
 import { matchesPulse } from "./pulse-filters.mjs";
+import { shareIcon } from "./share-icons.js";
 
 (() => {
   const storageKey = "trggr-polls-v1";
@@ -509,29 +510,35 @@ let hostablePolls = new Set();
       shareButton.dataset.shareTitle = poll.question;
       shareButton.dataset.shareText = shareText;
       shareButton.dataset.shareUrl = url;
-      const xLink = el("a", "poll-share-link", "X");
+      const xLink = el("a", "poll-share-link");
+      xLink.append(shareIcon("x"));
       xLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
       xLink.target = "_blank";
       xLink.rel = "noopener noreferrer";
       xLink.setAttribute("aria-label", "Share your vote on X");
-      const whatsappLink = el("a", "poll-share-link", "WhatsApp");
+      const whatsappLink = el("a", "poll-share-link");
+      whatsappLink.append(shareIcon("whatsapp"));
       whatsappLink.href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${url}`)}`;
       whatsappLink.target = "_blank";
       whatsappLink.rel = "noopener noreferrer";
       whatsappLink.setAttribute("aria-label", "Share your vote on WhatsApp");
-      const instagramButton = el("button", "poll-share-link", "Instagram");
+      const instagramButton = el("button", "poll-share-link");
+      instagramButton.append(shareIcon("instagram"));
       instagramButton.type = "button";
       instagramButton.dataset.shareTitle = poll.question;
       instagramButton.dataset.shareText = shareText;
       instagramButton.dataset.shareUrl = url;
       instagramButton.dataset.instagram = "true";
       instagramButton.setAttribute("aria-label", "Copy your vote and open Instagram to share it");
-      const snapchatLink = el("a", "poll-share-link", "Snapchat");
+      const snapchatLink = el("a", "poll-share-link");
+      snapchatLink.append(shareIcon("snapchat"));
       snapchatLink.href = `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(url)}`;
       snapchatLink.target = "_blank";
       snapchatLink.rel = "noopener noreferrer";
       snapchatLink.setAttribute("aria-label", "Share your vote on Snapchat");
-      share.append(shareButton, xLink, whatsappLink, instagramButton, snapchatLink);
+      const feedback = el("span", "poll-share-feedback");
+      feedback.setAttribute("role", "status");
+      share.append(shareButton, xLink, whatsappLink, instagramButton, snapchatLink, feedback);
       card.append(share);
     }
     if (backend && isTakesVisible(poll)) card.append(renderTakes(poll));
@@ -664,19 +671,20 @@ let hostablePolls = new Set();
   [grid, document.querySelector("#featured-track")].forEach((root) => root.addEventListener("click", async (event) => {
     const instagramShare = event.target.closest("[data-instagram]");
     if (instagramShare) {
-      const label = "Instagram";
+      const feedback = instagramShare.closest(".poll-share").querySelector(".poll-share-feedback");
       try {
         await navigator.clipboard.writeText(`${instagramShare.dataset.shareText} ${instagramShare.dataset.shareUrl}`);
-        instagramShare.textContent = "Copied ✓ opening Instagram…";
+        feedback.textContent = "Copied. Opening Instagram…";
       } catch (error) {
-        instagramShare.textContent = "Opening Instagram…";
+        console.warn("Could not copy the Instagram share.", error);
+        feedback.textContent = "Couldn't copy. Opening Instagram…";
       }
       const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       window.setTimeout(() => {
         if (mobile) window.location.href = "instagram://story-camera";
         else window.open("https://www.instagram.com/direct/new/", "_blank", "noopener,noreferrer");
-        instagramShare.textContent = "Paste in your Story or DM";
-        window.setTimeout(() => { instagramShare.textContent = label; }, 4000);
+        if (feedback.textContent.startsWith("Copied")) feedback.textContent = "Paste in your Story or DM.";
+        window.setTimeout(() => { feedback.textContent = ""; }, 4000);
       }, 400);
       return;
     }
