@@ -444,7 +444,43 @@ async function init() {
       failures.forEach((result) => console.warn("Could not play room audio.", result.reason));
       setRoomStatus("Audio could not start. Check your device volume and tap Enable audio again.");
     } else if (showFeedback) {
-      setRoomStatus("Audio enabled. If it's quiet, check whether the speaker is unmuted.");
+      setRoomStatus("Audio playback started. If you can't hear anyone, tap Check audio.");
+    }
+  }
+
+  async function checkAudio() {
+    const connected = [...peers.values()].filter((peer) => peer.pc.connectionState === "connected");
+    if (!connected.length) {
+      setRoomStatus("No voice connection yet. Make sure another person has joined.");
+      return;
+    }
+    const countPackets = async () => {
+      const reports = await Promise.all(connected.map((peer) => peer.pc.getStats()));
+      let total = 0;
+      let found = false;
+      reports.forEach((report) => report.forEach((stat) => {
+        if (stat.type === "transport" || stat.type === "candidate-pair" || stat.type === "inbound-rtp") found = true;
+        if (stat.type === "inbound-rtp" && (stat.kind === "audio" || stat.mediaType === "audio") && typeof stat.packetsReceived === "number") {
+          total += stat.packetsReceived;
+        }
+      }));
+      return found ? total : null;
+    };
+    try {
+      setRoomStatus("Checking for incoming voice… Ask someone to speak now.");
+      const before = await countPackets();
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const after = await countPackets();
+      if (before === null || after === null) {
+        setRoomStatus("Voice check unavailable in this browser. Check that the speaker is unmuted.");
+      } else if (after > before) {
+        setRoomStatus("Audio packets are arriving. If you can't hear anyone, check your volume and audio output.");
+      } else {
+        setRoomStatus("No incoming audio packets detected. Ask the speaker to unmute, then check again.");
+      }
+    } catch (error) {
+      console.warn("Could not check room audio.", error);
+      setRoomStatus("Voice check couldn't run. Try leaving and joining again.");
     }
   }
 
@@ -460,6 +496,12 @@ async function init() {
     const audioButton = node("button", "button button-dark button-small", "Enable audio");
     audioButton.type = "button";
     audioButton.addEventListener("click", () => unlockAudio(true));
+    const checkButton = node("button", "button button-dark button-small", "Check audio");
+    checkButton.type = "button";
+    checkButton.addEventListener("click", async () => {
+      checkButton.disabled = true;
+      try { await checkAudio(); } finally { checkButton.disabled = false; }
+    });
     const stageTitle = node("h2", "room-section-title", "On stage");
     const stageGrid = node("div", "room-people");
     const audienceTitle = node("h2", "room-section-title", "Audience");
@@ -475,7 +517,7 @@ async function init() {
     const leave = node("button", "button button-dark", "Leave");
     leave.type = "button";
     leave.addEventListener("click", () => { cleanup(); window.location.href = "community.html#rooms"; });
-    controls.append(audioButton, mic, handButton, leave);
+    controls.append(audioButton, checkButton, mic, handButton, leave);
     if (isHost) controls.append(endButton());
     root.append(roomStatus, stageTitle, stageGrid, audienceTitle, audienceGrid, controls, node("p", "room-note", "Voice is peer to peer, so rooms work best with a small crowd. Be respectful and keep it about the poll."));
     ui = { root, stageGrid, audienceGrid, audienceTitle, mic, hand: handButton, status: roomStatus };

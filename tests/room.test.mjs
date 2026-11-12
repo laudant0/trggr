@@ -30,7 +30,7 @@ class Element {
   click() { return this.listeners.click?.(); }
 }
 
-async function setup({ live = false, guest = false, endError = false, getUserMedia, RTCPeerConnection, MediaStream } = {}) {
+async function setup({ live = false, guest = false, endError = false, getUserMedia, RTCPeerConnection, MediaStream, scheduleTimeout = () => {} } = {}) {
   const stage = new Element("main");
   const actions = [];
   const listeners = {};
@@ -68,7 +68,7 @@ async function setup({ live = false, guest = false, endError = false, getUserMed
     getBackend: async () => backend, isBackendConfigured: () => true, initials: () => "M",
     URLSearchParams, Date, Set, Map, Uint8Array, RTCPeerConnection, MediaStream,
     console: { error() {}, warn() {} },
-    setTimeout() {}, setInterval() { return 1; }, clearInterval() {}
+    setTimeout: scheduleTimeout, setInterval() { return 1; }, clearInterval() {}
   });
   await new Promise((resolve) => setImmediate(resolve));
   return { stage, actions, alerts, location, channel, listeners, setState: (value) => { state = value; } };
@@ -100,6 +100,36 @@ test("enable audio explains when no speaker audio is available yet", async () =>
   await app.stage.find("Enable audio").click();
   assert.ok(app.stage.find("Waiting for a speaker's audio. Tap Enable audio again if you can't hear them."));
 });
+
+for (const [arriving, expected] of [
+  [true, "Audio packets are arriving. If you can't hear anyone, check your volume and audio output."],
+  [false, "No incoming audio packets detected. Ask the speaker to unmute, then check again."]
+]) {
+  test(`audio check reports ${arriving ? "incoming" : "missing"} voice packets`, async () => {
+    let packets = 10;
+    class Peer {
+      constructor() {
+        this.connectionState = "connected";
+        this.localDescription = { toJSON: () => ({}) };
+      }
+      addTransceiver() { return { sender: {} }; }
+      async createOffer() { return {}; }
+      async setLocalDescription() {}
+      async getStats() {
+        const current = packets;
+        if (arriving) packets++;
+        return new Map([["audio", { type: "inbound-rtp", kind: "audio", packetsReceived: current }]]);
+      }
+    }
+    const app = await setup({ live: true, RTCPeerConnection: Peer, scheduleTimeout: (callback) => callback() });
+    app.stage.find("Join the room 🎙").click();
+    await app.channel.subscribed("SUBSCRIBED");
+    app.setState({ a: [{ name: "Me" }], z: [{ name: "Guest" }] });
+    app.listeners["presence:sync"]();
+    await app.stage.find("Check audio").click();
+    assert.ok(app.stage.find(expected));
+  });
+}
 
 test("a microphone granted after demotion is stopped, not published", async () => {
   let grant;
