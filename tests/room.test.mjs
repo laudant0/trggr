@@ -93,6 +93,14 @@ test("failed room end stays in the room and does not announce an end", async () 
   assert.equal(app.alerts.length, 1);
 });
 
+test("enable audio explains when no speaker audio is available yet", async () => {
+  const app = await setup({ live: true });
+  app.stage.find("Join the room 🎙").click();
+  await app.channel.subscribed("SUBSCRIBED");
+  await app.stage.find("Enable audio").click();
+  assert.ok(app.stage.find("Waiting for a speaker's audio. Tap Enable audio again if you can't hear them."));
+});
+
 test("a microphone granted after demotion is stopped, not published", async () => {
   let grant;
   let stopped = false;
@@ -115,13 +123,16 @@ test("the answering speaker attaches their microphone to the offered audio chann
   const calls = [];
   const track = { stop() {} };
   class Peer {
-    constructor() { this.localDescription = { toJSON: () => ({ type: "answer" }) }; }
+    constructor() {
+      this.localDescription = { toJSON: () => ({ type: "answer" }) };
+      this.transceiver = { direction: "recvonly", receiver: { track: { kind: "audio" } }, sender: { replaceTrack: async (value) => calls.push(value === track ? "microphone attached" : "no microphone") } };
+    }
     addTransceiver() { calls.push("unexpected extra transceiver"); }
     async setRemoteDescription() { calls.push("remote offer"); }
     getTransceivers() {
-      return [{ receiver: { track: { kind: "audio" } }, sender: { replaceTrack: async (value) => calls.push(value === track ? "microphone attached" : "no microphone") } }];
+      return [this.transceiver];
     }
-    async createAnswer() { calls.push("answer"); return {}; }
+    async createAnswer() { calls.push(`answer ${this.transceiver.direction}`); return {}; }
     async setLocalDescription() {}
   }
   const app = await setup({
@@ -135,6 +146,6 @@ test("the answering speaker attaches their microphone to the offered audio chann
   app.listeners["presence:sync"]();
   await app.stage.find("🎙 Unmute").click();
   await app.listeners["broadcast:sig"]({ payload: { from: "a", to: "z", kind: "offer", data: {} } });
-  assert.deepEqual(calls, ["remote offer", "microphone attached", "answer"]);
+  assert.deepEqual(calls, ["remote offer", "microphone attached", "answer sendrecv"]);
   assert.ok(app.actions.includes("sig"));
 });
