@@ -51,6 +51,17 @@
         <article class="profile-stat logo-stat" aria-label="TRGGA"><span class="logo-orb" aria-hidden="true">%</span></article>
       </section>
 
+      <section class="pulse-panel" aria-labelledby="pulse-title">
+        <div class="pulse-intro"><span class="eyebrow">YOUR PULSE</span><strong id="pulse-title">Find your next move.</strong><span>Quick views for the conversations that matter to you.</span></div>
+        <div class="pulse-filters">
+          <a class="pulse-filter" href="index.html#polls"><span>All polls</span><strong id="pulse-count-all">—</strong></a>
+          <a class="pulse-filter" href="index.html?pulse=closing#polls"><span>Closing in 24h</span><strong id="pulse-count-closing">—</strong></a>
+          <a class="pulse-filter" href="index.html?pulse=voted#polls"><span>Your votes</span><strong id="pulse-count-voted">—</strong></a>
+          <a class="pulse-filter" href="index.html?pulse=pinned#polls"><span>Pinned</span><strong id="pulse-count-pinned">—</strong></a>
+        </div>
+        <p class="pulse-context" id="pulse-context" role="status">Loading your poll shortcuts…</p>
+      </section>
+
       <section class="profile-panel" id="boldest">
         <div class="profile-panel-heading"><div><span class="eyebrow">AGAINST THE GRAIN</span><h2>Your Boldest Stand</h2></div></div>
         <div class="profile-activity-list" id="win-bold"><p class="profile-empty">Loading...</p></div>
@@ -82,7 +93,7 @@
 
   <footer class="site-footer shell"><a class="wordmark" href="index.html">TRGGA</a><span>THE LOBBY IS NOTHING WITHOUT YOU.</span><span>YOUR VOICE IS THE DATA.</span><span><a href="terms.html">TERMS</a> · <a href="privacy.html">PRIVACY</a> · <a href="help.html">HELP</a> · <a href="report.html">REPORT</a></span></footer>
   <script src="auth-config.js"></script>
-  <script type="module" src="window.js?v=5"></script>
+  <script type="module" src="window.js?v=6"></script>
   <script type="module" src="site-nav.js?v=7"></script>
 </body>
 </html>
