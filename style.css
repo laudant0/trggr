@@ -1445,4 +1445,15 @@ html[data-theme="light"] .pulse-filter{background:rgba(255,255,255,.65);border-c
 html[data-theme="light"] .pulse-filter:hover,html[data-theme="light"] .pulse-filter.active{border-color:#3f7d00;background:#d6eac5}
 html[data-theme="light"] .pulse-filter:focus-visible{outline-color:#315e13}
 @media(max-width:600px){.pulse-panel{padding:16px}.pulse-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.pulse-filter{min-height:58px}}
+
+.poll-share-link{width:44px;min-height:44px;padding:0}
+.poll-share-link svg{width:19px;height:19px;fill:currentColor}
+.poll-share-link svg[fill="none"]{fill:none}
+.poll-share-link:focus-visible,.poll-share-native:focus-visible,.room-person-action:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.poll-share-feedback{flex-basis:100%;color:var(--paper);font:500 12px/1.4 var(--body)}
+.poll-share-feedback:empty{display:none}
+.room-connection{margin:0;color:var(--muted);font:600 13px/1.4 var(--body)}
+.room-controls{bottom:calc(14px + env(safe-area-inset-bottom))}
+.room-controls .button[hidden]{display:none}
+@media(max-width:600px){.room-controls{border-radius:20px;gap:8px}.room-controls .button{min-height:44px}}
 html[data-theme="light"] .streak-fill{background:linear-gradient(90deg,#3f7d00,#8fd13a)}

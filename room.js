@@ -55,6 +55,21 @@ async function init() {
   const myName = meta.full_name || meta.name || "Member";
   const isHost = room.host_id === me.id;
   let channel = null;
+  let localTrack = null;
+  let micOn = false;
+  let micBusy = false;
+  let micRequest = 0;
+  let hand = false;
+  let speakers = new Set([room.host_id]);
+  const peers = new Map();
+  const reconnectAttempts = new Map();
+  const pendingIce = new Map();
+  const levels = new Map();
+  const speaking = new Set();
+  let audioCtx = null;
+  let meter = null;
+  let people = new Map();
+  let ui = null;
 
   const header = node("div", "room-header");
   const badge = node("span", `room-badge${room.status === "live" ? " live" : ""}`, room.status === "live" ? "LIVE NOW" : `STARTS ${new Date(room.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" }).toUpperCase()}`);
@@ -84,33 +99,46 @@ async function init() {
     end.type = "button";
     end.addEventListener("click", async () => {
       end.disabled = true;
-      if (channel) await channel.send({ type: "broadcast", event: "ended", payload: {} });
-      await backend.rpc("end_room", { p_id: room.id });
+      try {
+        const { error } = await backend.rpc("end_room", { p_id: room.id });
+        if (error) throw error;
+      } catch (error) {
+        console.error("Could not end the room.", error);
+        window.alert("The room couldn't be ended. Please try again.");
+        end.disabled = false;
+        return;
+      }
+      if (channel) {
+        try {
+          const result = await channel.send({ type: "broadcast", event: "ended", payload: {} });
+          if (result !== "ok") console.warn("Room ended, but the live notification failed:", result);
+        } catch (error) {
+          console.warn("Room ended, but the live notification failed.", error);
+        }
+      }
       cleanup();
       window.location.href = "community.html#rooms";
     });
     return end;
   }
 
-  let localTrack = null;
-  let micOn = false;
-  let hand = false;
-  let speakers = new Set([room.host_id]);
-  const peers = new Map();
-  const pendingIce = new Map();
-  const levels = new Map();
-  const speaking = new Set();
-  let audioCtx = null;
-  let meter = null;
-  let people = new Map();
-  let ui = null;
-
   function canSpeak() {
     return speakers.has(me.id);
   }
 
   function send(to, kind, payload) {
-    channel.send({ type: "broadcast", event: "sig", payload: { from: me.id, to, kind, data: payload } });
+    if (!channel) return;
+    channel.send({ type: "broadcast", event: "sig", payload: { from: me.id, to, kind, data: payload } })
+      .then((result) => {
+        if (result !== "ok") {
+          console.warn("Room voice signal failed:", result);
+          setRoomStatus("Voice connection interrupted. Try leaving and joining again.");
+        }
+      })
+      .catch((error) => {
+        console.warn("Room voice signal failed.", error);
+        setRoomStatus("Voice connection interrupted. Try leaving and joining again.");
+      });
   }
 
   function watchLevel(id, stream) {
@@ -126,6 +154,7 @@ async function init() {
   }
 
   function startMeter() {
+    clearInterval(meter);
     meter = setInterval(() => {
       let changed = false;
       levels.forEach((analyser, id) => {
@@ -158,29 +187,48 @@ async function init() {
     speaking.delete(id);
   }
 
-  function makePeer(id) {
+  function reportVoiceError(error) {
+    console.warn("Could not connect room voice.", error);
+    setRoomStatus("Voice couldn't connect. Try leaving and joining again, or switch networks.");
+  }
+
+  function makePeer(id, offerer) {
     closePeer(id);
     const pc = new RTCPeerConnection(ICE);
-    const transceiver = pc.addTransceiver("audio", { direction: "sendrecv" });
+    const sender = offerer ? pc.addTransceiver("audio", { direction: "sendrecv" }).sender : null;
     const audio = document.createElement("audio");
     audio.autoplay = true;
     audio.playsInline = true;
+    audio.setAttribute("playsinline", "");
     document.body.append(audio);
-    const peer = { pc, audio, sender: transceiver.sender };
+    const peer = { pc, audio, sender };
     pc.onicecandidate = (event) => { if (event.candidate) send(id, "ice", event.candidate.toJSON()); };
     pc.onconnectionstatechange = () => {
+      if (pc.connectionState === "connected") {
+        reconnectAttempts.delete(id);
+        return;
+      }
       if (pc.connectionState !== "failed" || peers.get(id)?.pc !== pc) return;
       closePeer(id);
       if (!people.has(id)) return;
-      if (me.id < id) connectTo(id).catch(() => {}); else send(id, "reconnect", {});
+      const attempts = (reconnectAttempts.get(id) || 0) + 1;
+      reconnectAttempts.set(id, attempts);
+      if (attempts > 2) {
+        setRoomStatus("Voice couldn't connect to someone. Try leaving and joining again, or switch networks.");
+        return;
+      }
+      setRoomStatus("Voice connection interrupted. Reconnecting…");
+      if (me.id < id) connectTo(id).catch(reportVoiceError); else send(id, "reconnect", {});
     };
     pc.ontrack = (event) => {
       const stream = new MediaStream([event.track]);
       audio.srcObject = stream;
-      audio.play().catch(() => {});
+      audio.play().catch((error) => {
+        console.warn("Room audio needs a tap to play.", error);
+        setRoomStatus("Tap anywhere in the room to enable audio.");
+      });
       watchLevel(id, stream);
     };
-    if (localTrack && micOn) peer.sender.replaceTrack(localTrack).catch(() => {});
     peers.set(id, peer);
     return peer;
   }
@@ -195,8 +243,12 @@ async function init() {
     if (to !== me.id) return;
     try {
       if (kind === "offer") {
-        const peer = makePeer(from);
+        const peer = makePeer(from, false);
         await peer.pc.setRemoteDescription(payload);
+        const audioTransceiver = peer.pc.getTransceivers().find((item) => item.receiver.track.kind === "audio");
+        if (!audioTransceiver) throw new Error("The voice offer has no audio channel.");
+        peer.sender = audioTransceiver.sender;
+        await peer.sender.replaceTrack(micOn ? localTrack : null);
         await flushIce(from, peer.pc);
         const answer = await peer.pc.createAnswer();
         await peer.pc.setLocalDescription(answer);
@@ -215,11 +267,13 @@ async function init() {
       }
     } catch (error) {
       console.warn("Voice signal failed.", error);
+      setRoomStatus("Voice couldn't connect. Try leaving and joining again, or switch networks.");
     }
   }
 
   async function connectTo(id) {
-    const peer = makePeer(id);
+    const peer = makePeer(id, true);
+    if (micOn && localTrack) await peer.sender.replaceTrack(localTrack);
     const offer = await peer.pc.createOffer();
     await peer.pc.setLocalDescription(offer);
     send(id, "offer", peer.pc.localDescription.toJSON());
@@ -232,37 +286,70 @@ async function init() {
     const hostMeta = people.get(room.host_id);
     if (!isHost && hostMeta && Array.isArray(hostMeta.speakers)) applySpeakers(hostMeta.speakers);
     people.forEach((_, id) => {
-      if (id !== me.id && !peers.has(id) && me.id < id) connectTo(id).catch((error) => console.warn("Could not connect.", error));
+      if (id !== me.id && !peers.has(id) && me.id < id && (reconnectAttempts.get(id) || 0) <= 2) connectTo(id).catch(reportVoiceError);
     });
     [...peers.keys()].forEach((id) => { if (!people.has(id)) closePeer(id); });
+    [...reconnectAttempts.keys()].forEach((id) => { if (!people.has(id)) reconnectAttempts.delete(id); });
     render();
   }
 
-  function announce() {
-    return channel.track(isHost ? { name: myName, hand, mic: micOn, speakers: [...speakers] } : { name: myName, hand, mic: micOn });
+  async function announce() {
+    if (!channel) return;
+    try {
+      const result = await channel.track(isHost ? { name: myName, hand, mic: micOn, speakers: [...speakers] } : { name: myName, hand, mic: micOn });
+      if (result !== "ok") throw new Error(`Presence update: ${result}`);
+      return true;
+    } catch (error) {
+      console.error("Could not update room presence.", error);
+      setRoomStatus("Connection interrupted. Your room status may not be up to date.");
+      return false;
+    }
+  }
+
+  function stopMic() {
+    micOn = false;
+    peers.forEach((peer) => {
+      if (peer.sender) peer.sender.replaceTrack(null).catch((error) => console.warn("Could not mute a peer.", error));
+    });
+    if (localTrack) localTrack.stop();
+    localTrack = null;
+    levels.delete(me.id);
+    speaking.delete(me.id);
   }
 
   async function setMic(on) {
-    if (on && !canSpeak()) return;
+    if (micBusy || (on && !canSpeak())) return;
+    micBusy = true;
+    const request = ++micRequest;
+    render();
     if (on) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+        if (request !== micRequest || !channel || !canSpeak()) {
+          stream.getTracks().forEach((track) => track.stop());
+          micBusy = false;
+          render();
+          return;
+        }
         localTrack = stream.getAudioTracks()[0];
         watchLevel(me.id, new MediaStream([localTrack]));
       } catch (error) {
-        window.alert("TRGGA needs microphone access to let you speak. Check your browser permission.");
+        console.error("Could not access the microphone.", error);
+        setRoomStatus("Microphone unavailable. Check your browser permission and try again.");
+        micBusy = false;
+        render();
         return;
       }
     }
-    micOn = on;
-    peers.forEach((peer) => peer.sender.replaceTrack(on ? localTrack : null).catch(() => {}));
-    if (!on && localTrack) {
-      localTrack.stop();
-      localTrack = null;
-      levels.delete(me.id);
-      speaking.delete(me.id);
-    }
+    if (on) {
+      micOn = true;
+      peers.forEach((peer) => peer.sender?.replaceTrack(localTrack).catch((error) => {
+        console.warn("Could not send microphone audio.", error);
+        setRoomStatus("Your microphone couldn't connect to everyone. Try muting and unmuting.");
+      }));
+    } else stopMic();
     await announce();
+    micBusy = false;
     render();
   }
 
@@ -270,7 +357,10 @@ async function init() {
     const next = new Set([room.host_id, ...ids]);
     if (next.size === speakers.size && [...next].every((id) => speakers.has(id))) return;
     speakers = next;
-    if (!canSpeak() && micOn) setMic(false);
+    if (!canSpeak()) {
+      micRequest++;
+      if (micOn) stopMic();
+    }
     if (canSpeak()) hand = false;
     announce();
   }
@@ -316,6 +406,7 @@ async function init() {
     ui.audienceGrid.replaceChildren(...audience.map(([id, info]) => tile(id, info)));
     ui.audienceTitle.textContent = `Audience \u00b7 ${audience.length}`;
     ui.mic.hidden = !canSpeak();
+    ui.mic.disabled = micBusy;
     ui.mic.textContent = micOn ? "\ud83c\udf99 Mute" : "\ud83c\udf99 Unmute";
     ui.mic.classList.toggle("is-on", micOn);
     ui.hand.hidden = canSpeak();
@@ -324,23 +415,43 @@ async function init() {
   }
 
   function cleanup() {
+    micRequest++;
     clearInterval(meter);
     [...peers.keys()].forEach(closePeer);
     if (localTrack) localTrack.stop();
     if (channel) backend.removeChannel(channel);
     channel = null;
+    ["pointerdown", "touchend"].forEach((name) => document.removeEventListener(name, unlockAudio));
+    if (audioCtx) audioCtx.close().catch((error) => console.warn("Could not close room audio.", error));
+    audioCtx = null;
   }
 
   function unlockAudio() {
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
-    peers.forEach((peer) => peer.audio.play().catch(() => {}));
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume().catch((error) => console.warn("Could not resume room audio.", error));
+    } catch (error) {
+      console.warn("Could not unlock room audio.", error);
+    }
+    peers.forEach((peer) => peer.audio.play().catch((error) => {
+      console.warn("Could not play room audio.", error);
+      setRoomStatus("Audio could not start. Tap Enable audio to try again.");
+    }));
+  }
+
+  function setRoomStatus(text) {
+    if (ui) ui.status.textContent = text;
   }
 
   function startSession() {
-    try { unlockAudio(); } catch (error) { /* audio unlock is best effort */ }
-    ["pointerdown", "touchend"].forEach((name) => document.addEventListener(name, () => { try { unlockAudio(); } catch (error) { /* ignore */ } }, { passive: true }));
+    unlockAudio();
+    ["pointerdown", "touchend"].forEach((name) => document.addEventListener(name, unlockAudio, { passive: true }));
     const root = node("div", "room-live");
+    const roomStatus = node("p", "room-connection", "Connecting to the room…");
+    roomStatus.setAttribute("role", "status");
+    const audioButton = node("button", "button button-dark button-small", "Enable audio");
+    audioButton.type = "button";
+    audioButton.addEventListener("click", unlockAudio);
     const stageTitle = node("h2", "room-section-title", "On stage");
     const stageGrid = node("div", "room-people");
     const audienceTitle = node("h2", "room-section-title", "Audience");
@@ -356,10 +467,10 @@ async function init() {
     const leave = node("button", "button button-dark", "Leave");
     leave.type = "button";
     leave.addEventListener("click", () => { cleanup(); window.location.href = "community.html#rooms"; });
-    controls.append(mic, handButton, leave);
+    controls.append(audioButton, mic, handButton, leave);
     if (isHost) controls.append(endButton());
-    root.append(stageTitle, stageGrid, audienceTitle, audienceGrid, controls, node("p", "room-note", "Voice is peer to peer, so rooms work best with a small crowd. Be respectful and keep it about the poll."));
-    ui = { root, stageGrid, audienceGrid, audienceTitle, mic, hand: handButton };
+    root.append(roomStatus, stageTitle, stageGrid, audienceTitle, audienceGrid, controls, node("p", "room-note", "Voice is peer to peer, so rooms work best with a small crowd. Be respectful and keep it about the poll."));
+    ui = { root, stageGrid, audienceGrid, audienceTitle, mic, hand: handButton, status: roomStatus };
     body.replaceChildren(root);
 
     channel = backend.channel(`trgga-room-${room.id}`, { config: { broadcast: { self: false }, presence: { key: me.id } } });
@@ -369,10 +480,16 @@ async function init() {
       message("The host ended this room. Thanks for being part of it.", "community.html#rooms", "Back to rooms");
     });
     channel.on("presence", { event: "sync" }, syncPeople);
+    const activeChannel = channel;
     channel.subscribe(async (status) => {
+      if (channel !== activeChannel) return;
       if (status === "SUBSCRIBED") {
-        await announce();
+        const announced = await announce();
+        if (channel !== activeChannel) return;
         startMeter();
+        if (announced) setRoomStatus("Connected · Voice only");
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        setRoomStatus("Connection interrupted. Reconnecting…");
       }
     });
     window.addEventListener("pagehide", cleanup);
