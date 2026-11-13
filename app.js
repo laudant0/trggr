@@ -1,7 +1,7 @@
 import { liveStreak, recordVote, openStreakModal } from "./streak.js";
 import { setLinkedText } from "./linkify.js";
 import { getBackend, isBackendConfigured } from "./backend.js";
-import { startRoomFlow } from "./rooms.js?v=3";
+import { startRoomFlow } from "./rooms.js?v=4";
 import { matchesPulse } from "./pulse-filters.mjs";
 import { shareIcon } from "./share-icons.js";
 
@@ -538,7 +538,7 @@ let hostablePolls = new Set();
       snapchatLink.setAttribute("aria-label", "Share your vote on Snapchat");
       const feedback = el("span", "poll-share-feedback");
       feedback.setAttribute("role", "status");
-      share.append(shareButton, xLink, whatsappLink, instagramButton, snapchatLink, feedback);
+      share.append(xLink, whatsappLink, instagramButton, snapchatLink, shareButton, feedback);
       card.append(share);
     }
     if (backend && isTakesVisible(poll)) card.append(renderTakes(poll));

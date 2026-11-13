@@ -1448,6 +1448,9 @@ html[data-theme="light"] .pulse-filter:focus-visible{outline-color:#315e13}
 
 .poll-share-link{width:44px;min-height:44px;padding:0}
 .poll-share-link svg{width:16px;height:16px;fill:currentColor}
+.list-more{justify-self:start;margin-top:12px}
+.list-more[hidden]{display:none}
+html[data-theme="light"] .profile-activity-list>.list-more{color:#f4f3ec}
 .poll-share-link svg[fill="none"]{fill:none}
 .poll-share-link:focus-visible,.poll-share-native:focus-visible,.room-person-action:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
 .poll-share-feedback{flex-basis:100%;color:var(--paper);font:500 12px/1.4 var(--body)}

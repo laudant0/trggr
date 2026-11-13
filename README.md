@@ -50,6 +50,8 @@ Window's Your Pulse shortcuts open the Lobby with filters for polls closing with
 
 On the website, the Explore and Topics labels are intentionally distinct from their legacy HTML filenames: `explore.html` is the live poll feed, and `topics.html` is the topic directory.
 
+Apply `supabase/migrations/20261011001800_topics_and_member_paging.sql` before deploying the updated community page. It adds Careers, Movies, Parenting, Pets and Wellness and enables paging through discoverable members.
+
 After voting, members can share the poll results to X and WhatsApp. The Instagram button uses the device's native share sheet when available; otherwise it copies the share text so it can be pasted into Instagram. Individual vote identities are never included in public profiles or public poll results.
 
 ## Launch readiness

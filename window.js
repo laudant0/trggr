@@ -1,6 +1,7 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
 import { setLinkedText } from "./linkify.js";
 import { pulseCounts } from "./pulse-filters.mjs";
+import { renderExpandableList } from "./expandable-list.js";
 
 const status = document.querySelector("#window-status");
 const signedOut = document.querySelector("#window-signed-out");
@@ -116,13 +117,13 @@ function render(data) {
     recent.replaceChildren(node("p", "profile-empty", "No votes yet. Head to the Lobby and pick a side."));
     return;
   }
-  recent.replaceChildren(...data.recent.map((row) => {
+  renderExpandableList(recent, data.recent, (row) => {
     const link = node("a", "profile-activity-item");
     link.href = `index.html?poll=${encodeURIComponent(row.poll_id)}`;
     const detail = `YOU: ${row.my_label} · ${row.my_percent ?? 0}% AGREED · ${row.with_room ? "WITH THE ROOM" : "AGAINST THE ROOM"}`;
     link.append(node("strong", "", row.question), node("span", "", detail.toUpperCase()));
     return link;
-  }));
+  });
 }
 
 async function loadNotifications() {
@@ -136,7 +137,7 @@ async function loadNotifications() {
     list.replaceChildren(node("p", "profile-empty", "Nothing yet. New followers, polls from people you follow and vote milestones show up here."));
     return;
   }
-  list.replaceChildren(...data.map((item) => {
+  renderExpandableList(list, data, (item) => {
     const isFollow = item.kind === "follow";
     const isPoll = item.kind === "poll";
     const link = node("a", `notif-item${item.is_read ? "" : " unread"}`);
@@ -147,7 +148,7 @@ async function loadNotifications() {
       : `Your poll hit ${item.detail} votes: ${item.poll_question || ""}`;
     link.append(node("strong", "", title), node("span", "", new Date(item.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }).toUpperCase()));
     return link;
-  }));
+  });
   if (data.some((item) => !item.is_read)) {
     myBackend.rpc("mark_notifications_read").then(() => document.querySelectorAll(".nav-badge").forEach((b) => b.remove()));
   }
@@ -165,7 +166,7 @@ async function loadNotes() {
     list.replaceChildren(node("p", "profile-empty", "No notes yet. Post one, or follow members to see theirs."));
     return;
   }
-  list.replaceChildren(...data.map((note) => {
+  renderExpandableList(list, data, (note) => {
     const item = node("article", `window-note${note.mine ? " mine" : ""}`);
     const head = node("div", "window-note-head");
     head.append(node("strong", "", note.mine ? "You" : note.author_name), node("time", "", new Date(note.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })));
@@ -187,7 +188,7 @@ async function loadNotes() {
       item.append(remove);
     }
     return item;
-  }));
+  });
 }
 
 function setupNotes() {
