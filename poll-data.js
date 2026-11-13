@@ -1,8 +1,8 @@
 window.TRGGR_CATEGORIES = [
-  "Arts", "Automotive", "Books", "Business", "Creators", "Culture",
+  "Arts", "Automotive", "Books", "Business", "Careers", "Creators", "Culture",
   "Education", "Entertainment", "Environment", "Fashion", "Finance", "Food",
-  "Gaming", "Health", "Lifestyle", "Music", "News", "Other", "Politics",
-  "Relationships", "Science", "Sports", "Tech", "Travel", "World"
+  "Gaming", "Health", "Lifestyle", "Movies", "Music", "News", "Other", "Parenting", "Pets", "Politics",
+  "Relationships", "Science", "Sports", "Tech", "Travel", "Wellness", "World"
 ];
 
 window.TRGGR_SEED_POLLS = [

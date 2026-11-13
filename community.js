@@ -3,15 +3,21 @@ import { avatarUrl, loadAvatarPaths } from "./avatar.js";
 
 const memberGrid = document.querySelector("#member-grid");
 const searchInput = document.querySelector("#member-search");
+const moreButton = document.querySelector("#member-more");
+const memberStatus = document.querySelector("#member-status");
+const PAGE_SIZE = 12;
 let backend;
 let requestNumber = 0;
+let offset = 0;
+let activeQuery = "";
 
 function profileInitials(name) {
   return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "%";
 }
 
-function renderMembers(profiles) {
+function renderMembers(profiles, append = false) {
   if (!profiles.length) {
+    if (append) return;
     const empty = document.createElement("p");
     empty.className = "profile-empty";
     empty.textContent = searchInput.value.trim()
@@ -21,7 +27,7 @@ function renderMembers(profiles) {
     return;
   }
 
-  memberGrid.replaceChildren(...profiles.map((profile) => {
+  const cards = profiles.map((profile) => {
     const card = document.createElement("a");
     card.className = "member-card";
     card.href = `member.html?id=${encodeURIComponent(profile.id)}`;
@@ -54,33 +60,47 @@ function renderMembers(profiles) {
     arrow.textContent = "↗";
     card.append(avatar, identity, arrow);
     return card;
-  }));
+  });
+  if (append) memberGrid.append(...cards);
+  else memberGrid.replaceChildren(...cards);
 }
 
-async function loadMembers(query = "") {
+async function loadMembers(query = "", append = false) {
   const currentRequest = ++requestNumber;
-  memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
-    className: "profile-empty",
-    textContent: "Finding the people behind the polls…"
-  }));
+  if (!append) {
+    activeQuery = query.trim();
+    offset = 0;
+    moreButton.hidden = true;
+    memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
+      className: "profile-empty",
+      textContent: "Finding the people behind the polls…"
+    }));
+  }
+  moreButton.disabled = true;
+  memberStatus.hidden = true;
   try {
-    const { data, error } = await backend.rpc("get_discoverable_profiles", {
-      p_search: query.trim() || null
+    const { data, error } = await backend.rpc("get_discoverable_profiles_page", {
+      p_search: activeQuery || null,
+      p_offset: offset
     });
     if (error) throw error;
     if (currentRequest === requestNumber) {
-      const paths = await loadAvatarPaths(backend, (data || []).map((profile) => profile.id));
-      (data || []).forEach((profile) => { profile.avatar_path = paths.get(profile.id) || null; });
-      if (currentRequest === requestNumber) renderMembers(data || []);
+      const profiles = (data || []).slice(0, PAGE_SIZE);
+      const paths = await loadAvatarPaths(backend, profiles.map((profile) => profile.id));
+      profiles.forEach((profile) => { profile.avatar_path = paths.get(profile.id) || null; });
+      if (currentRequest !== requestNumber) return;
+      renderMembers(profiles, append);
+      offset += profiles.length;
+      moreButton.hidden = (data || []).length <= PAGE_SIZE;
     }
   } catch (error) {
     if (currentRequest !== requestNumber) return;
     console.error("Could not load the member directory.", error);
-    memberGrid.replaceChildren(Object.assign(document.createElement("p"), {
-      className: "category-load-error",
-      role: "status",
-      textContent: `Public profiles couldn't load: ${error.message}. Refresh to try again.`
-    }));
+    memberStatus.textContent = `Public profiles couldn't load: ${error.message}. ${append ? "Try again." : "Refresh to try again."}`;
+    memberStatus.hidden = false;
+    if (!append) memberGrid.replaceChildren();
+  } finally {
+    if (currentRequest === requestNumber) moreButton.disabled = false;
   }
 }
 
@@ -163,10 +183,14 @@ async function initializeDirectory() {
 
 let searchTimer;
 searchInput.addEventListener("input", () => {
+  requestNumber++;
+  moreButton.hidden = true;
   window.clearTimeout(searchTimer);
   searchTimer = window.setTimeout(() => {
     if (backend) loadMembers(searchInput.value);
   }, 250);
 });
+
+moreButton.addEventListener("click", () => loadMembers(activeQuery, true));
 
 initializeDirectory();

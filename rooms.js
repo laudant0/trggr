@@ -1,4 +1,5 @@
 import { getBackend, isBackendConfigured } from "./backend.js";
+import { renderExpandableList } from "./expandable-list.js";
 
 const grid = document.querySelector("#rooms-grid");
 
@@ -125,7 +126,7 @@ async function loadGrid() {
       button.disabled = false;
     }
   };
-  grid.replaceChildren(...data.map((room) => roomCard(room, onEnd)));
+  renderExpandableList(grid, data, (room) => roomCard(room, onEnd), 6);
 }
 
 loadGrid().catch((error) => console.error("Could not load rooms.", error));

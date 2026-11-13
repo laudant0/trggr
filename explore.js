@@ -6,6 +6,7 @@ const categorySymbols = {
   Automotive: "↗",
   Books: "▤",
   Business: "◫",
+  Careers: "↗",
   Creators: "◎",
   Culture: "✳",
   Education: "⌘",
@@ -17,15 +18,19 @@ const categorySymbols = {
   Gaming: "▣",
   Health: "+",
   Lifestyle: "✳",
+  Movies: "✦",
   Music: "♫",
   News: "◉",
   Other: "＋",
+  Parenting: "♡",
+  Pets: "♡",
   Politics: "§",
   Relationships: "♡",
   Science: "⌬",
   Sports: "◉",
   Tech: "⌘",
   Travel: "↗",
+  Wellness: "+",
   World: "◎"
 };
 
