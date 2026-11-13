@@ -179,3 +179,30 @@ test("the answering speaker attaches their microphone to the offered audio chann
   assert.deepEqual(calls, ["remote offer", "microphone attached", "answer sendrecv"]);
   assert.ok(app.actions.includes("sig"));
 });
+
+test("an incoming voice offer survives presence arriving out of order", async () => {
+  let closed = false;
+  class Peer {
+    constructor() {
+      this.localDescription = { toJSON: () => ({ type: "answer" }) };
+      this.transceiver = { receiver: { track: { kind: "audio" } }, sender: { replaceTrack: async () => {} } };
+    }
+    async setRemoteDescription() {}
+    getTransceivers() { return [this.transceiver]; }
+    async createAnswer() { return {}; }
+    async setLocalDescription() {}
+    close() { closed = true; }
+  }
+  const app = await setup({ live: true, guest: true, RTCPeerConnection: Peer });
+  app.stage.find("Join the room 🎙").click();
+  await app.channel.subscribed("SUBSCRIBED");
+  await app.listeners["broadcast:sig"]({ payload: { from: "a", to: "z", kind: "offer", data: {} } });
+  app.setState({ z: [{ name: "Me" }] });
+  app.listeners["presence:sync"]();
+  assert.equal(closed, false);
+  app.setState({ a: [{ name: "Host" }], z: [{ name: "Me" }] });
+  app.listeners["presence:sync"]();
+  app.setState({ z: [{ name: "Me" }] });
+  app.listeners["presence:sync"]();
+  assert.equal(closed, true);
+});

@@ -282,6 +282,7 @@ async function init() {
 
   function syncPeople() {
     const state = channel.presenceState();
+    const previousPeople = people;
     people = new Map();
     Object.entries(state).forEach(([id, metas]) => { if (metas && metas[0]) people.set(id, metas[0]); });
     const hostMeta = people.get(room.host_id);
@@ -289,7 +290,7 @@ async function init() {
     people.forEach((_, id) => {
       if (id !== me.id && !peers.has(id) && me.id < id && (reconnectAttempts.get(id) || 0) <= 2) connectTo(id).catch(reportVoiceError);
     });
-    [...peers.keys()].forEach((id) => { if (!people.has(id)) closePeer(id); });
+    [...peers.keys()].forEach((id) => { if (previousPeople.has(id) && !people.has(id)) closePeer(id); });
     [...reconnectAttempts.keys()].forEach((id) => { if (!people.has(id)) reconnectAttempts.delete(id); });
     render();
   }
